@@ -14,7 +14,12 @@ class Audit < ActiveRecord::Base
 
   before_create :set_version_number, :set_audit_user
 
-  serialize :changes
+  # ActiveRecord::Base#changes is an existing method, so before serializing the +changes+ column,
+  # the existing +changes+ method is undefined. The overridden +changes+ method pertained to 
+  # dirty attributes, but will not affect the partial updates functionality as that's based on
+  # an underlying +changed_attributes+ method, not +changes+ itself.
+  undef_method :changes
+  serialize :changes, Hash
 
   cattr_accessor :audited_class_names
   self.audited_class_names = Set.new
