@@ -31,7 +31,7 @@ module CollectiveIdea #:nodoc:
     # See <tt>CollectiveIdea::Acts::Audited::ClassMethods#acts_as_audited</tt>
     # for configuration options
     module Audited
-      CALLBACKS = [:clear_changed_attributes, :save_audit]
+      CALLBACKS = [:clear_changed_attributes, :audit_create, :audit_update, :audit_destroy]
 
       def self.included(base) # :nodoc:
         base.extend ClassMethods
@@ -68,60 +68,34 @@ module CollectiveIdea #:nodoc:
         #
         # == Database Schema
         #
-        # The model that you're versioning needs to have a 'version' attribute. The model is versioned 
-        # into a table called #{model}_versions where the model name is singlular. The _versions table should 
-        # contain all the fields you want versioned, the same version column, and a #{model}_id foreign key field.
-        #
-        # A lock_version field is also accepted if your model uses Optimistic Locking.  If your table uses Single Table inheritance,
-        # then that field is reflected in the versioned model as 'versioned_type' by default.
-        #
-        # Acts_as_versioned comes prepared with the ActiveRecord::Acts::Versioned::ActMethods::ClassMethods#create_versioned_table 
-        # method, perfect for a migration.  It will also create the version column if the main model does not already have it.
-        #
-        #   class AddVersions < ActiveRecord::Migration
-        #     def self.up
-        #       # create_versioned_table takes the same options hash
-        #       # that create_table does
-        #       Post.create_versioned_table
-        #     end
-        #   
-        #     def self.down
-        #       Post.drop_versioned_table
-        #     end
-        #   end
-        # 
         def acts_as_audited(options = {})
           # don't allow multiple calls
           return if self.included_modules.include?(CollectiveIdea::Acts::Audited::InstanceMethods)
 
-          class_eval do
-            extend CollectiveIdea::Acts::Audited::SingletonMethods
-          end
           include CollectiveIdea::Acts::Audited::InstanceMethods
           
-          cattr_accessor :audit_condition, :non_audited_columns
-          
-          attr_accessor :changed_attributes
-
-          self.audit_condition = options[:if] || true
-          self.non_audited_columns = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
-          self.non_audited_columns |= options[:except].is_a?(Array) ?
-            options[:except].collect{|column| column.to_s} : [options[:except].to_s] if options[:except]
-
           class_eval do
+            extend CollectiveIdea::Acts::Audited::SingletonMethods
+
+            cattr_accessor :audit_condition, :non_audited_columns
+          
+            attr_accessor :changed_attributes
+
+            self.audit_condition = options[:if] || true
+            self.non_audited_columns = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
+            self.non_audited_columns |= options[:except].is_a?(Array) ?
+              options[:except].collect{|column| column.to_s} : [options[:except].to_s] if options[:except]
+
             has_many :audits, :as => :auditable, :dependent => :nullify
-            after_save :save_audit
+            after_create :audit_create
+            after_update :audit_update
+            before_destroy :audit_destroy
             after_save :clear_changed_attributes
           end
         end
       end
     
       module InstanceMethods
-        # Creates a new record in the audits table if applicable
-        def save_audit
-          audits.create(:changes => changed_attributes.inspect, :user => User.current_user) if save_audit?
-        end
-
         # Temporarily turns off auditing while saving.
         def save_without_auditing
           without_auditing do
@@ -131,7 +105,7 @@ module CollectiveIdea #:nodoc:
       
         # Returns an array of attribute keys that are audited.  See non_audited_columns
         def audited_attributes
-          self.attributes.keys.collect { |k| !self.class.non_audited_columns.include?(k) }
+          self.attributes.keys.select { |k| !self.class.non_audited_columns.include?(k) }
         end
         
         # If called with no parameters, gets whether the current model has changed.
@@ -171,13 +145,34 @@ module CollectiveIdea #:nodoc:
         end
 
         private
+          # Creates a new record in the audits table if applicable
+          def audit_create
+            write_audit(:create)
+          end
+  
+          def audit_update
+            write_audit(:update) if save_audit?
+          end
+  
+          def audit_destroy
+            write_audit(:destroy)
+          end
+        
+          def write_audit(action = :update)
+            # FIXME: make user class configurable
+            audits.create(:changes => changed_attributes.inspect, :person => Person.current_user)
+          end
+
           # clears current changed attributes.  Called after save.
           def clear_changed_attributes
             self.changed_attributes = {}
           end
           
+          # overload write_attribute to save changes to audited attributes
           def write_attribute(attr_name, attr_value)
-            (self.changed_attributes ||= {})[attr_name.to_s] = [read_attribute(attr_name), attr_value] unless self.changed?(attr_name) or self.send(attr_name) == attr_value
+            if audited_attributes.include?(attr_name)
+              (self.changed_attributes ||= {})[attr_name.to_s] = [read_attribute(attr_name), attr_value] unless self.changed?(attr_name) or self.send(attr_name) == attr_value
+            end
             super(attr_name.to_s, attr_value)
           end
 
