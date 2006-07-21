@@ -1,4 +1,4 @@
-# Copyright (c) 2005 Brandon Keepers
+# Copyright (c) 2006 Brandon Keepers
 # 
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -40,20 +40,6 @@ module CollectiveIdea #:nodoc:
       module ClassMethods
         # == Configuration options
         #
-        # * <tt>if</tt> - symbol of method to check before saving an audit log.
-        #   If this method returns false, an audit log is not saved. For finer
-        #   control, pass either a Proc or modify Model#audit_condition_met?
-        #
-        #     acts_as_audited :if => Proc.new { |auction| !auction.expired? }
-        #
-        #   or...
-        #
-        #     class Auction
-        #       def audit_condition_met? # totally bypasses the <tt>:if</tt> option
-        #         !expired?
-        #       end
-        #     end
-        #
         # * <tt>except</tt> - Excludes fields from being saved in the audit log.
         #   By default, acts_as_audited will audit all but these fields: 
         # 
@@ -77,11 +63,8 @@ module CollectiveIdea #:nodoc:
           class_eval do
             extend CollectiveIdea::Acts::Audited::SingletonMethods
 
-            cattr_accessor :audit_condition, :non_audited_columns
-          
-            attr_accessor :changed_attributes
+            cattr_accessor :non_audited_columns
 
-            self.audit_condition = options[:if] || true
             self.non_audited_columns = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
             self.non_audited_columns |= options[:except].is_a?(Array) ?
               options[:except].collect{|column| column.to_s} : [options[:except].to_s] if options[:except]
@@ -112,26 +95,8 @@ module CollectiveIdea #:nodoc:
         # If called with a single parameter, gets whether the parameter has changed.
         def changed?(attr_name = nil)
           attr_name.nil? ?
-            (changed_attributes && changed_attributes.length > 0) :
-            (changed_attributes && changed_attributes.include?(attr_name.to_s))
-        end
-        
-        # Checks whether a new audit record should be saved.  Calls <tt>audit_condition_met?</tt> and <tt>changed?</tt>.
-        def save_audit?
-          audit_condition_met? && changed?
-        end
-        
-        # Checks condition set in the :if option to check whether or not to record audit logs.  Override this for
-        # custom condition checking.
-        def audit_condition_met?
-          case
-          when audit_condition.is_a?(Symbol)
-            send(audit_condition)
-          when audit_condition.respond_to?(:call) && (audit_condition.arity == 1 || audit_condition.arity == -1)
-            audit_condition.call(self)
-          else
-            audit_condition
-          end          
+            (@changed_attributes && @changed_attributes.length > 0) :
+            (@changed_attributes && @changed_attributes.include?(attr_name.to_s))
         end
 
         # Executes the block with the auditing callbacks disabled.
@@ -151,7 +116,7 @@ module CollectiveIdea #:nodoc:
           end
   
           def audit_update
-            write_audit(:update) if save_audit?
+            write_audit(:update) if changed?
           end
   
           def audit_destroy
@@ -160,18 +125,18 @@ module CollectiveIdea #:nodoc:
         
           def write_audit(action = :update)
             # FIXME: make user class configurable
-            audits.create(:changes => changed_attributes.inspect, :person => Person.current_user)
+            audits.create(:changes => @changed_attributes.inspect, :person => Person.current_user)
           end
 
           # clears current changed attributes.  Called after save.
           def clear_changed_attributes
-            self.changed_attributes = {}
+            @changed_attributes = {}
           end
           
           # overload write_attribute to save changes to audited attributes
           def write_attribute(attr_name, attr_value)
             if audited_attributes.include?(attr_name)
-              (self.changed_attributes ||= {})[attr_name.to_s] = [read_attribute(attr_name), attr_value] unless self.changed?(attr_name) or self.send(attr_name) == attr_value
+              (@changed_attributes ||= {})[attr_name.to_s] = [read_attribute(attr_name), attr_value] unless self.changed?(attr_name) or self.send(attr_name) == attr_value
             end
             super(attr_name.to_s, attr_value)
           end
