@@ -134,7 +134,7 @@ module CollectiveIdea #:nodoc:
           def write_audit(action = :update)
             user = self.audited_user_class_name ? Object.const_get(audited_user_class_name).send(self.audited_user_method) : nil
             
-            audits.create(:changes => @changed_attributes.inspect, :action = action.to_s,
+            audits.create(:changes => @changed_attributes.inspect, :action => action.to_s,
               :user_id => user ? user.id : nil)
           end
 
