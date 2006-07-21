@@ -1,6 +1,5 @@
 
 class Audit < ActiveRecord::Base
-  belongs_to :person
   belongs_to :auditable, :polymorphic => true
   
   def self.audited_classes

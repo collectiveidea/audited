@@ -51,6 +51,12 @@ module CollectiveIdea #:nodoc:
         #       acts_as_audited :except => :password
         #     end
         # 
+        # * <tt>user_class_name</tt> - specifiy the class name of the user class.
+        #   This defaults to "User". Set to false to disable user auditing.
+        #
+        # * <tt>user_method</tt> - specify the method to call on <tt>:user_class_name</tt>
+        #   that returns the user that is performing the action. This defaults to
+        #   <tt>:current_user</tt>.
         #
         # == Database Schema
         #
@@ -63,11 +69,13 @@ module CollectiveIdea #:nodoc:
           class_eval do
             extend CollectiveIdea::Acts::Audited::SingletonMethods
 
-            cattr_accessor :non_audited_columns
+            cattr_accessor :non_audited_columns, :audited_user_class_name, :audited_user_method
 
             self.non_audited_columns = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
             self.non_audited_columns |= options[:except].is_a?(Array) ?
               options[:except].collect{|column| column.to_s} : [options[:except].to_s] if options[:except]
+            self.audited_user_class_name = options[:user_class_name].nil? ? "User" : options[:user_class_name]
+            self.audited_user_method = options[:user_method] || :current_user
 
             has_many :audits, :as => :auditable, :dependent => :nullify
             after_create :audit_create
@@ -124,8 +132,10 @@ module CollectiveIdea #:nodoc:
           end
         
           def write_audit(action = :update)
-            # FIXME: make user class configurable
-            audits.create(:changes => @changed_attributes.inspect, :person => Person.current_user)
+            user = self.audited_user_class_name ? Object.const_get(audited_user_class_name).send(self.audited_user_method) : nil
+            
+            audits.create(:changes => @changed_attributes.inspect, :action = action.to_s,
+              :user_id => user ? user.id : nil)
           end
 
           # clears current changed attributes.  Called after save.
