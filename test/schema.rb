@@ -3,6 +3,8 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :name, :string
     t.column :username, :string
     t.column :password, :string
+    t.column :activated, :boolean
+    t.column :logins, :integer, :default => 0
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
   end

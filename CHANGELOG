@@ -1,0 +1,11 @@
+ acts_as_audited ChangeLog
+-------------------------------------------------------------------------------
+
+0.2 - 2006-08-14
+* incorporated changes from Michael Schuerig to write_attribute that saves the
+  new value after every change and not just the first, and performs proper
+  type-casting before doing comparisons
+* The "changes" are now saved as a serialized hash
+
+0.1 - 2006-07-21
+* initial version
