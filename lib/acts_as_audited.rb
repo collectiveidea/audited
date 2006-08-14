@@ -134,7 +134,7 @@ module CollectiveIdea #:nodoc:
           def write_audit(action = :update)
             user = self.audited_user_class_name ? Object.const_get(audited_user_class_name).send(self.audited_user_method) : nil
             
-            audits.create(:changes => @changed_attributes.inspect, :action => action.to_s,
+            audits.create(:changes => @changed_attributes, :action => action.to_s,
               :user_id => user ? user.id : nil)
           end
 
@@ -145,10 +145,19 @@ module CollectiveIdea #:nodoc:
           
           # overload write_attribute to save changes to audited attributes
           def write_attribute(attr_name, attr_value)
+            attr_name = attr_name.to_s
             if audited_attributes.include?(attr_name)
-              (@changed_attributes ||= {})[attr_name.to_s] = [read_attribute(attr_name), attr_value] unless self.changed?(attr_name) or self.send(attr_name) == attr_value
+              @changed_attributes ||= {}
+              # get original value
+              old_value = @changed_attributes[attr_name] ?
+                @changed_attributes[attr_name].first : self[attr_name]
+              super(attr_name, attr_value)
+              new_value = self[attr_name]
+              
+              @changed_attributes[attr_name] = [old_value, new_value] if new_value != old_value
+            else
+              super(attr_name, attr_value)
             end
-            super(attr_name.to_s, attr_value)
           end
 
           CALLBACKS.each do |attr_name| 

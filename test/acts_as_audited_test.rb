@@ -15,7 +15,7 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   end
   
   def test_audited_attributes
-    assert_equal ['name', 'username'], User.new.audited_attributes
+    assert_equal ['name', 'username', 'logins', 'activated'].sort, User.new.audited_attributes.sort
   end
   
   def test_non_audited_columns
@@ -70,6 +70,30 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     assert u.changed?
     u.save
     assert !u.changed?
+  end
+  
+  def test_type_casting
+    u = User.create(:name => 'Brandon', :logins => 0, :activated => true)
+    audits = Audit.count
+    
+    u.update_attribute :logins, '0'
+    assert_equal audits, Audit.count, "Setting to same value should not create a new audit"
+
+    u.update_attribute :logins, 0
+    assert_equal audits, Audit.count, "Setting to same value should not create a new audit"
+    
+    u.update_attribute :activated, true
+    assert_equal audits, Audit.count, "Setting to same value should not create a new audit"
+
+    u.update_attribute :activated, 1
+    assert_equal audits, Audit.count, "Setting to same value should not create a new audit"
+  end
+  
+  def test_that_changes_is_a_hash
+    u = User.create(:name => 'Brandon')
+    audit = Audit.find(u.audits.first.id)
+    assert audit.changes.is_a?(Hash)
+    assert_equal 1, audit.changes.size
   end
 
 end
