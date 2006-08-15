@@ -77,7 +77,7 @@ module CollectiveIdea #:nodoc:
             self.audited_user_class_name = options[:user_class_name].nil? ? "User" : options[:user_class_name]
             self.audited_user_method = options[:user_method] || :current_user
 
-            has_many :audits, :as => :auditable, :dependent => :nullify
+            has_many :audits, :as => :auditable
             after_create :audit_create
             after_update :audit_update
             before_destroy :audit_destroy
