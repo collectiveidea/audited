@@ -78,6 +78,8 @@ module CollectiveIdea #:nodoc:
             self.audited_user_method = options[:user_method] || :current_user
 
             has_many :audits, :as => :auditable
+            attr_protected :audit_ids
+            
             after_create :audit_create
             after_update :audit_update
             before_destroy :audit_destroy
