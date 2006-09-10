@@ -105,7 +105,7 @@ module CollectiveIdea #:nodoc:
         # If called with a single parameter, gets whether the parameter has changed.
         def changed?(attr_name = nil)
           attr_name.nil? ?
-            (@changed_attributes && @changed_attributes.length > 0) :
+            !@changed_attributes.empty? :
             (@changed_attributes && @changed_attributes.include?(attr_name.to_s))
         end
 

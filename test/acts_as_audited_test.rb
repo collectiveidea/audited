@@ -32,30 +32,24 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   end
   
   def test_save_audit
-    count = Audit.count
-    u = User.create(:name => 'Brandon', :username => 'brandon', :password => 'password')
-    assert_equal count + 1, Audit.count, "An audit record should have been saved when the user was created."
-    u.update_attribute(:name, "Someone")
-    assert_equal count + 2, Audit.count, "An audit record should have been saved when the user was updated."
-    u.save
-    assert_equal count + 2, Audit.count, "An audit record shouldn't have been saved if the user was not modified."
-    u.destroy
-    assert_equal count + 3, Audit.count, "An audit record should have been saved when the user was destroyed."
+    u = User.new :name => 'Brandon', :username => 'brandon', :password => 'password'
+    assert_difference(Audit, :count) { u.save }
+    assert_difference(Audit, :count) { u.update_attribute(:name, "Someone") }
+    assert_no_difference(Audit, :count) { u.save }
+    assert_difference(Audit, :count) { u.destroy }
   end
   
   def test_save_without_auditing
-    count = Audit.count
-    u = User.new(:name => 'Brandon')
-    assert u.save_without_auditing
-    assert_equal count, Audit.count, "should not have saved and audit when calling save_without_audits"
+    assert_no_difference Audit, :count do
+      u = User.new(:name => 'Brandon')
+      assert u.save_without_auditing
+    end
   end
   
   def test_without_auditing
-    count = Audit.count
-    User.without_auditing do
-      User.create(:name => 'Brandon')
+    assert_no_difference Audit, :count do
+      User.without_auditing { User.create(:name => 'Brandon') }
     end
-    assert_equal count, Audit.count, "should not have saved and audit when calling save_without_audits"
   end
   
   def test_changed?
@@ -74,19 +68,11 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   
   def test_type_casting
     u = User.create(:name => 'Brandon', :logins => 0, :activated => true)
-    audits = Audit.count
     
-    u.update_attribute :logins, '0'
-    assert_equal audits, Audit.count, "Setting to same value should not create a new audit"
-
-    u.update_attribute :logins, 0
-    assert_equal audits, Audit.count, "Setting to same value should not create a new audit"
-    
-    u.update_attribute :activated, true
-    assert_equal audits, Audit.count, "Setting to same value should not create a new audit"
-
-    u.update_attribute :activated, 1
-    assert_equal audits, Audit.count, "Setting to same value should not create a new audit"
+    assert_no_difference(Audit, :count) { u.update_attribute :logins, '0' }
+    assert_no_difference(Audit, :count) { u.update_attribute :logins, 0 }
+    assert_no_difference(Audit, :count) { u.update_attribute :activated, true }
+    assert_no_difference(Audit, :count) { u.update_attribute :activated, 1 }
   end
   
   def test_that_changes_is_a_hash
