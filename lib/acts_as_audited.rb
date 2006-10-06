@@ -105,8 +105,8 @@ module CollectiveIdea #:nodoc:
         # If called with a single parameter, gets whether the parameter has changed.
         def changed?(attr_name = nil)
           attr_name.nil? ?
-            !@changed_attributes.empty? :
-            (@changed_attributes && @changed_attributes.include?(attr_name.to_s))
+            !@changed_attributes.nil? && !@changed_attributes.empty? :
+            (!@changed_attributes.nil? && @changed_attributes.include?(attr_name.to_s))
         end
 
         # Executes the block with the auditing callbacks disabled.
