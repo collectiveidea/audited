@@ -81,5 +81,14 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     assert audit.changes.is_a?(Hash)
     assert_equal 1, audit.changes.size
   end
+  
+  def test_save_without_audited_modifications
+    u = User.create(:name => 'Brandon')
+    u = User.find(u.id) # reload
+    assert_nothing_raised do
+      assert !u.changed?
+      u.save!
+    end
+  end
 
 end
