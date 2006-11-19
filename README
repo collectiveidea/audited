@@ -1,9 +1,22 @@
-===============================================================================
-                                ActsAsAudited
-===============================================================================
+= acts_as_audited
 
-acts_as_audited is an ActiveRecord extension that logs all changes to your
-model in an audits table.
+acts_as_audited is an ActiveRecord extension that logs all changes to your models in an audits table.
+
+== Auditing in Rails
+
+If you're using acts_as_audited within Rails, you can simply declare which models should be audited.  acts_as_audited can also automatically record the user that made the change if your controller has a <tt>current_user</tt> method.
+
+  class ApplicationController < ActionController::Base
+    audit User, List, Item
+  protected
+    def current_user
+      @user ||= User.find(session[:user])
+    end
+  end
+  
+== Customizing
+
+To get auditing outside of Rails, or to customize which fields are audited within Rails, you can explicitly declare <tt>acts_as_audited</tt> on your models:
 
     class User < ActiveRecord::Base
       acts_as_audited :except => [:password, :mistress]
@@ -11,12 +24,15 @@ model in an audits table.
 
 See http://opensoul.org/2006/07/21/acts_as_audited for more information.
 
- Installation
-------------------------------------------------------------------------------
+== Installation
 
-1. Install the plugin into your rails app
+# Install the plugin into your rails app
+    script/plugin install http://source.collectiveidea.com/public/rails/plugins/acts_as_audited
+# Generate the migration
+    script/generate audited_model add_audits_table
+    rake db:migrate
 
-     script/plugin install \
-       http://source.collectiveidea.com/public/rails/plugins/acts_as_audited
+== Caveats
 
-2. Copy db/migration.rb into a new migration and run it.
+Auditing with user support depends on Rails' caching mechanisms, therefore auditing isn't enabled during development mode. To test that auditing is working, start up your app in production mode, or try setting "config.action_controller.perform_caching" to true in config/environments/environment.rb (mileage may vary).
+

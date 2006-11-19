@@ -30,7 +30,7 @@ module CollectiveIdea #:nodoc:
     #
     # See <tt>CollectiveIdea::Acts::Audited::ClassMethods#acts_as_audited</tt>
     # for configuration options
-    module Audited
+    module Audited #:nodoc:
       CALLBACKS = [:clear_changed_attributes, :audit_create, :audit_update, :audit_destroy]
 
       def self.included(base) # :nodoc:
@@ -51,15 +51,6 @@ module CollectiveIdea #:nodoc:
         #       acts_as_audited :except => :password
         #     end
         # 
-        # * <tt>user_class_name</tt> - specifiy the class name of the user class.
-        #   This defaults to "User". Set to false to disable user auditing.
-        #
-        # * <tt>user_method</tt> - specify the method to call on <tt>:user_class_name</tt>
-        #   that returns the user that is performing the action. This defaults to
-        #   <tt>:current_user</tt>.
-        #
-        # == Database Schema
-        #
         def acts_as_audited(options = {})
           # don't allow multiple calls
           return if self.included_modules.include?(CollectiveIdea::Acts::Audited::InstanceMethods)
@@ -69,21 +60,22 @@ module CollectiveIdea #:nodoc:
           class_eval do
             extend CollectiveIdea::Acts::Audited::SingletonMethods
 
-            cattr_accessor :non_audited_columns, :audited_user_class_name, :audited_user_method
+            cattr_accessor :non_audited_columns, :auditing_enabled
 
             self.non_audited_columns = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
             self.non_audited_columns |= options[:except].is_a?(Array) ?
               options[:except].collect{|column| column.to_s} : [options[:except].to_s] if options[:except]
-            self.audited_user_class_name = options[:user_class_name].nil? ? "User" : options[:user_class_name]
-            self.audited_user_method = options[:user_method] || :current_user
 
             has_many :audits, :as => :auditable
             attr_protected :audit_ids
+            Audit.audited_classes << self
             
             after_create :audit_create
             after_update :audit_update
-            before_destroy :audit_destroy
+            after_destroy :audit_destroy
             after_save :clear_changed_attributes
+
+            self.auditing_enabled = true
           end
         end
       end
@@ -104,9 +96,8 @@ module CollectiveIdea #:nodoc:
         # If called with no parameters, gets whether the current model has changed.
         # If called with a single parameter, gets whether the parameter has changed.
         def changed?(attr_name = nil)
-          attr_name.nil? ?
-            !@changed_attributes.nil? && !@changed_attributes.empty? :
-            (!@changed_attributes.nil? && @changed_attributes.include?(attr_name.to_s))
+          @changed_attributes ||= {}
+            attr_name.nil? ? !@changed_attributes.empty? : @changed_attributes.include?(attr_name.to_s)
         end
 
         # Executes the block with the auditing callbacks disabled.
@@ -133,11 +124,8 @@ module CollectiveIdea #:nodoc:
             write_audit(:destroy)
           end
         
-          def write_audit(action = :update)
-            user = self.audited_user_class_name ? Object.const_get(audited_user_class_name).send(self.audited_user_method) : nil
-            
-            audits.create(:changes => @changed_attributes, :action => action.to_s,
-              :user_id => user ? user.id : nil)
+          def write_audit(action = :update, user = nil)
+            self.audits.create :changes => @changed_attributes, :action => action.to_s, :user => user
           end
 
           # clears current changed attributes.  Called after save.
@@ -183,22 +171,32 @@ module CollectiveIdea #:nodoc:
         #   end
         #
         def without_auditing(&block)
+          auditing_was_enabled = auditing_enabled
+          disable_auditing
+          result = block.call
+          enable_auditing if auditing_was_enabled
+          result
+        end
+        
+        def disable_auditing
           class_eval do 
             CALLBACKS.each do |attr_name| 
               alias_method attr_name, :empty_callback
             end
           end
-          result = block.call
+          self.auditing_enabled = false
+        end
+        
+        def enable_auditing
           class_eval do 
             CALLBACKS.each do |attr_name|
               alias_method attr_name, "orig_#{attr_name}".to_sym
             end
           end
-          result
+          self.auditing_enabled = true
         end
+
       end
     end
   end
 end
-
-ActiveRecord::Base.send :include, CollectiveIdea::Acts::Audited

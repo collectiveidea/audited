@@ -1,0 +1,7 @@
+Description:
+	The audited migration generator creates a migration to add the audits table.
+
+Example:
+    ./script/generate audited_migration add_audits_table
+
+    This will create a migration in db/migrate/.  Run "rake db:migrate" to update your database.
