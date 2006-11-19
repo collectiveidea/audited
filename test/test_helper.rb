@@ -13,6 +13,9 @@ load(File.dirname(__FILE__) + "/schema.rb")
 Test::Unit::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
 $LOAD_PATH.unshift(Test::Unit::TestCase.fixture_path)
 
+# load model
+require File.join(File.dirname(__FILE__), 'fixtures/user')
+
 class Test::Unit::TestCase #:nodoc:
   def create_fixtures(*table_names)
     if block_given?

@@ -1,6 +1,11 @@
  acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
 
+0.3 - 2006-11-17
+* Replaced use of singleton User.current_user with cache sweeper implementation
+  for auditing the user that made the change
+* added migration generator
+
 0.2 - 2006-08-14
 * incorporated changes from Michael Schuerig to write_attribute that saves the
   new value after every change and not just the first, and performs proper

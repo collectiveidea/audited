@@ -1,5 +1,4 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
-require File.join(File.dirname(__FILE__), 'fixtures/user')
 
 class ActsAsAuditedTest < Test::Unit::TestCase
   
@@ -53,7 +52,9 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   end
   
   def test_changed?
-    u = User.new(:name => 'Brandon')
+    u = User.create(:name => 'Brandon')
+    assert !u.changed?
+    u.name = "Bobby"
     assert u.changed?
     assert u.changed?(:name)
     assert !u.changed?(:username)
