@@ -5,6 +5,7 @@ class <%= class_name %> < ActiveRecord::Migration
       t.column :auditable_type, :string
       t.column :user_id, :integer
       t.column :user_type, :string
+      t.column :username, :string
       t.column :action, :string
       t.column :changes, :text
       t.column :created_at, :datetime
