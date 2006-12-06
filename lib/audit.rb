@@ -19,7 +19,7 @@ class Audit < ActiveRecord::Base
   
   # Allows user to be set to either a string or an ActiveRecord object
   def user_as_string=(user) #:nodoc:
-    # reset both no either way
+    # reset both either way
     self.user_as_model = self.username = nil
     user.is_a?(ActiveRecord::Base) ?
       self.user_as_model = user :
