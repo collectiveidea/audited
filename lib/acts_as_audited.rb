@@ -173,9 +173,7 @@ module CollectiveIdea #:nodoc:
         def without_auditing(&block)
           auditing_was_enabled = auditing_enabled
           disable_auditing
-          result = block.call
-          enable_auditing if auditing_was_enabled
-          result
+          returning(block.call) { enable_auditing if auditing_was_enabled }
         end
         
         def disable_auditing
