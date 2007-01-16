@@ -18,9 +18,5 @@ class <%= class_name %> < ActiveRecord::Migration
 
   def self.down
     drop_table :audits
-    
-    remove_index :audits, :name => 'auditable_index'
-    remove_index :audits, :name => 'user_index'
-    remove_index :audits, :created_at
   end
 end
