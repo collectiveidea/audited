@@ -14,9 +14,15 @@ end
 
 desc 'Generate documentation for the acts_as_audited plugin.'
 Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'ActsAsAudited'
+  rdoc.rdoc_dir = 'doc'
+  rdoc.title    = 'acts_as_audited'
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.rdoc_files.include('README')
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+desc "Publish the rdocs"
+task :publish => [:rdoc] do
+  `ssh host.collectiveidea.com "mkdir -p /var/www/vhosts/source.collectiveidea.com/public/dist/api/acts_as_audited"`
+  Rake::SshDirPublisher.new("host.collectiveidea.com", "/var/www/vhosts/source.collectiveidea.com/public/dist/api/acts_as_audited", "doc").upload
 end
