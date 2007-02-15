@@ -28,8 +28,9 @@ See http://opensoul.org/2006/07/21/acts_as_audited for more information.
 
 # Install the plugin into your rails app
     script/plugin install http://source.collectiveidea.com/public/rails/plugins/acts_as_audited
+    
 # Generate the migration
-    script/generate audited_model add_audits_table
+    script/generate audited_migration add_audits_table
     rake db:migrate
 
 == Caveats
