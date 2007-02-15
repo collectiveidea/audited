@@ -15,8 +15,6 @@ module CollectiveIdea #:nodoc:
         #   end
         #
         def audit(*models)
-          #AuditSweeper.audited_models = models.flatten
-          #$audited_models = models.flatten
           AuditSweeper.class_eval do
             observe *models
             models.each do |clazz|

@@ -68,7 +68,7 @@ module CollectiveIdea #:nodoc:
 
             has_many :audits, :as => :auditable
             attr_protected :audit_ids
-            Audit.audited_classes << self
+            Audit.audited_classes << self unless Audit.audited_classes.include?(self)
             
             after_create :audit_create
             after_update :audit_update
