@@ -35,7 +35,10 @@ See http://opensoul.org/2006/07/21/acts_as_audited for more information.
 
 == Caveats
 
-Auditing with user support depends on Rails' caching mechanisms, therefore auditing isn't enabled during development mode. To test that auditing is working, start up your app in production mode, or try setting "config.action_controller.perform_caching" to true in config/environments/environment.rb (mileage may vary).
+Auditing with user support depends on Rails' caching mechanisms, therefore auditing isn't enabled during development mode. To test that auditing is working, start up your app in production mode, or change the following options in config/environments/environment.rb: 
+
+  config.cache_classes = true
+  config.action_controller.perform_caching = true
 
 == Upgrading
 

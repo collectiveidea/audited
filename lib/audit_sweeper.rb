@@ -15,14 +15,13 @@ module CollectiveIdea #:nodoc:
         #   end
         #
         def audit(*models)
+          models.each do |clazz|
+            clazz.send :acts_as_audited unless clazz.respond_to?(:disable_auditing)
+            # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
+            clazz.send :disable_auditing
+          end
           AuditSweeper.class_eval do
             observe *models
-            models.each do |clazz|
-              clazz.send :acts_as_audited unless clazz.respond_to?(:disable_auditing)
-              # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
-              clazz.send :disable_auditing
-            end
-            
           end
           class_eval do
             cache_sweeper :audit_sweeper
