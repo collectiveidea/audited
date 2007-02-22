@@ -19,7 +19,7 @@ module CollectiveIdea #:nodoc:
             observe *models
             models.each do |clazz|
               clazz.send :acts_as_audited unless clazz.respond_to?(:disable_auditing)
-              # disable automatic auditing
+              # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
               clazz.send :disable_auditing
             end
             

@@ -64,7 +64,7 @@ module CollectiveIdea #:nodoc:
 
             self.non_audited_columns = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
             self.non_audited_columns |= options[:except].is_a?(Array) ?
-              options[:except].collect{|column| column.to_s} : [options[:except].to_s] if options[:except]
+              options[:except].collect(&:to_s) : [options[:except].to_s] if options[:except]
 
             has_many :audits, :as => :auditable
             attr_protected :audit_ids
@@ -83,9 +83,7 @@ module CollectiveIdea #:nodoc:
       module InstanceMethods
         # Temporarily turns off auditing while saving.
         def save_without_auditing
-          without_auditing do
-            save
-          end
+          without_auditing { save }
         end
       
         # Returns an array of attribute keys that are audited.  See non_audited_columns
@@ -97,7 +95,7 @@ module CollectiveIdea #:nodoc:
         # If called with a single parameter, gets whether the parameter has changed.
         def changed?(attr_name = nil)
           @changed_attributes ||= {}
-            attr_name.nil? ? !@changed_attributes.empty? : @changed_attributes.include?(attr_name.to_s)
+          attr_name ? @changed_attributes.include?(attr_name.to_s) : !@changed_attributes.empty?
         end
 
         # Executes the block with the auditing callbacks disabled.
