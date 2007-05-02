@@ -57,14 +57,16 @@ module CollectiveIdea #:nodoc:
 
           include CollectiveIdea::Acts::Audited::InstanceMethods
           
+          class_inheritable_reader :non_audited_columns
+          class_inheritable_reader :auditing_enabled
+
+          except = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
+          except |= options[:except].is_a?(Array) ?
+            options[:except].collect(&:to_s) : [options[:except].to_s] if options[:except]
+          write_inheritable_attribute :non_audited_columns, except
+
           class_eval do
             extend CollectiveIdea::Acts::Audited::SingletonMethods
-
-            cattr_accessor :non_audited_columns, :auditing_enabled
-
-            self.non_audited_columns = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
-            self.non_audited_columns |= options[:except].is_a?(Array) ?
-              options[:except].collect(&:to_s) : [options[:except].to_s] if options[:except]
 
             has_many :audits, :as => :auditable
             attr_protected :audit_ids
@@ -75,7 +77,7 @@ module CollectiveIdea #:nodoc:
             after_destroy :audit_destroy
             after_save :clear_changed_attributes
 
-            self.auditing_enabled = true
+            write_inheritable_attribute :auditing_enabled, true
           end
         end
       end
@@ -88,7 +90,7 @@ module CollectiveIdea #:nodoc:
       
         # Returns an array of attribute keys that are audited.  See non_audited_columns
         def audited_attributes
-          self.attributes.keys.select { |k| !self.class.non_audited_columns.include?(k) }
+          self.attributes.keys.select { |k| !self.non_audited_columns.include?(k) }
         end
         
         # If called with no parameters, gets whether the current model has changed.
@@ -180,7 +182,7 @@ module CollectiveIdea #:nodoc:
               alias_method attr_name, :empty_callback
             end
           end
-          self.auditing_enabled = false
+          write_inheritable_attribute :auditing_enabled, false
         end
         
         def enable_auditing
@@ -189,7 +191,7 @@ module CollectiveIdea #:nodoc:
               alias_method attr_name, "orig_#{attr_name}".to_sym
             end
           end
-          self.auditing_enabled = true
+          write_inheritable_attribute :auditing_enabled, true
         end
 
       end
