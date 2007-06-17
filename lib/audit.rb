@@ -11,6 +11,7 @@
 class Audit < ActiveRecord::Base
   belongs_to :auditable, :polymorphic => true
   belongs_to :user, :polymorphic => true
+  acts_as_list :column => :version, :scope => 'auditable_id = #{auditable_id} AND auditable_type = \'#{auditable_type}\''
   
   serialize :changes
   

@@ -68,7 +68,7 @@ module CollectiveIdea #:nodoc:
           class_eval do
             extend CollectiveIdea::Acts::Audited::SingletonMethods
 
-            has_many :audits, :as => :auditable
+            has_many :audits, :as => :auditable, :order => 'audits.version desc'
             attr_protected :audit_ids
             Audit.audited_classes << self unless Audit.audited_classes.include?(self)
             
@@ -76,6 +76,8 @@ module CollectiveIdea #:nodoc:
             after_update :audit_update
             after_destroy :audit_destroy
             after_save :clear_changed_attributes
+            
+            attr_accessor :version
 
             write_inheritable_attribute :auditing_enabled, true
           end
@@ -109,8 +111,46 @@ module CollectiveIdea #:nodoc:
         def without_auditing(&block)
           self.class.without_auditing(&block)
         end
-
+        
+        # Gets an array of the revisions available
+        #
+        #   user.revisions.each do |revision|
+        #     user.name
+        #     user.version
+        #   end
+        #
+        def revisions(from_version = 1)
+          changes(from_version) {|attributes| revision_with(attributes) }
+        end
+        
+        # Get a specific revision
+        def revision(version)
+          revision_with changes(version)
+        end
+        
         private
+        
+          def changes(from_version = 1)
+            from_version = audits.find(:first).version if from_version == :previous
+            changes = {}
+            result = audits.find(:all, :conditions => ['version >= ?', from_version]).collect do |audit|
+              attributes = audit.changes.inject({}) do |attrs, (name, values)|
+                attrs[name] = values.first
+                attrs
+              end
+              changes.merge!(attributes.merge!(:version => audit.version))
+              yield changes if block_given?
+            end
+            block_given? ? result : changes
+          end
+          
+          def revision_with(attributes)
+            returning self.dup do |revision|
+              revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
+              revision.attributes = attributes
+            end
+          end
+          
           # Creates a new record in the audits table if applicable
           def audit_create
             write_audit(:create)

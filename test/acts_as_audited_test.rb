@@ -24,18 +24,18 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   end
 
   def test_doesnt_save_non_audited_columns
-    u = User.create(:name => 'Brandon')
+    u = create_user
     assert !u.audits.first.changes.include?('created_at'), 'created_at should not be audited'
     assert !u.audits.first.changes.include?('updated_at'), 'updated_at should not be audited'
     assert !u.audits.first.changes.include?('password'), 'password should not be audited'
   end
   
   def test_save_audit
-    u = User.new :name => 'Brandon', :username => 'brandon', :password => 'password'
-    assert_difference(Audit, :count) { u.save }
-    assert_difference(Audit, :count) { u.update_attribute(:name, "Someone") }
-    assert_no_difference(Audit, :count) { u.save }
-    assert_difference(Audit, :count) { u.destroy }
+    u = nil
+    assert_difference(Audit, :count)    { u = create_user }
+    assert_difference(Audit, :count)    { assert u.update_attribute(:name, "Someone") }
+    assert_no_difference(Audit, :count) { assert u.save }
+    assert_difference(Audit, :count)    { assert u.destroy }
   end
   
   def test_save_without_auditing
@@ -45,14 +45,14 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     end
   end
   
-  def test_without_auditing
+  def test_without_auditing_block
     assert_no_difference Audit, :count do
       User.without_auditing { User.create(:name => 'Brandon') }
     end
   end
   
   def test_changed?
-    u = User.create(:name => 'Brandon')
+    u = create_user
     assert !u.changed?
     u.name = "Bobby"
     assert u.changed?
@@ -60,7 +60,7 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     assert !u.changed?(:username)
   end
   
-  def test_calls_clear_changed_attributes_after_save
+  def test_clears_changed_attributes_after_save
     u = User.new(:name => 'Brandon')
     assert u.changed?
     u.save
@@ -68,8 +68,7 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   end
   
   def test_type_casting
-    u = User.create(:name => 'Brandon', :logins => 0, :activated => true)
-    
+    u = create_user(:logins => 0, :activated => true)
     assert_no_difference(Audit, :count) { u.update_attribute :logins, '0' }
     assert_no_difference(Audit, :count) { u.update_attribute :logins, 0 }
     assert_no_difference(Audit, :count) { u.update_attribute :activated, true }
@@ -77,19 +76,78 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   end
   
   def test_that_changes_is_a_hash
-    u = User.create(:name => 'Brandon')
+    u = create_user
     audit = Audit.find(u.audits.first.id)
     assert audit.changes.is_a?(Hash)
-    assert_equal 1, audit.changes.size
   end
   
-  def test_save_without_audited_modifications
-    u = User.create(:name => 'Brandon')
-    u = User.find(u.id) # reload
+  def test_save_without_modifications
+    u = create_user
+    u.reload
     assert_nothing_raised do
       assert !u.changed?
       u.save!
     end
+  end
+  
+  def test_revisions_should_return_array
+    u = create_versions
+    assert_kind_of Array, u.revisions
+    u.revisions.each {|version| assert_kind_of User, version }
+  end
+  
+  def test_latest_revision_first
+    u = User.create(:name => 'Brandon')
+    assert_equal 1, u.revisions.size
+    assert_equal nil, u.revisions[0].name
+    
+    u.update_attribute :name, 'Foobar'
+    assert_equal 2, u.revisions.size
+    assert_equal 'Brandon', u.revisions[0].name
+    assert_equal nil, u.revisions[1].name
+  end
+  
+  def test_get_specific_revision
+    u = create_versions(5)
+    revision = u.revision(3)
+    assert_kind_of User, revision
+    assert_equal 3, revision.version
+    assert_equal 'Foobar 2', revision.name
+  end
+  
+  def test_get_previous_revision
+    u = create_versions(5)
+    revision = u.revision(:previous)
+    assert_equal 5, revision.version
+    assert_equal u.revision(5), revision
+  end
+  
+  def test_revision_marks_attributes_changed
+    u = create_versions(2)
+    assert u.revision(1).changed?(:name)
+  end
+
+  def test_save_revision_records_audit
+    u = create_versions(2)
+    assert_difference Audit, :count do
+      assert u.revision(1).save
+    end
+  end
+  
+private
+
+  def create_user(attrs = {})
+    User.create({:name => 'Brandon', :username => 'brandon', :password => 'password'}.merge(attrs))
+  end
+  
+  def create_versions(n = 2)
+    returning User.create(:name => 'Foobar 1') do |u|
+      (n - 1).times do |i|
+        u.update_attribute :name, "Foobar #{i + 2}"
+      end
+      u.reload
+    end
+    
   end
 
 end

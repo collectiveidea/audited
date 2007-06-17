@@ -1,7 +1,10 @@
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 
 require 'test/unit'
-require File.expand_path(File.join(File.dirname(__FILE__), '../../../../config/environment.rb'))
+require 'rubygems'
+require 'active_record'
+require File.dirname(__FILE__) + '/../init.rb'
+
 require 'active_record/fixtures'
 
 config = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
