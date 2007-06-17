@@ -1,6 +1,9 @@
  acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
 
+0.4 - 2007-06-17
+* Added support getting previous revisions
+
 0.3 - 2006-11-17
 * Replaced use of singleton User.current_user with cache sweeper implementation
   for auditing the user that made the change

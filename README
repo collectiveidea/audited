@@ -42,8 +42,12 @@ Auditing with user support depends on Rails' caching mechanisms, therefore audit
 
 == Upgrading
 
-Those upgrading from version 0.2 need to add 2 fields the audits table:
+To upgrade from an older version, add a migration with:
 
+  # to version 0.3
   add_column :audits, :user_type, :string
   add_column :audits, :username, :string
+
+  # to version 0.4
+  add_column :audits, :version, :integer, :default => 0
 
