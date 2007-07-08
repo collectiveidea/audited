@@ -29,5 +29,21 @@ class AuditedTest < Test::Unit::TestCase
     assert_equal @user, @audit.user
     assert_nil @audit.username
   end
+  
+  def test_revision
+    user = User.create :name => "1"
+    5.times {|i| user.update_attribute :name, (i + 2).to_s  }
+    user.audits.each do |audit|
+      assert_equal audit.version.to_s, audit.revision.name
+    end
+  end
+
+  def test_revision_for_deleted_model
+    user = User.create :name => "1"
+    user.destroy
+    revision = user.audits.last.revision
+    assert_equal user.name, revision.name
+    assert revision.new_record?
+  end
 
 end
