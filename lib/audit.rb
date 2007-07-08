@@ -35,4 +35,31 @@ class Audit < ActiveRecord::Base
   alias_method :user_as_model, :user
   alias_method :user, :user_as_string
   
+  def revision
+    attributes = self.class.reconstruct_attributes(ancestors).merge({:version => version})
+    clazz = auditable_type.constantize
+    returning clazz.find_by_id(auditable_id) || clazz.new do |m|
+      m.attributes = attributes
+    end
+  end
+  
+  def ancestors
+    self.class.find(:all, :order => 'version',
+      :conditions => ['auditable_id = ? and auditable_type = ? and version <= ?',
+      auditable_id, auditable_type, version])
+  end
+  
+  def self.reconstruct_attributes(audits)
+    changes = {}
+    result = audits.collect do |audit|
+      attributes = (audit.changes || {}).inject({}) do |attrs, (name, (_,value))|
+        attrs[name] = value
+        attrs
+      end
+      changes.merge!(attributes.merge!(:version => audit.version))
+      yield changes if block_given?
+    end
+    block_given? ? result : changes
+  end
+  
 end

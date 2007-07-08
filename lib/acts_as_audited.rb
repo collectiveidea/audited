@@ -61,8 +61,7 @@ module CollectiveIdea #:nodoc:
           class_inheritable_reader :auditing_enabled
 
           except = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
-          except |= options[:except].is_a?(Array) ?
-            options[:except].collect(&:to_s) : [options[:except].to_s] if options[:except]
+          except |= [options[:except]].flatten.collect(&:to_s) if options[:except]
           write_inheritable_attribute :non_audited_columns, except
 
           class_eval do
