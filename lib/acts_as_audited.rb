@@ -77,6 +77,8 @@ module CollectiveIdea #:nodoc:
             after_save :clear_changed_attributes
             
             attr_accessor :version
+            
+            alias_method_chain :write_attribute, :auditing
 
             write_inheritable_attribute :auditing_enabled, true
           end
@@ -173,19 +175,19 @@ module CollectiveIdea #:nodoc:
           end
           
           # overload write_attribute to save changes to audited attributes
-          def write_attribute(attr_name, attr_value)
+          def write_attribute_with_auditing(attr_name, attr_value)
             attr_name = attr_name.to_s
             if audited_attributes.include?(attr_name)
               @changed_attributes ||= {}
               # get original value
               old_value = @changed_attributes[attr_name] ?
                 @changed_attributes[attr_name].first : self[attr_name]
-              super(attr_name, attr_value)
+              write_attribute_without_auditing(attr_name, attr_value)
               new_value = self[attr_name]
               
               @changed_attributes[attr_name] = [old_value, new_value] if new_value != old_value
             else
-              super(attr_name, attr_value)
+              write_attribute_without_auditing(attr_name, attr_value)
             end
           end
 
