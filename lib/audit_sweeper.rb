@@ -14,7 +14,13 @@ module CollectiveIdea #:nodoc:
         #     audit User, Widget
         #   end
         #
+        # You can also specify an options hash which will be passed on to
+        # Rails' cache_sweeper call:
+        #
+        #    audit User, :only => [:create, :edit, :destroy]
+        #
         def audit(*models)
+          options = models.extract_options!
           models.each do |clazz|
             clazz.send :acts_as_audited unless clazz.respond_to?(:disable_auditing)
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
@@ -24,7 +30,7 @@ module CollectiveIdea #:nodoc:
             observe *models
           end
           class_eval do
-            cache_sweeper :audit_sweeper
+            cache_sweeper :audit_sweeper, options
           end
         end
       end
