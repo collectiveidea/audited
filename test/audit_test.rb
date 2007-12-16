@@ -45,5 +45,15 @@ class AuditedTest < Test::Unit::TestCase
     assert_equal user.name, revision.name
     assert revision.new_record?
   end
+  
+  def test_sets_version_number_on_create
+    user = User.create! :name => "Set Version Number"
+    assert_equal 1, user.audits.last.version
+    user.update_attribute :name, "Set to 2"
+    assert_equal 2, user.audits(true).first.version
+    assert_equal 1, user.audits(true).last.version
+    user.destroy
+    assert_equal 3, user.audits(true).first.version
+  end
 
 end

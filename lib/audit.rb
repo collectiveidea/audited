@@ -11,7 +11,8 @@
 class Audit < ActiveRecord::Base
   belongs_to :auditable, :polymorphic => true
   belongs_to :user, :polymorphic => true
-  acts_as_list :column => :version, :scope => 'auditable_id = #{auditable_id} AND auditable_type = \'#{auditable_type}\''
+  
+  before_create :set_version_number
   
   serialize :changes
   
@@ -60,6 +61,17 @@ class Audit < ActiveRecord::Base
       yield changes if block_given?
     end
     block_given? ? result : changes
+  end
+  
+private
+
+  def set_version_number
+    max = self.class.maximum(:version,
+      :conditions => {
+        :auditable_id => auditable_id,
+        :auditable_type => auditable_type
+      }) || 0
+    self.version = max + 1
   end
   
 end
