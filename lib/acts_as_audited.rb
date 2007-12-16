@@ -129,73 +129,73 @@ module CollectiveIdea #:nodoc:
           revision_with changes(version)
         end
         
-        private
+      private
+      
+        def changes(from_version = 1)
+          from_version = audits.find(:first).version if from_version == :previous
+          changes = {}
+          result = audits.find(:all, :conditions => ['version >= ?', from_version]).collect do |audit|
+            attributes = (audit.changes || {}).inject({}) do |attrs, (name, values)|
+              attrs[name] = values.first
+              attrs
+            end
+            changes.merge!(attributes.merge!(:version => audit.version))
+            yield changes if block_given?
+          end
+          block_given? ? result : changes
+        end
         
-          def changes(from_version = 1)
-            from_version = audits.find(:first).version if from_version == :previous
-            changes = {}
-            result = audits.find(:all, :conditions => ['version >= ?', from_version]).collect do |audit|
-              attributes = (audit.changes || {}).inject({}) do |attrs, (name, values)|
-                attrs[name] = values.first
-                attrs
-              end
-              changes.merge!(attributes.merge!(:version => audit.version))
-              yield changes if block_given?
-            end
-            block_given? ? result : changes
+        def revision_with(attributes)
+          returning self.dup do |revision|
+            revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
+            revision.attributes = attributes
           end
-          
-          def revision_with(attributes)
-            returning self.dup do |revision|
-              revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
-              revision.attributes = attributes
-            end
-          end
-          
-          # Creates a new record in the audits table if applicable
-          def audit_create
-            write_audit(:create)
-          end
-  
-          def audit_update
-            write_audit(:update) if changed?
-          end
-  
-          def audit_destroy
-            write_audit(:destroy)
-          end
+        end
         
-          def write_audit(action = :update, user = nil)
-            self.audits.create :changes => @changed_attributes, :action => action.to_s, :user => user
-          end
+        # Creates a new record in the audits table if applicable
+        def audit_create
+          write_audit(:create)
+        end
 
-          # clears current changed attributes.  Called after save.
-          def clear_changed_attributes
-            @changed_attributes = {}
-          end
-          
-          # overload write_attribute to save changes to audited attributes
-          def write_attribute_with_auditing(attr_name, attr_value)
-            attr_name = attr_name.to_s
-            if audited_attributes.include?(attr_name)
-              @changed_attributes ||= {}
-              # get original value
-              old_value = @changed_attributes[attr_name] ?
-                @changed_attributes[attr_name].first : self[attr_name]
-              write_attribute_without_auditing(attr_name, attr_value)
-              new_value = self[attr_name]
-              
-              @changed_attributes[attr_name] = [old_value, new_value] if new_value != old_value
-            else
-              write_attribute_without_auditing(attr_name, attr_value)
-            end
-          end
+        def audit_update
+          write_audit(:update) if changed?
+        end
 
-          CALLBACKS.each do |attr_name| 
-            alias_method "orig_#{attr_name}".to_sym, attr_name
+        def audit_destroy
+          write_audit(:destroy)
+        end
+      
+        def write_audit(action = :update, user = nil)
+          self.audits.create :changes => @changed_attributes, :action => action.to_s, :user => user
+        end
+
+        # clears current changed attributes.  Called after save.
+        def clear_changed_attributes
+          @changed_attributes = {}
+        end
+        
+        # overload write_attribute to save changes to audited attributes
+        def write_attribute_with_auditing(attr_name, attr_value)
+          attr_name = attr_name.to_s
+          if audited_attributes.include?(attr_name)
+            @changed_attributes ||= {}
+            # get original value
+            old_value = @changed_attributes[attr_name] ?
+              @changed_attributes[attr_name].first : self[attr_name]
+            write_attribute_without_auditing(attr_name, attr_value)
+            new_value = self[attr_name]
+            
+            @changed_attributes[attr_name] = [old_value, new_value] if new_value != old_value
+          else
+            write_attribute_without_auditing(attr_name, attr_value)
           end
-          
-          def empty_callback() end #:nodoc:
+        end
+
+        CALLBACKS.each do |attr_name| 
+          alias_method "orig_#{attr_name}".to_sym, attr_name
+        end
+        
+        def empty_callback() end #:nodoc:
 
       end # InstanceMethods
       
