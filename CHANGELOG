@@ -2,6 +2,7 @@
 -------------------------------------------------------------------------------
 
 0.5
+* Added #revision_at for retrieving a revision from a specific time [Jacob Atzen]
 * Fix error when getting revision from audit with no changes [Geoffrey Wiseman]
 * Remove dependency on acts_as_list
 

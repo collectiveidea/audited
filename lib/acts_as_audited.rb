@@ -129,6 +129,12 @@ module CollectiveIdea #:nodoc:
           revision_with changes(version)
         end
         
+        def revision_at(date_or_time)
+          audit = audits.find(:first, :conditions => ["created_at <= ?", date_or_time],
+            :order => "created_at DESC")
+          revision_with changes(audit.version) if audit
+        end
+
       private
       
         def changes(from_version = 1)
