@@ -2,6 +2,7 @@
 -------------------------------------------------------------------------------
 
 0.5
+* Fix error when getting revision from audit with no changes [Geoffrey Wiseman]
 * Remove dependency on acts_as_list
 
 0.4 - 2007-06-17
