@@ -107,6 +107,13 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     assert_equal nil, u.revisions[1].name
   end
   
+  def test_revisions_without_changes
+    u = User.create
+    assert_nothing_raised do
+      assert_equal 1, u.revisions.size
+    end
+  end
+  
   def test_get_specific_revision
     u = create_versions(5)
     revision = u.revision(3)
