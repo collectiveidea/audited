@@ -114,6 +114,19 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     end
   end
   
+  # FIXME: figure out a better way to test this
+  def test_revision_at
+    u = create_user
+    Audit.update(u.audits.first.id, :created_at => 1.hour.ago)
+    u.update_attributes :name => 'updated'
+    assert_equal 1, u.revision_at(2.minutes.ago).version
+  end
+  
+  def test_revision_at_before_record_created
+    u = create_user
+    assert_nil u.revision_at(1.week.ago)
+  end
+  
   def test_get_specific_revision
     u = create_versions(5)
     revision = u.revision(3)
