@@ -1,6 +1,9 @@
  acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
 
+0.5
+* Remove dependency on acts_as_list
+
 0.4 - 2007-06-17
 * Added support getting previous revisions
 
