@@ -20,7 +20,7 @@ module CollectiveIdea #:nodoc:
         #    audit User, :only => [:create, :edit, :destroy]
         #
         def audit(*models)
-          options = models.extract_options!
+          options = models.last.is_a?(Hash) ? models.pop : {}
           models.each do |clazz|
             clazz.send :acts_as_audited unless clazz.respond_to?(:disable_auditing)
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
