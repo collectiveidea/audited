@@ -86,6 +86,11 @@ module CollectiveIdea #:nodoc:
       end
     
       module InstanceMethods
+        
+        def changed_attributes
+          @changed_attributes ||= {}
+        end
+        
         # Temporarily turns off auditing while saving.
         def save_without_auditing
           without_auditing { save }
@@ -99,8 +104,7 @@ module CollectiveIdea #:nodoc:
         # If called with no parameters, gets whether the current model has changed.
         # If called with a single parameter, gets whether the parameter has changed.
         def changed?(attr_name = nil)
-          @changed_attributes ||= {}
-          attr_name ? @changed_attributes.include?(attr_name.to_s) : !@changed_attributes.empty?
+          attr_name ? changed_attributes.include?(attr_name.to_s) : !changed_attributes.empty?
         end
 
         # Executes the block with the auditing callbacks disabled.
@@ -172,7 +176,7 @@ module CollectiveIdea #:nodoc:
         end
       
         def write_audit(action = :update, user = nil)
-          self.audits.create :changes => @changed_attributes, :action => action.to_s, :user => user
+          self.audits.create :changes => changed_attributes, :action => action.to_s, :user => user
         end
 
         # clears current changed attributes.  Called after save.
@@ -184,14 +188,13 @@ module CollectiveIdea #:nodoc:
         def write_attribute_with_auditing(attr_name, attr_value)
           attr_name = attr_name.to_s
           if audited_attributes.include?(attr_name)
-            @changed_attributes ||= {}
             # get original value
-            old_value = @changed_attributes[attr_name] ?
-              @changed_attributes[attr_name].first : self[attr_name]
+            old_value = changed_attributes[attr_name] ?
+              changed_attributes[attr_name].first : self[attr_name]
             write_attribute_without_auditing(attr_name, attr_value)
             new_value = self[attr_name]
             
-            @changed_attributes[attr_name] = [old_value, new_value] if new_value != old_value
+            changed_attributes[attr_name] = [old_value, new_value] if new_value != old_value
           else
             write_attribute_without_auditing(attr_name, attr_value)
           end
