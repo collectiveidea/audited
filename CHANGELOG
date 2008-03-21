@@ -1,6 +1,8 @@
  acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
 
+* 2008-03-21 - added #changed_attributes to get access to the changes before a save [Chris Parker]
+
 0.5
 * Added #revision_at for retrieving a revision from a specific time [Jacob Atzen]
 * Fix error when getting revision from audit with no changes [Geoffrey Wiseman]
