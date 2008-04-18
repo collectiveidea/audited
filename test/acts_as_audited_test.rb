@@ -154,6 +154,13 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     end
   end
   
+  def test_without_previous_audits
+    user = create_user
+    user.audits.destroy_all
+    assert_nothing_raised(NoMethodError) { user.revision(:previous) }
+  end
+  
+  
 private
 
   def create_user(attrs = {})

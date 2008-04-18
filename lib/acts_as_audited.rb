@@ -142,7 +142,10 @@ module CollectiveIdea #:nodoc:
       private
       
         def changes(from_version = 1)
-          from_version = audits.find(:first).version if from_version == :previous
+          if from_version == :previous
+            last_audit = audits.find(:first)
+            from_version = last_audit ? last_audit.version : 1
+          end
           changes = {}
           result = audits.find(:all, :conditions => ['version >= ?', from_version]).collect do |audit|
             attributes = (audit.changes || {}).inject({}) do |attrs, (name, values)|
