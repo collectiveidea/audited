@@ -1,5 +1,5 @@
+require 'set'
 
-#
 # Audit saves the changes to ActiveRecord models.  It has the following attributes:
 #
 # * <tt>auditable</tt>: the ActiveRecord model that was changed
@@ -17,7 +17,7 @@ class Audit < ActiveRecord::Base
   serialize :changes
   
   cattr_accessor :audited_classes
-  self.audited_classes = []
+  self.audited_classes = Set.new
   
   # Allows user to be set to either a string or an ActiveRecord object
   def user_as_string=(user) #:nodoc:
@@ -53,11 +53,7 @@ class Audit < ActiveRecord::Base
   def self.reconstruct_attributes(audits)
     changes = {}
     result = audits.collect do |audit|
-      attributes = (audit.changes || {}).inject({}) do |attrs, (name, (_,value))|
-        attrs[name] = value
-        attrs
-      end
-      changes.merge!(attributes.merge!(:version => audit.version))
+      changes.merge!((audit.changes || {}).merge!(:version => audit.version))
       yield changes if block_given?
     end
     block_given? ? result : changes
