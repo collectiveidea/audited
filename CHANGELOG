@@ -1,5 +1,7 @@
  acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
+* 2008-04-19 - refactored to make compatible with dirty tracking in edge rails
+               and to stop storing both old and new values in a single audit
 * 2008-04-18 - Fix NoMethodError when trying to access the :previous revision
                on a model that doesn't have previous revisions [Alex Soto]
 * 2008-03-21 - added #changed_attributes to get access to the changes before a
