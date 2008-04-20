@@ -72,9 +72,9 @@ module CollectiveIdea #:nodoc:
           attr_protected :audit_ids
           Audit.audited_classes << self
           
-          after_create :audit_create
-          before_update :audit_update
-          after_destroy :audit_destroy
+          after_create :audit_create_callback
+          before_update :audit_update_callback
+          after_destroy :audit_destroy_callback
           
           attr_accessor :version
 
@@ -159,29 +159,30 @@ module CollectiveIdea #:nodoc:
           end
         end
         
-        def audit_create
-          write_audit(:create, audited_attributes)
+        def audit_create(user = nil)
+          write_audit(:action => :create, :changes => audited_attributes, :user => user)
         end
 
-        def audit_update
-          changes = changed_audited_attributes
-          write_audit(:update, changes) unless changes.empty?
+        def audit_update(user = nil)
+          unless (changes = changed_audited_attributes).empty?
+            write_audit(:action => :update, :changes => changes, :user => user)
+          end
         end
 
-        def audit_destroy
-          write_audit(:destroy)
+        def audit_destroy(user = nil)
+          write_audit(:action => :destroy, :user => user)
         end
       
-        def write_audit(action, attributes = {}, user = nil)
-          self.audits.create :action => action.to_s, :user => user,
-            :changes => attributes
+        def write_audit(attrs)
+          self.audits.create attrs if auditing_enabled
         end
 
         CALLBACKS.each do |attr_name| 
-          alias_method "orig_#{attr_name}".to_sym, attr_name
+          alias_method "#{attr_name}_callback".to_sym, attr_name
         end
         
-        def empty_callback; end #:nodoc:
+        def empty_callback #:nodoc:
+        end
 
       end # InstanceMethods
       
@@ -191,7 +192,7 @@ module CollectiveIdea #:nodoc:
           self.columns.select { |c| !non_audited_columns.include?(c.name) }
         end
 
-        # Executes the block with the auditing callbacks disabled.
+        # Executes the block with auditing disabled.
         #
         #   Foo.without_auditing do
         #     @foo.save
@@ -204,23 +205,29 @@ module CollectiveIdea #:nodoc:
         end
         
         def disable_auditing
-          class_eval do
-            CALLBACKS.each do |attr_name|
-              alias_method attr_name, :empty_callback
-            end
-          end
           write_inheritable_attribute :auditing_enabled, false
         end
         
         def enable_auditing
-          class_eval do 
-            CALLBACKS.each do |attr_name|
-              alias_method attr_name, "orig_#{attr_name}".to_sym
-            end
-          end
           write_inheritable_attribute :auditing_enabled, true
         end
-
+        
+        def disable_auditing_callbacks
+          class_eval do
+            CALLBACKS.each do |attr_name|
+              alias_method "#{attr_name}_callback", :empty_callback
+            end
+          end
+        end
+        
+        def enable_auditing_callbacks
+          class_eval do 
+            CALLBACKS.each do |attr_name|
+              alias_method "#{attr_name}_callback".to_sym, attr_name
+            end
+          end
+        end
+        
       end
     end
   end

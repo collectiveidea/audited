@@ -9,6 +9,10 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :updated_at, :datetime
   end
   
+  create_table :companies, :force => true do |t|
+    t.column :name, :string
+  end
+  
   create_table :audits, :force => true do |t|
     t.column :auditable_id, :integer
     t.column :auditable_type, :string

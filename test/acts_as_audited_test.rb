@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'test_helper')
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 class ActsAsAuditedTest < Test::Unit::TestCase
   
@@ -74,8 +74,8 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   end
   
   def test_that_changes_is_a_hash
-    u = create_user
-    audit = Audit.find(u.audits.first.id)
+    audit = create_user.audits.first
+    audit.reload
     assert audit.changes.is_a?(Hash)
   end
   
@@ -158,21 +158,25 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     assert_nothing_raised(NoMethodError) { user.revision(:previous) }
   end
   
-  
-private
-
-  def create_user(attrs = {})
-    User.create({:name => 'Brandon', :username => 'brandon', :password => 'password'}.merge(attrs))
-  end
-  
-  def create_versions(n = 2)
-    returning User.create(:name => 'Foobar 1') do |u|
-      (n - 1).times do |i|
-        u.update_attribute :name, "Foobar #{i + 2}"
+  def test_without_auditing
+    u = create_user
+    assert_no_difference Audit, :count do
+      User.without_auditing do
+        u.update_attribute :name, 'Changed'
       end
-      u.reload
     end
-    
+    assert_difference Audit, :count do
+      u.update_attribute :name, 'Changed Again'
+    end
   end
-
+  
+  def test_disable_auditing_callbacks
+    User.disable_auditing_callbacks
+    assert_no_difference Audit, :count do
+      create_user
+    end
+  ensure
+    User.enable_auditing_callbacks
+  end
+  
 end

@@ -22,9 +22,9 @@ module CollectiveIdea #:nodoc:
         def audit(*models)
           options = models.last.is_a?(Hash) ? models.pop : {}
           models.each do |clazz|
-            clazz.send :acts_as_audited unless clazz.respond_to?(:disable_auditing)
+            clazz.send :acts_as_audited
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
-            clazz.send :disable_auditing
+            clazz.send :disable_auditing_callbacks
           end
           AuditSweeper.class_eval do
             observe *models
@@ -42,19 +42,15 @@ end
 class AuditSweeper < ActionController::Caching::Sweeper #:nodoc:
 
   def after_create(record)
-    record.send(:write_audit, :create, current_user)
+    record.send(:audit_create, current_user)
   end
 
   def after_destroy(record)
-    record.send(:write_audit, :destroy, current_user)
+    record.send(:audit_destroy, current_user)
   end
 
-  def after_update(record)
-    record.send(:write_audit, :update, current_user)
-  end
-  
-  def after_save(record)
-    record.send(:clear_changed_attributes)
+  def before_update(record)
+    record.send(:audit_update, current_user)
   end
   
   def current_user
