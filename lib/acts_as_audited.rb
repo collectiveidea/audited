@@ -19,12 +19,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-class Hash
-  def only(*keys)
-    reject {|k,| !keys.include? k }
-  end
-end
-
 module CollectiveIdea #:nodoc:
   module Acts #:nodoc:
     # Specify this act if you want changes to your model to be saved in an
@@ -92,7 +86,7 @@ module CollectiveIdea #:nodoc:
       module InstanceMethods
         
         def changed_audited_attributes
-          attributes.only(*changed_attributes.keys).except(*non_audited_columns)
+          attributes.slice(*changed_attributes.keys).except(*non_audited_columns)
         end
         
         # Returns the attributes that are audited
