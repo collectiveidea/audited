@@ -139,11 +139,7 @@ module CollectiveIdea #:nodoc:
             version = last_audit ? last_audit.version : 1
           end
           revisions = audits.find(:all, :conditions => ['version >= ?', version])
-          if block
-            Audit.reconstruct_attributes(revisions, &block)
-          else
-            Audit.reconstruct_attributes(revisions)
-          end
+          Audit.reconstruct_attributes(revisions, &block)
         end
         
         def revision_with(attributes)
