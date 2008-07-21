@@ -146,6 +146,18 @@ module CollectiveIdea #:nodoc:
           returning self.dup do |revision|
             revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
             revision.attributes = attributes
+            
+            # Remove any association proxies so that they will be recreated
+            # and reference the correct object for this revision. The only way
+            # to determine if an instance variable is a proxy object is to
+            # see if it responds to certain methods, as it forwards almost
+            # everything to its target.
+            for ivar in revision.instance_variables
+              proxy = revision.instance_variable_get ivar
+              if !proxy.nil? and proxy.respond_to? :proxy_respond_to?
+                revision.instance_variable_set ivar, nil
+              end
+            end
           end
         end
         
