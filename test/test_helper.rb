@@ -2,6 +2,7 @@ $:.unshift(File.dirname(__FILE__) + '/../lib')
 
 require 'test/unit'
 require 'rubygems'
+require 'multi_rails_init'
 require 'active_record'
 require 'action_controller'
 require 'action_view'
@@ -21,7 +22,11 @@ Test::Unit::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
 $LOAD_PATH.unshift(Test::Unit::TestCase.fixture_path)
 
 # load model
-require 'user'
+class User < ActiveRecord::Base
+  acts_as_audited :except => :password
+end
+class Company < ActiveRecord::Base
+end
 
 class Test::Unit::TestCase #:nodoc:
   def create_fixtures(*table_names)

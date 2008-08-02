@@ -1,7 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
-class Company < ActiveRecord::Base
-end
 class AuditsController < ActionController::Base
   audit Company
   attr_accessor :current_user

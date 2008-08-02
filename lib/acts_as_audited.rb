@@ -40,7 +40,7 @@ module CollectiveIdea #:nodoc:
       module ClassMethods
         # == Configuration options
         #
-        # * <tt>except</tt> - Excludes fields from being saved in the audit log.
+        # * +except+ - Excludes fields from being saved in the audit log.
         #   By default, acts_as_audited will audit all but these fields: 
         # 
         #     [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
@@ -50,10 +50,19 @@ module CollectiveIdea #:nodoc:
         #     class User < ActiveRecord::Base
         #       acts_as_audited :except => :password
         #     end
+        # * +protect+ If your model uses attr_protected, set this to false to prevent Rails from
+        #   raising an error
+        #
+        #     class User < ActiveRecord::Base
+        #       acts_as_audited :protect => false
+        #       attr_accessible :name
+        #     end
         # 
         def acts_as_audited(options = {})
           # don't allow multiple calls
           return if self.included_modules.include?(CollectiveIdea::Acts::Audited::InstanceMethods)
+          
+          options = {:protect => true}.merge(options)
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled
@@ -63,7 +72,7 @@ module CollectiveIdea #:nodoc:
           write_inheritable_attribute :non_audited_columns, except
 
           has_many :audits, :as => :auditable, :order => 'audits.version desc'
-          attr_protected :audit_ids
+          attr_protected :audit_ids if options[:protect]
           Audit.audited_classes << self
           
           after_create :audit_create_callback

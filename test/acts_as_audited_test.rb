@@ -179,4 +179,22 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     User.enable_auditing_callbacks
   end
   
+  class InaccessibleUser < ActiveRecord::Base
+    set_table_name :users
+    acts_as_audited
+    attr_accessible :name, :username, :password
+  end
+  def test_attr_accessible_breaks
+    assert_raises(RuntimeError) { InaccessibleUser.new(:name => 'FAIL!') }
+  end
+  
+  class AccessibleUser < ActiveRecord::Base
+    set_table_name :users
+    acts_as_audited :protect => false
+    attr_accessible :name, :username, :password
+  end
+  def test_attr_accessible_without_protection
+    assert_nothing_raised { AccessibleUser.new(:name => 'NO FAIL!') }
+  end
+  
 end

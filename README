@@ -45,6 +45,13 @@ Auditing with user support depends on Rails' caching mechanisms, therefore audit
 
   config.cache_classes = true
   config.action_controller.perform_caching = true
+  
+Also, if your model uses attr_accessible, you need to set +:protect+ to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+.
+
+  class User < ActiveRecord::Base
+    acts_as_audited :protect => false
+    attr_accessible :name
+  end
 
 === ActiveScaffold
 
@@ -54,14 +61,6 @@ Many users have also reported problems with acts_as_audited and ActiveScaffold, 
     audit MyModel, :only => [:create, :update, :destroy]
   end
 
-== Upgrading
+== Compatability
 
-To upgrade from an older version, add a migration with:
-
-  # to version 0.3
-  add_column :audits, :user_type, :string
-  add_column :audits, :username, :string
-
-  # to version 0.4
-  add_column :audits, :version, :integer, :default => 0
-
+acts_as_audited works with Rails 2.0 or later.
