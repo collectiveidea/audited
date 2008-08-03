@@ -46,7 +46,7 @@ Auditing with user support depends on Rails' caching mechanisms, therefore audit
   config.cache_classes = true
   config.action_controller.perform_caching = true
   
-Also, if your model uses attr_accessible, you need to set +:protect+ to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+.
+Also, if your model declares +attr_accessible+ after +acts_as_audited+, you need to set +:protect+ to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +acts_as_audited+, but needs to be explicitly set if it is called after.
 
   class User < ActiveRecord::Base
     acts_as_audited :protect => false

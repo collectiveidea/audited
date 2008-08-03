@@ -50,8 +50,10 @@ module CollectiveIdea #:nodoc:
         #     class User < ActiveRecord::Base
         #       acts_as_audited :except => :password
         #     end
-        # * +protect+ If your model uses attr_protected, set this to false to prevent Rails from
-        #   raising an error
+        # * +protect+ - If your model uses +attr_protected+, set this to false to prevent Rails from
+        #   raising an error.  If you declare +attr_accessibe+ before calling +acts_as_audited+, it
+        #   will automatically default to false.  You only need to explicitly set this if you are
+        #   calling +attr_accessible+ after.
         #
         #     class User < ActiveRecord::Base
         #       acts_as_audited :protect => false
@@ -62,7 +64,7 @@ module CollectiveIdea #:nodoc:
           # don't allow multiple calls
           return if self.included_modules.include?(CollectiveIdea::Acts::Audited::InstanceMethods)
           
-          options = {:protect => true}.merge(options)
+          options = {:protect => accessible_attributes.nil?}.merge(options)
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled

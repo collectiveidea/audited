@@ -188,10 +188,20 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     assert_raises(RuntimeError) { InaccessibleUser.new(:name => 'FAIL!') }
   end
   
-  class AccessibleUser < ActiveRecord::Base
+  class UnprotectedUser < ActiveRecord::Base
     set_table_name :users
     acts_as_audited :protect => false
     attr_accessible :name, :username, :password
+  end
+  def test_attr_accessible_without_protection
+    assert_nothing_raised { UnprotectedUser.new(:name => 'NO FAIL!') }
+  end
+  
+  # declare attr_accessible before calling aaa
+  class AccessibleUser < ActiveRecord::Base
+    set_table_name :users
+    attr_accessible :name, :username, :password
+    acts_as_audited
   end
   def test_attr_accessible_without_protection
     assert_nothing_raised { AccessibleUser.new(:name => 'NO FAIL!') }
