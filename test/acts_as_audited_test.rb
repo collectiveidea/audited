@@ -36,6 +36,33 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     assert_difference(Audit, :count)    { assert u.destroy }
   end
   
+  def test_create
+    u = User.create! :name => 'Brandon'
+    assert_equal 1, u.audits.count
+    audit = u.audits.first
+    assert_equal 'create', audit.action
+    assert_equal u.audited_attributes, audit.changes
+  end
+  
+  def test_update
+    u = create_user
+    u.update_attributes :name => 'Changed'
+    assert_equal 2, u.audits.count
+    u.reload
+    audit = u.audits.first
+    assert_equal 'update', audit.action
+    assert_equal({'name' => 'Changed'}, audit.changes)
+  end
+
+  def test_destroy
+    u = create_user
+    u.destroy
+    assert_equal 2, u.audits.count
+    audit = u.audits.first
+    assert_equal 'destroy', audit.action
+    assert_nil audit.changes
+  end
+  
   def test_save_without_auditing
     assert_no_difference Audit, :count do
       u = User.new(:name => 'Brandon')
