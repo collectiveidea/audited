@@ -146,8 +146,12 @@ module CollectiveIdea #:nodoc:
       
         def changes_from(version = 1, &block)
           if version == :previous
-            last_audit = audits.find(:first, :offset => 1)
-            version = last_audit ? last_audit.version : 1
+            version = if self.version
+              self.version - 1
+            else
+              last_audit = audits.find(:first, :offset => 1)
+              last_audit ? last_audit.version : 1
+            end
           end
           revisions = audits.find(:all, :conditions => ['version >= ?', version])
           Audit.reconstruct_attributes(revisions, &block)

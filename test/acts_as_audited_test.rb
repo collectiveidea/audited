@@ -166,6 +166,12 @@ class ActsAsAuditedTest < Test::Unit::TestCase
     assert_equal 4, revision.version
     assert_equal u.revision(4), revision
   end
+
+  def test_get_previous_revision_repeatedly
+    u = create_versions(5).revision(:previous)
+    assert_equal 4, u.version
+    assert_equal 3, u.revision(:previous).version
+  end
   
   def test_revision_marks_attributes_changed
     u = create_versions(2)
