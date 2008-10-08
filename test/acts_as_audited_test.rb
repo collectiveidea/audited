@@ -163,8 +163,8 @@ class ActsAsAuditedTest < Test::Unit::TestCase
   def test_get_previous_revision
     u = create_versions(5)
     revision = u.revision(:previous)
-    assert_equal 5, revision.version
-    assert_equal u.revision(5), revision
+    assert_equal 4, revision.version
+    assert_equal u.revision(4), revision
   end
   
   def test_revision_marks_attributes_changed

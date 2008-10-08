@@ -146,7 +146,7 @@ module CollectiveIdea #:nodoc:
       
         def changes_from(version = 1, &block)
           if version == :previous
-            last_audit = audits.find(:first)
+            last_audit = audits.find(:first, :offset => 1)
             version = last_audit ? last_audit.version : 1
           end
           revisions = audits.find(:all, :conditions => ['version >= ?', version])
