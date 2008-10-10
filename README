@@ -4,11 +4,11 @@ acts_as_audited is an ActiveRecord extension that logs all changes to your model
 
 == Installation
 
-* Install the plugin into your rails app 
+* Install the plugin into your rails app
   If you are using Rails 2.1:
 
     script/plugin install git://github.com/collectiveidea/acts_as_audited.git
-  
+
   For versions prior to 2.1:
 
     git clone git://github.com/collectiveidea/acts_as_audited.git vendor/plugins/acts_as_audited
@@ -28,7 +28,7 @@ If you're using acts_as_audited within Rails, you can simply declare which model
       @user ||= User.find(session[:user])
     end
   end
-  
+
 == Customizing
 
 To get auditing outside of Rails, or to customize which fields are audited within Rails, you can explicitly declare <tt>acts_as_audited</tt> on your models:
@@ -41,12 +41,7 @@ See http://opensoul.org/2006/07/21/acts_as_audited for more information.
 
 == Caveats
 
-Auditing with user support depends on Rails' caching mechanisms, therefore auditing isn't enabled during development mode. To test that auditing is working, start up your app in production mode, or change the following options in config/environments/environment.rb: 
-
-  config.cache_classes = true
-  config.action_controller.perform_caching = true
-  
-Also, if your model declares +attr_accessible+ after +acts_as_audited+, you need to set +:protect+ to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +acts_as_audited+, but needs to be explicitly set if it is called after.
+If your model declares +attr_accessible+ after +acts_as_audited+, you need to set +:protect+ to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +acts_as_audited+, but needs to be explicitly set if it is called after.
 
   class User < ActiveRecord::Base
     acts_as_audited :protect => false
