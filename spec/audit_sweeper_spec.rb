@@ -1,4 +1,5 @@
-require File.expand_path(File.dirname(__FILE__) + '/test_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require 'spec/rails'
 
 class AuditsController < ActionController::Base
   audit Company
@@ -13,9 +14,8 @@ end
 AuditsController.view_paths = [File.expand_path(File.dirname(__FILE__) + "/../fixtures")]
 ActionController::Routing::Routes.draw {|m| m.connect ':controller/:action/:id' }
 
-class AuditSweeperTest < Test::Unit::TestCase
-
-  def setup
+describe "AuditSweeper" do
+  before do
     @controller = AuditsController.new
     @controller.logger = Logger.new(nil)
     @request    = ActionController::TestRequest.new
@@ -23,16 +23,16 @@ class AuditSweeperTest < Test::Unit::TestCase
     @request.host = "www.example.com"
   end
   
-  def test_calls_acts_as_audited_on_non_audited_models
-    assert_kind_of CollectiveIdea::Acts::Audited::SingletonMethods, Company
+  it "calls acts as audited on non audited models" do
+    Company.should be_kind_of(CollectiveIdea::Acts::Audited::SingletonMethods)
   end
   
-  def test_audits_user
+  it "audits user" do
     user = @controller.current_user = create_user
     assert_difference Audit, :count do
       post :audit
     end
-    assert_equal user, assigns(:company).audits.last.user
+    assigns(:company).audits.last.user.should == user
   end
   
 end
