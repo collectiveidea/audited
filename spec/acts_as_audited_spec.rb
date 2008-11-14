@@ -1,276 +1,266 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-describe "ActsAsAudited" do
+describe CollectiveIdea::Acts::Audited do
   
-  it "acts as authenticated declaration includes instance methods" do
+  it "should include instance methods" do
     User.new.should be_kind_of(CollectiveIdea::Acts::Audited::InstanceMethods)
   end
   
-  it "acts as authenticated declaration extends singleton methods" do
+  it "should extend singleton methods" do
     User.should be_kind_of(CollectiveIdea::Acts::Audited::SingletonMethods)
   end
 
-  it "audits attributes" do
+  it "should know which attributes are audited" do
     attrs = {'name' => nil, 'username' => nil, 'logins' => 0, 'activated' => nil}
     User.new.audited_attributes.should == attrs
   end
   
-  it "has columns not audited by default" do
-    ['created_at', 'updated_at', 'lock_version', 'id', 'password'].each do |column|
+  ['created_at', 'updated_at', 'lock_version', 'id', 'password'].each do |column|
+    it "should not audit #{column}" do
       User.non_audited_columns.should include(column)
     end
   end
 
-  it "doesn't save non audited columns" do
-    u = create_user
-    u.audits.first.changes.keys.any?{|col| ['created_at', 'updated_at', 'password'].include? col}.should be_false
+  it "should not save non-audited columns" do
+    create_user.audits.first.changes.keys.any?{|col| ['created_at', 'updated_at', 'password'].include? col}.should be_false
   end
   
-  it "audits saves and updates" do
-    u = nil
-    assert_difference(Audit, :count)    { u = create_user }
-    assert_difference(Audit, :count)    { u.update_attribute(:name, "Someone") }
-    assert_difference(Audit, :count)    { u.update_attribute(:name, "Someone else") }
-    assert_no_difference(Audit, :count) { u.save }
-    assert_difference(Audit, :count)    { u.destroy }
-  end
-  
-  it "audits creates" do
-    u = User.create! :name => 'Brandon'
-    u.audits.count.should == 1
-    audit = u.audits.first
-    audit.action.should == 'create'
-    audit.changes.should == u.audited_attributes
-  end
-  
-  it "audits updates" do
-    u = create_user
-    u.update_attributes :name => 'Changed'
-    u.audits.count.should == 2
-    u.reload
-    audit = u.audits.first
-    audit.action.should == 'update'
-    audit.changes.should == {'name' => 'Changed'}
-  end
-
-  it "audits destroys" do
-    u = create_user
-    u.destroy
-    u.audits.count.should == 2
-    audit = u.audits.first
-    audit.action.should == 'destroy'
-    audit.changes.should == nil
-  end
-  
-  it "can save without auditing" do
-    assert_no_difference Audit, :count do
-      u = User.new(:name => 'Brandon')
-      u.save_without_auditing.should_not == nil
-    end
-  end
-  
-  it "can do stuff in a block without auditing" do
-    assert_no_difference Audit, :count do
-      User.without_auditing { User.create(:name => 'Brandon') }
-    end
-  end
-  
-  it "leverages ARs dirty attribute tracking, aka 'changed?'" do
-    u = create_user
-    u.changed?.should_not be_true
-    u.name = "Bobby"
-    u.changed?.should_not be_nil
-    u.name_changed?.should_not be_nil
-    u.username_changed?.should_not be_true
-  end
-  
-  it "clears changed attributes after save" do
-    u = User.new(:name => 'Brandon')
-    u.changed?.should_not be_nil
-    u.save
-    u.changed?.should_not be_true
-  end
-  
-  it "type casting" do
-    pending
-    User.delete_all; Audit.delete_all
-    u = create_user(:logins => 0, :activated => true)
-    u.update_attribute :logins, '0' 
-    assert_no_difference(Audit, :count) {
-      puts "User count before: #{User.count}; Audit count before: #{Audit.count}"
-      u.update_attribute :logins, '0'
-      u.update_attribute :logins, '0' 
-      
-      puts "User count after: #{User.count}; Audit count after: #{Audit.count}"
-    }
-    # assert_no_difference(Audit, :count) { u.update_attribute :logins, 0 }
-    assert_no_difference(Audit, :count) { u.update_attribute :activated, true }
-    assert_no_difference(Audit, :count) { u.update_attribute :activated, 1 }
-  end
-  
-  it "stores changes in a hash" do
-    audit = create_user.audits.first
-    audit.reload
-    audit.changes.should be_an_instance_of(Hash)
-  end
-  
-  it "save without modifications" do
-    u = create_user
-    u.reload
-    
-    lambda{
-      u.changed?.should_not be_true
-      u.save!
-    }.should_not raise_error
-  end
-  
-  it "returns revisions as an Array of Users" do
-    u = create_versions
-    u.revisions.should be_an_instance_of(Array)
-    u.revisions.each {|version| 
-      version.should be_an_instance_of(User)
-    }
-  end
-  
-  it "the first revision is the most recent one" do
-    u = User.create(:name => 'Brandon')
-    u.revisions.size.should == 1
-    u.revisions[0].name.should == 'Brandon'
-    
-    u.update_attribute :name, 'Foobar'
-    u.revisions.size.should == 2
-    u.revisions[0].name.should == 'Foobar'
-    u.revisions[1].name.should == 'Brandon'
-  end
-  
-  # TODO: not sure what this actually tests
-  it "revisions without changes" do
-    u = User.create
-    lambda{
-      u.revisions.size.should == 1
-    }.should_not raise_error
-  end
-  
-  # FIXME: figure out a better way to test this
-  it "can reconstruct the object as it was at a certain time ('revision_at')" do
-    u = create_user
-    Audit.update(u.audits.first.id, :created_at => 1.hour.ago)
-    u.update_attributes :name => 'updated'
-    u.revision_at(2.minutes.ago).version.should == 1
-  end
-  
-  it "doesn't have a revision from a point in time before the creation (nil)" do
-    u = create_user
-    u.revision_at(1.week.ago).should be_nil
-  end
-  
-  it "can get specific revision" do
-    u = create_versions(5)
-    revision = u.revision(3)
-    revision.should be_an_instance_of(User)
-    revision.version.should == 3
-    revision.name.should == 'Foobar 3'
-  end
-  
-  it "can get previous revisions" do
-    u = create_versions(5)
-    revision = u.revision(:previous)
-    revision.version.should == 4
-    revision.should == u.revision(4)
-  end
-
-  it "get previous revision repeatedly" do
-    u = create_versions(5).revision(:previous)
-    u.version.should == 4
-    u.revision(:previous).version.should == 3
-  end
-  
-  it "revision marks attributes changed" do
-    u = create_versions(2)
-    u.revision(1).name_changed?.should_not be_nil
-  end
-
-  it "save revision records audit" do
-    u = create_versions(2)
-    assert_difference Audit, :count do
-      u.revision(1).save.should_not be_nil
-    end
-  end
-  
-  it "an AR record can live without previous audits without raising" do
-    user = create_user
-    user.audits.destroy_all
-    lambda{
-      user.revision(:previous)
-    }.should_not raise_error(NoMethodError)
-    # assert_nothing_raised(NoMethodError) { user.revision(:previous) }
-  end
-  
-  it "can update stuff without auditing if needed" do
-    u = create_user
-    assert_no_difference Audit, :count do
-      User.without_auditing do
-        u.update_attribute :name, 'Changed'
-      end
+  describe "on create" do
+    it "should save an audit" do
+      lambda {
+        create_user.should have(1).audit
+      }.should change { Audit.count }.by(1)
     end
     
-    assert_difference Audit, :count do
-      u.update_attribute :name, 'Changed Again'
+    it "should set the action to 'create'" do
+      audit = create_user.audits.first
+      audit.action.should == 'create'
+    end
+    
+    it "should store all the audited attributes" do
+      audit = create_user.audits.first
+      audit.changes.should == audit.auditable.audited_attributes
     end
   end
-
-  describe "can disable auditing callbacks" do
+  
+  describe "on update" do
     before do
-      User.disable_auditing_callbacks
+      @user = create_user
     end
     
-    after do
-      User.enable_auditing_callbacks
+    it "should save an audit on update" do
+      lambda { @user.update_attribute(:name, "Someone") }.should change { @user.audits.count }.by(1)
+      lambda { @user.update_attribute(:name, "Someone else") }.should change { @user.audits.count }.by(1)
+    end
+
+    it "should not save an audit if the record is not changed" do
+      lambda { @user.save! }.should_not change { Audit.count }
     end
     
-    it "disable auditing callbacks" do
-      assert_no_difference Audit, :count do
-        create_user
+    it "should set the action to 'update'" do
+      @user.update_attributes :name => 'Changed'
+      @user.audits.first.action.should == 'update'
+    end
+    
+    it "should store the changed attributes" do
+      @user.update_attributes :name => 'Changed'
+      @user.audits.first.changes.should == {'name' => 'Changed'}
+    end
+    
+    it "should not save an audit if the value doesn't change after type casting" do
+      pending "Dirty tracking doesn't seem to account for type casting"
+      @user.update_attributes! :logins => 0, :activated => true
+      lambda { @user.update_attribute :logins, '0' }.should_not change { Audit.count }
+      lambda { @user.update_attribute :activated, 1 }.should_not change { Audit.count }
+      lambda { @user.update_attribute :activated, '1' }.should_not change { Audit.count }
+    end
+    
+  end
+  
+  describe "on destroy" do
+    before do
+      @user = create_user
+    end
+    
+    it "should save an audit" do
+      lambda { @user.destroy }.should change { Audit.count }.by(1)
+      @user.should have(2).audits
+    end
+    
+    it "should set the action to 'destroy'" do
+      @user.destroy
+      @user.audits.first.action.should == 'destroy'
+    end
+    
+    it "should not store any changes" do
+      @user.destroy
+      @user.audits.first.changes.should be_nil
+    end
+  end
+  
+  describe "dirty tracking" do
+    before do
+      @user = create_user
+    end
+    
+    it "should not be changed when the record is saved" do
+      u = User.new(:name => 'Brandon')
+      u.should be_changed
+      u.save
+      u.should_not be_changed
+    end
+    
+    it "should be changed when an attribute has been changed" do
+      @user.name = "Bobby"
+      @user.should be_changed
+      @user.name_changed?.should be_true
+      @user.username_changed?.should be_false
+    end
+    
+    it "should not be changed if the value doesn't change after type casting" do
+      pending "Dirty tracking doesn't seem to account for type casting"
+      @user.update_attributes! :logins => 0, :activated => true
+      @user.logins = '0'
+      @user.should_not be_changed
+    end
+    
+  end
+  
+  describe "revisions" do
+    before do
+      @user = create_versions
+    end
+    
+    it "should be an Array of Users" do
+      @user.revisions.should be_an_instance_of(Array)
+      @user.revisions.each {|version| version.should be_an_instance_of(User) }
+    end
+    
+    it "should have one revision for a new record" do
+      create_user.revisions.size.should == 1
+    end
+    
+    it "should have one revision for each audit" do
+      @user.should have(@user.audits.size).revisions
+    end
+
+    it "should set the attributes for each revision" do
+      u = User.create(:name => 'Brandon')
+      u.revisions.size.should == 1
+      u.revisions[0].name.should == 'Brandon'
+
+      u.update_attribute :name, 'Foobar'
+      u.revisions.size.should == 2
+      u.revisions[0].name.should == 'Foobar'
+      u.revisions[1].name.should == 'Brandon'
+    end
+
+  end
+  
+  describe "revision" do
+    before do
+      @user = create_versions(5)
+    end
+    
+    it "should maintain identity" do
+      @user.revision(1).should == @user
+    end
+    
+    it "should find the given revision" do
+      revision = @user.revision(3)
+      revision.should be_an_instance_of(User)
+      revision.version.should == 3
+      revision.name.should == 'Foobar 3'
+    end
+    
+    it "should find the previous revision with :previous" do
+      revision = @user.revision(:previous)
+      revision.version.should == 4
+      revision.should == @user.revision(4)
+    end
+    
+    it "should be able to get the previous revision repeatedly" do
+      previous = @user.revision(:previous)
+      previous.version.should == 4
+      previous.revision(:previous).version.should == 3
+    end
+    
+    it "should not raise an error when no previous audits exist" do
+      @user.audits.destroy_all
+      lambda{ @user.revision(:previous) }.should_not raise_error
+    end
+    
+    it "should mark revision's attributes as changed" do
+      @user.revision(1).name_changed?.should be_true
+    end
+    
+    it "should record new audit when saving revision" do
+      lambda { @user.revision(1).save! }.should change { @user.audits.count }
+    end
+    
+  end
+  
+  describe "revision_at" do
+    it "should find the latest revision before the given time" do
+      u = create_user
+      Audit.update(u.audits.first.id, :created_at => 1.hour.ago)
+      u.update_attributes :name => 'updated'
+      u.revision_at(2.minutes.ago).version.should == 1
+    end
+    
+    it "should be nil if given a time before audits" do
+      create_user.revision_at(1.week.ago).should be_nil
+    end
+
+  end
+  
+  describe "without auditing" do
+    
+    it "should not save an audit when calling #save_without_auditing" do
+      lambda {
+        u = User.new(:name => 'Brandon')
+        u.save_without_auditing.should be_true
+      }.should_not change { Audit.count }
+    end
+    
+    it "should not save an audit inside of the #without_auditing block" do
+      lambda do
+        User.without_auditing { User.create(:name => 'Brandon') }
+      end.should_not change { Audit.count }
+    end
+
+    it "should not save an audit when callbacks are disabled" do
+      begin
+        User.disable_auditing_callbacks
+        lambda { create_user }.should_not change { Audit.count }
+      ensure
+        User.enable_auditing_callbacks
       end
     end
   end
-  
-  class InaccessibleUser < ActiveRecord::Base
-    set_table_name :users
-    acts_as_audited
-    attr_accessible :name, :username, :password
-  end
 
-  # TODO: not sure what this tests
-  it "attr accessible breaks" do
-    lambda{
-      InaccessibleUser.new(:name => 'FAIL!')
-    }.should raise_error(RuntimeError)
-  end
+  describe "attr_protected and attr_accessible" do
+    class UnprotectedUser < ActiveRecord::Base
+      set_table_name :users
+      acts_as_audited :protect => false
+      attr_accessible :name, :username, :password
+    end
+    it "should not raise error when attr_accessible is set and protected is false" do
+      lambda{
+        UnprotectedUser.new(:name => 'NO FAIL!')
+      }.should_not raise_error(RuntimeError)
+    end
   
-  class UnprotectedUser < ActiveRecord::Base
-    set_table_name :users
-    acts_as_audited :protect => false
-    attr_accessible :name, :username, :password
-  end
-  it "attr accessible without protection" do
-    lambda{
-      UnprotectedUser.new(:name => 'NO FAIL!')
-    }.should_not raise_error(RuntimeError)
-    
-  end
-  
-  # declare attr_accessible before calling aaa
-  class AccessibleUser < ActiveRecord::Base
-    set_table_name :users
-    attr_accessible :name, :username, :password
-    acts_as_audited
-  end
-  
-  it "attr accessible without protection" do
-    lambda{
-      AccessibleUser.new(:name => 'NO FAIL!')
-    }.should_not raise_error
+    class AccessibleUser < ActiveRecord::Base
+      set_table_name :users
+      attr_accessible :name, :username, :password # declare attr_accessible before calling aaa
+      acts_as_audited
+    end  
+    it "should not raise an error when attr_accessible is declared before acts_as_audited" do
+      lambda{
+        AccessibleUser.new(:name => 'NO FAIL!')
+      }.should_not raise_error
+    end
   end
   
 end
