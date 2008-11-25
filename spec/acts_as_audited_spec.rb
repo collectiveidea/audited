@@ -154,6 +154,11 @@ describe CollectiveIdea::Acts::Audited do
       u.revisions[0].name.should == 'Foobar'
       u.revisions[1].name.should == 'Brandon'
     end
+    
+    it "should ignore attributes that have been deleted" do
+      @user.audits.last.update_attributes :changes => {:old_attribute => 'old value'}
+      lambda { @user.revisions }.should_not raise_error(ActiveRecord::UnknownAttributeError)
+    end
 
   end
   
