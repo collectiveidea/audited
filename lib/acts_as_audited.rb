@@ -73,7 +73,7 @@ module CollectiveIdea #:nodoc:
           except |= [options[:except]].flatten.collect(&:to_s) if options[:except]
           write_inheritable_attribute :non_audited_columns, except
 
-          has_many :audits, :as => :auditable, :order => 'audits.version desc'
+          has_many :audits, :as => :auditable, :order => "#{Audit.table_name}.version desc"
           attr_protected :audit_ids if options[:protect]
           Audit.audited_classes << self
           
