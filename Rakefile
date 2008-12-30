@@ -4,7 +4,6 @@ require 'rake/rdoctask'
 
 desc 'Default: run specs.'
 task :default => :spec
-Rake::Task[:default].prerequisites.clear
 
 desc 'Test the acts_as_audited plugin'
 Spec::Rake::SpecTask.new(:spec) do |t|
