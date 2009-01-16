@@ -145,14 +145,19 @@ describe CollectiveIdea::Acts::Audited do
     end
 
     it "should set the attributes for each revision" do
-      u = User.create(:name => 'Brandon')
-      u.revisions.size.should == 1
-      u.revisions[0].name.should == 'Brandon'
+      u = User.create(:name => 'Brandon', :username => 'brandon')
+      u.update_attributes :name => 'Foobar'
+      u.update_attributes :name => 'Awesome', :username => 'keepers'
+      
+      u.revisions.size.should == 3
+      u.revisions[0].name.should == 'Awesome'
+      u.revisions[0].username.should == 'keepers'
+      
+      u.revisions[1].name.should == 'Foobar'
+      u.revisions[1].username.should == 'brandon'
 
-      u.update_attribute :name, 'Foobar'
-      u.revisions.size.should == 2
-      u.revisions[0].name.should == 'Foobar'
-      u.revisions[1].name.should == 'Brandon'
+      u.revisions[2].name.should == 'Brandon'
+      u.revisions[2].username.should == 'brandon'
     end
     
     it "should ignore attributes that have been deleted" do
