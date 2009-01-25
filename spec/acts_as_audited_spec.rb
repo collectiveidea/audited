@@ -92,9 +92,9 @@ describe CollectiveIdea::Acts::Audited do
       @user.audits.first.action.should == 'destroy'
     end
     
-    it "should not store any changes" do
+    it "should store all audited attributes" do
       @user.destroy
-      @user.audits.first.changes.should be_nil
+      @user.audits.first.changes.should == @user.audited_attributes
     end
   end
   
@@ -270,6 +270,28 @@ describe CollectiveIdea::Acts::Audited do
       lambda{
         AccessibleUser.new(:name => 'NO FAIL!')
       }.should_not raise_error
+    end
+  end
+
+  describe "parent record tracking" do
+    class ::Author < ActiveRecord::Base
+      has_many :books
+    end
+    class ::Book < ActiveRecord::Base
+      belongs_to :author
+      acts_as_audited :parent => :author
+    end
+    
+    it "should give parents access to children changes" do
+      Author.new.should respond_to(:book_audits)
+    end
+
+    it "should track the parent in child audits" do
+      a = Author.create!( :name => 'Kenneth Kalmer' )
+      b = Book.create!( :title => 'Open Sourcery 101', :author => a )
+      
+      b.audits.first.auditable_parent.should == a
+      a.book_audits.first.auditable.should == b
     end
   end
   
