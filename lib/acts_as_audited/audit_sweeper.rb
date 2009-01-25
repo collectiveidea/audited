@@ -13,6 +13,12 @@ module CollectiveIdea #:nodoc:
         #   class ApplicationController < ActionController::Base
         #     audit User, Widget
         #   end
+        # 
+        # Optionally pass a parent option along for specific models
+        # 
+        #   class ApplicationContoller < ActionController::Base
+        #     audit Author, Book, :parents => { Book => :author }
+        #   end
         #
         # You can also specify an options hash which will be passed on to
         # Rails' cache_sweeper call:
@@ -21,8 +27,9 @@ module CollectiveIdea #:nodoc:
         #
         def audit(*models)
           options = models.extract_options!
+          parents = options.delete(:parents) || {}
           models.each do |clazz|
-            clazz.send :acts_as_audited
+            clazz.send :acts_as_audited, :parent => parents[clazz]
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
             clazz.send :disable_auditing_callbacks
             clazz.add_observer(AuditSweeper.instance)

@@ -1,6 +1,8 @@
  acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
 * 2008-10-10 - changed to make it work in development mode
+* 2008-09-24 - Add ability to record parent record of the record being audited
+               [Kenneth Kalmer]
 * 2008-04-19 - refactored to make compatible with dirty tracking in edge rails
                and to stop storing both old and new values in a single audit
 * 2008-04-18 - Fix NoMethodError when trying to access the :previous revision

@@ -11,6 +11,7 @@ require 'set'
 class Audit < ActiveRecord::Base
   belongs_to :auditable, :polymorphic => true
   belongs_to :user, :polymorphic => true
+  belongs_to :auditable_parent, :polymorphic => true
   
   before_create :set_version_number
   
@@ -47,6 +48,12 @@ class Audit < ActiveRecord::Base
   def ancestors
     self.class.find(:all, :order => 'version',
       :conditions => ['auditable_id = ? and auditable_type = ? and version <= ?',
+      auditable_id, auditable_type, version])
+  end
+  
+  def peers
+    self.class.find(:all, :order => 'version',
+      :conditions => ['auditable_id = ? and auditable_type = ? and version <> ?',
       auditable_id, auditable_type, version])
   end
   

@@ -2,8 +2,6 @@
 
 acts_as_audited is an ActiveRecord extension that logs all changes to your models in an audits table.
 
-The purpose of this fork is to store both the previous values and the changed value, making each audit record selfcontained.
-
 == Installation
 
 * Install the plugin into your rails app
@@ -40,6 +38,22 @@ To get auditing outside of Rails, or to customize which fields are audited withi
     end
 
 See http://opensoul.org/2006/07/21/acts_as_audited for more information.
+
+== Parent record tracking
+
+To track the parent record of the record being audited, you pass an optional parent option in the model being audited:
+
+    class Author < ActiveRecord::Base
+      has_many :books
+    end
+    class Book < ActiveRecord::Base
+      belongs_to :author
+      acts_as_audited :parent => :author
+    end
+
+Each audit entry on a book will be associated to an author through <tt>auditable_parent</tt>, and each author will have a <tt>book_audits</tt> association for tracking the collective changes to an authors' books. This becomes really valuable to track when a book has been removed from the catalog.
+
+The association name on the parent is built using the singular of the <tt>has_many</tt> association name, with <tt>_audits</tt> appended, in the example yielding <tt>book_audits</tt> and not <tt>books_audits</tt>.
 
 == Caveats
 

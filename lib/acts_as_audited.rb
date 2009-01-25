@@ -77,6 +77,20 @@ module CollectiveIdea #:nodoc:
           attr_protected :audit_ids if options[:protect]
           Audit.audited_classes << self
           
+          if options[:parent]
+            parent_class = options[:parent].to_s.classify.constantize
+            auditable_children_association = ( class_name.tableize.singularize + '_audits' ).to_sym
+            parent_class.class_eval do 
+              has_many auditable_children_association, 
+              :as => :auditable_parent,
+              :order => 'audits.version desc',
+              :class_name => 'Audit'
+            end
+            write_inheritable_attribute :auditable_parent, options[:parent]
+          else
+            write_inheritable_attribute :auditable_parent, nil
+          end
+          
           after_create :audit_create_callback
           before_update :audit_update_callback
           after_destroy :audit_destroy_callback
@@ -141,9 +155,26 @@ module CollectiveIdea #:nodoc:
             :order => "created_at DESC")
           revision_with changes_from(audit.version) if audit
         end
+        
+        # Return the current revision of the instance.
+        def current_revision
+          @current_revision ||= (
+            audit = audits.find(:first, :select => 'version')
+            audit ? audit.version : 1
+          )
+        end
 
       private
       
+        def auditable_parent
+          case ( possible_parent = self.class.read_inheritable_attribute(:auditable_parent) )
+          when Symbol
+            send( possible_parent )
+          else
+            nil
+          end
+        end
+        
         def changes_from(version = 1, &block)
           if version == :previous
             version = if self.version
@@ -177,17 +208,17 @@ module CollectiveIdea #:nodoc:
         end
         
         def audit_create(user = nil)
-          write_audit(:action => 'create', :changes => audited_attributes, :user => user)
+          write_audit(:action => 'create', :auditable_parent => auditable_parent, :changes => audited_attributes, :user => user)
         end
 
         def audit_update(user = nil)
           unless (changes = changed_audited_attributes).empty?
-            write_audit(:action => 'update', :changes => changes, :user => user)
+            write_audit(:action => 'update', :auditable_parent => auditable_parent, :changes => changes, :user => user)
           end
         end
 
         def audit_destroy(user = nil)
-          write_audit(:action => 'destroy', :user => user)
+          write_audit(:action => 'destroy', :auditable_parent => auditable_parent, :changes => audited_attributes, :user => user)
         end
       
         def write_audit(attrs)
