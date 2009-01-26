@@ -299,6 +299,8 @@ describe CollectiveIdea::Acts::Audited do
     it "should track the parent in child audits" do
       @book.audits.first.auditable_parent.should == @author
       @author.book_audits.first.auditable.should == @book
+      
+      @author.child_record_audits.should == @author.book_audits
     end
   end
   
