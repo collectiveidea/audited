@@ -80,12 +80,22 @@ module CollectiveIdea #:nodoc:
           if options[:parent]
             parent_class = options[:parent].to_s.classify.constantize
             auditable_children_association = ( class_name.tableize.singularize + '_audits' ).to_sym
+            
             parent_class.class_eval do 
               has_many auditable_children_association, 
               :as => :auditable_parent,
-              :order => 'audits.version desc',
+              :order => "#{Audit.quoted_table_name}.version desc",
               :class_name => 'Audit'
+              
+              def audited_parent?
+                true
+              end
+
+              def child_record_audits
+                auditable_children_association
+              end
             end
+            
             write_inheritable_attribute :auditable_parent, options[:parent]
           else
             write_inheritable_attribute :auditable_parent, nil

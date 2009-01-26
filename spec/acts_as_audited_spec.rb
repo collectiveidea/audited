@@ -281,17 +281,24 @@ describe CollectiveIdea::Acts::Audited do
       belongs_to :author
       acts_as_audited :parent => :author
     end
+
+    before(:each) do
+      @author = Author.create!( :name => 'Kenneth Kalmer' )
+      @book = Book.create!( :title => 'Open Sourcery 101', :author => @author )
+    end
     
-    it "should give parents access to children changes" do
-      Author.new.should respond_to(:book_audits)
+    it "should give parents access to child changes" do
+      @author.should respond_to(:book_audits)
+      @author.should respond_to(:child_record_audits)
+    end
+
+    it "should allow detection of audited parent" do
+      @author.should respond_to(:audited_parent?)
     end
 
     it "should track the parent in child audits" do
-      a = Author.create!( :name => 'Kenneth Kalmer' )
-      b = Book.create!( :title => 'Open Sourcery 101', :author => a )
-      
-      b.audits.first.auditable_parent.should == a
-      a.book_audits.first.auditable.should == b
+      @book.audits.first.auditable_parent.should == @author
+      @author.book_audits.first.auditable.should == @book
     end
   end
   
