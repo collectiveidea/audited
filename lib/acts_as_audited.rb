@@ -70,7 +70,7 @@ module CollectiveIdea #:nodoc:
           class_inheritable_reader :auditing_enabled
 
           except = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
-          except |= [options[:except]].flatten.collect(&:to_s) if options[:except]
+          except |= Array(options[:except]).collect(&:to_s) if options[:except]
           write_inheritable_attribute :non_audited_columns, except
 
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version desc"
@@ -91,15 +91,6 @@ module CollectiveIdea #:nodoc:
       end
     
       module InstanceMethods
-        
-        def changed_audited_attributes
-          attributes.slice(*changed_attributes.keys).except(*non_audited_columns)
-        end
-        
-        # Returns the attributes that are audited
-        def audited_attributes
-          attributes.except(*non_audited_columns)
-        end
         
         # Temporarily turns off auditing while saving.
         def save_without_auditing
@@ -137,9 +128,16 @@ module CollectiveIdea #:nodoc:
             :order => "created_at DESC")
           revision_with changes_from(audit.version) if audit
         end
-
+        
       private
-      
+        
+        def audited_changes
+          changed_attributes.except(*non_audited_columns).inject({}) do |changes,(attr, old_value)|
+            changes[attr] = [old_value, self[attr]]
+            changes
+          end
+        end
+        
         def changes_from(version = 1, &block)
           if version == :previous
             version = if self.version
@@ -173,11 +171,11 @@ module CollectiveIdea #:nodoc:
         end
         
         def audit_create(user = nil)
-          write_audit(:action => 'create', :changes => audited_attributes, :user => user)
+          write_audit(:action => 'create', :changes => audited_changes, :user => user)
         end
 
         def audit_update(user = nil)
-          unless (changes = changed_audited_attributes).empty?
+          unless (changes = audited_changes).empty?
             write_audit(:action => 'update', :changes => changes, :user => user)
           end
         end

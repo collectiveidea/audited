@@ -70,5 +70,12 @@ describe Audit do
     user.destroy
     user.audits(true).first.version.should == 3
   end
+  
+  describe "reconstruct_attributes" do
+    it "should work with with old way of storing just the new value" do
+      audits = Audit.reconstruct_attributes([Audit.new(:changes => {'attribute' => 'value'})])
+      audits['attribute'].should == 'value'
+    end
+  end
 
 end

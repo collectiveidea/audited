@@ -38,14 +38,14 @@ describe CollectiveIdea::Acts::Audited do
     end
     
     it "should store all the audited attributes" do
-      audit = create_user.audits.first
-      audit.changes.should == audit.auditable.audited_attributes
+      audit = User.create(:name => 'Brandon').audits.first
+      audit.changes.should == {'name' => [nil, 'Brandon']}
     end
   end
   
   describe "on update" do
     before do
-      @user = create_user
+      @user = create_user(:name => 'Brandon')
     end
     
     it "should save an audit on update" do
@@ -64,7 +64,7 @@ describe CollectiveIdea::Acts::Audited do
     
     it "should store the changed attributes" do
       @user.update_attributes :name => 'Changed'
-      @user.audits.first.changes.should == {'name' => 'Changed'}
+      @user.audits.first.changes.should == {'name' => ['Brandon', 'Changed']}
     end
     
     it "should not save an audit if the value doesn't change after type casting" do
