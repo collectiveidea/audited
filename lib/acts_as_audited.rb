@@ -85,10 +85,6 @@ module CollectiveIdea #:nodoc:
 
           extend CollectiveIdea::Acts::Audited::SingletonMethods
           include CollectiveIdea::Acts::Audited::InstanceMethods
-          unless ActiveRecord.const_defined? 'Dirty'
-            require 'acts_as_audited/dirty'
-            include CollectiveIdea::Acts::Audited::Dirty
-          end
           
           write_inheritable_attribute :auditing_enabled, true
         end
