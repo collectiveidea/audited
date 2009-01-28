@@ -115,8 +115,9 @@ module CollectiveIdea #:nodoc:
         #   end
         #
         def revisions(from_version = 1)
-          revision = audits.find_by_version(from_version).revision
           audits = self.audits.find(:all, :conditions => ['version >= ?', from_version])
+          return [] if audits.empty?
+          revision = self.audits.find_by_version(from_version).revision
           Audit.reconstruct_attributes(audits) {|attrs| revision.revision_with(attrs) }
         end
         

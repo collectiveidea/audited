@@ -177,7 +177,10 @@ describe CollectiveIdea::Acts::Audited do
       u.revisions(2)[1].username.should == 'keepers'
     end
 
-    
+    it "should be empty if no audits exist" do
+      @user.audits.delete_all
+      @user.revisions.should be_empty
+    end
 
     it "should ignore attributes that have been deleted" do
       @user.audits.last.update_attributes :changes => {:old_attribute => 'old value'}
