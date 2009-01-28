@@ -73,7 +73,7 @@ module CollectiveIdea #:nodoc:
           except |= Array(options[:except]).collect(&:to_s) if options[:except]
           write_inheritable_attribute :non_audited_columns, except
 
-          has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version desc"
+          has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
           Audit.audited_classes << self
           
@@ -115,47 +115,32 @@ module CollectiveIdea #:nodoc:
         #   end
         #
         def revisions(from_version = 1)
-          changes_from(from_version) {|attributes| revision_with(attributes) }
+          revision = audits.find_by_version(from_version).revision
+          audits = self.audits.find(:all, :conditions => ['version >= ?', from_version])
+          Audit.reconstruct_attributes(audits) {|attrs| revision.revision_with(attrs) }
         end
         
-        # Get a specific revision
+        # Get a specific revision specified by the version number, or +:previous+
         def revision(version)
-          revision_with changes_from(version)
+          revision_with Audit.reconstruct_attributes(audits_to(version))
         end
         
         def revision_at(date_or_time)
-          audit = audits.find(:first, :conditions => ["created_at <= ?", date_or_time],
-            :order => "created_at DESC")
-          revision_with changes_from(audit.version) if audit
+          audits = self.audits.find(:all, :conditions => ["created_at <= ?", date_or_time])
+          revision_with Audit.reconstruct_attributes(audits) unless audits.empty?
         end
         
-      private
-        
-        def audited_changes
-          changed_attributes.except(*non_audited_columns).inject({}) do |changes,(attr, old_value)|
-            changes[attr] = [old_value, self[attr]]
-            changes
-          end
+        def audited_attributes
+          attributes.except(*non_audited_columns)
         end
         
-        def changes_from(version = 1, &block)
-          if version == :previous
-            version = if self.version
-              self.version - 1
-            else
-              last_audit = audits.find(:first, :offset => 1)
-              last_audit ? last_audit.version : 1
-            end
-          end
-          revisions = audits.find(:all, :conditions => ['version >= ?', version])
-          Audit.reconstruct_attributes(revisions, &block)
-        end
+      protected
         
         def revision_with(attributes)
           returning self.dup do |revision|
             revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
             revision.attributes = attributes.reject {|attr,_| !respond_to?("#{attr}=") }
-            
+          
             # Remove any association proxies so that they will be recreated
             # and reference the correct object for this revision. The only way
             # to determine if an instance variable is a proxy object is to
@@ -170,8 +155,30 @@ module CollectiveIdea #:nodoc:
           end
         end
         
+      private
+        
+        def audited_changes
+          changed_attributes.except(*non_audited_columns).inject({}) do |changes,(attr, old_value)|
+            changes[attr] = [old_value, self[attr]]
+            changes
+          end
+        end
+        
+        def audits_to(version = nil)
+          if version == :previous
+            version = if self.version
+              self.version - 1
+            else
+              previous = audits.find(:first, :offset => 1,
+                :order => "#{Audit.quoted_table_name}.version DESC")
+              previous ? previous.version : 1
+            end
+          end
+          audits.find(:all, :conditions => ['version <= ?', version])
+        end
+        
         def audit_create(user = nil)
-          write_audit(:action => 'create', :changes => audited_changes, :user => user)
+          write_audit(:action => 'create', :changes => audited_attributes, :user => user)
         end
 
         def audit_update(user = nil)
@@ -181,7 +188,7 @@ module CollectiveIdea #:nodoc:
         end
 
         def audit_destroy(user = nil)
-          write_audit(:action => 'destroy', :user => user)
+          write_audit(:action => 'destroy', :user => user, :changes => audited_attributes)
         end
       
         def write_audit(attrs)
