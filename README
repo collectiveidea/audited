@@ -74,4 +74,12 @@ Many users have also reported problems with acts_as_audited and ActiveScaffold, 
 
 == Compatability
 
-acts_as_audited works with Rails 2.0 or later.
+acts_as_audited works with Rails 2.1 or later.
+
+== Contributing
+
+Contributions are always welcome. Checkout the latest code on GitHub:
+  http://github.com/collectiveidea/acts_as_audited 
+
+Please report bugs or feature suggestions at:
+  http://collectiveidea.lighthouseapp.com/projects/20257-acts_as_audited

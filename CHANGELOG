@@ -1,5 +1,7 @@
  acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
+* 2009-01-27 - Store old and new values for updates, and store all attributes on destroy.
+               Refactored revisioning methods to work as expected
 * 2008-10-10 - changed to make it work in development mode
 * 2008-09-24 - Add ability to record parent record of the record being audited
                [Kenneth Kalmer]

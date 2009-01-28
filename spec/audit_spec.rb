@@ -65,10 +65,17 @@ describe Audit do
     user = User.create! :name => "Set Version Number"
     user.audits.first.version.should == 1
     user.update_attribute :name, "Set to 2"
-    user.audits(true).first.version.should == 2
-    user.audits(true).last.version.should == 1
+    user.audits(true).first.version.should == 1
+    user.audits(true).last.version.should == 2
     user.destroy
-    user.audits(true).first.version.should == 3
+    user.audits(true).last.version.should == 3
+  end
+  
+  describe "reconstruct_attributes" do
+    it "should work with with old way of storing just the new value" do
+      audits = Audit.reconstruct_attributes([Audit.new(:changes => {'attribute' => 'value'})])
+      audits['attribute'].should == 'value'
+    end
   end
 
 end

@@ -10,11 +10,6 @@ describe CollectiveIdea::Acts::Audited do
     User.should be_kind_of(CollectiveIdea::Acts::Audited::SingletonMethods)
   end
 
-  it "should know which attributes are audited" do
-    attrs = {'name' => nil, 'username' => nil, 'logins' => 0, 'activated' => nil}
-    User.new.audited_attributes.should == attrs
-  end
-  
   ['created_at', 'updated_at', 'lock_version', 'id', 'password'].each do |column|
     it "should not audit #{column}" do
       User.non_audited_columns.should include(column)
@@ -38,14 +33,14 @@ describe CollectiveIdea::Acts::Audited do
     end
     
     it "should store all the audited attributes" do
-      audit = create_user.audits.first
-      audit.changes.should == audit.auditable.audited_attributes
+      user = User.create(:name => 'Brandon')
+      user.audits.first.changes.should == user.audited_attributes
     end
   end
   
   describe "on update" do
     before do
-      @user = create_user
+      @user = create_user(:name => 'Brandon')
     end
     
     it "should save an audit on update" do
@@ -59,12 +54,12 @@ describe CollectiveIdea::Acts::Audited do
     
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
-      @user.audits.first.action.should == 'update'
+      @user.audits.last.action.should == 'update'
     end
     
     it "should store the changed attributes" do
       @user.update_attributes :name => 'Changed'
-      @user.audits.first.changes.should == {'name' => 'Changed'}
+      @user.audits.last.changes.should == {'name' => ['Brandon', 'Changed']}
     end
     
     it "should not save an audit if the value doesn't change after type casting" do
@@ -89,12 +84,19 @@ describe CollectiveIdea::Acts::Audited do
     
     it "should set the action to 'destroy'" do
       @user.destroy
-      @user.audits.first.action.should == 'destroy'
+      @user.audits.last.action.should == 'destroy'
     end
     
-    it "should store all audited attributes" do
+    it "should store all of the audited attributes" do
       @user.destroy
-      @user.audits.first.changes.should == @user.audited_attributes
+      @user.audits.last.changes.should == @user.audited_attributes
+    end
+    
+    it "should be able to reconstruct destroyed record without history" do
+      @user.audits.delete_all
+      @user.destroy
+      revision = @user.audits.first.revision
+      revision.name.should == @user.name
     end
   end
   
@@ -150,16 +152,36 @@ describe CollectiveIdea::Acts::Audited do
       u.update_attributes :name => 'Awesome', :username => 'keepers'
       
       u.revisions.size.should == 3
-      u.revisions[0].name.should == 'Awesome'
-      u.revisions[0].username.should == 'keepers'
+
+      u.revisions[0].name.should == 'Brandon'
+      u.revisions[0].username.should == 'brandon'
       
       u.revisions[1].name.should == 'Foobar'
       u.revisions[1].username.should == 'brandon'
 
-      u.revisions[2].name.should == 'Brandon'
-      u.revisions[2].username.should == 'brandon'
+      u.revisions[2].name.should == 'Awesome'
+      u.revisions[2].username.should == 'keepers'
     end
     
+    it "should access to only recent revisions" do
+      u = User.create(:name => 'Brandon', :username => 'brandon')
+      u.update_attributes :name => 'Foobar'
+      u.update_attributes :name => 'Awesome', :username => 'keepers'
+      
+      u.revisions(2).size.should == 2
+
+      u.revisions(2)[0].name.should == 'Foobar'
+      u.revisions(2)[0].username.should == 'brandon'
+
+      u.revisions(2)[1].name.should == 'Awesome'
+      u.revisions(2)[1].username.should == 'keepers'
+    end
+
+    it "should be empty if no audits exist" do
+      @user.audits.delete_all
+      @user.revisions.should be_empty
+    end
+
     it "should ignore attributes that have been deleted" do
       @user.audits.last.update_attributes :changes => {:old_attribute => 'old value'}
       lambda { @user.revisions }.should_not raise_error(ActiveRecord::UnknownAttributeError)
@@ -193,6 +215,21 @@ describe CollectiveIdea::Acts::Audited do
       previous = @user.revision(:previous)
       previous.version.should == 4
       previous.revision(:previous).version.should == 3
+    end
+    
+    it "should set the attributes for each revision" do
+      u = User.create(:name => 'Brandon', :username => 'brandon')
+      u.update_attributes :name => 'Foobar'
+      u.update_attributes :name => 'Awesome', :username => 'keepers'
+      
+      u.revision(3).name.should == 'Awesome'
+      u.revision(3).username.should == 'keepers'
+      
+      u.revision(2).name.should == 'Foobar'
+      u.revision(2).username.should == 'brandon'
+
+      u.revision(1).name.should == 'Brandon'
+      u.revision(1).username.should == 'brandon'
     end
     
     it "should not raise an error when no previous audits exist" do

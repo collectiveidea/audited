@@ -58,12 +58,16 @@ class Audit < ActiveRecord::Base
   end
   
   def self.reconstruct_attributes(audits)
-    changes = {}
+    attributes = {}
     result = audits.collect do |audit|
-      changes.merge!((audit.changes || {}).merge!(:version => audit.version))
-      yield changes if block_given?
+      changes = (audit.changes || {}).inject({}) do |changes,(attr,values)|
+        changes[attr] = Array(values).last
+        changes
+      end
+      attributes.merge!(changes).merge!(:version => audit.version)
+      yield attributes if block_given?
     end
-    block_given? ? result : changes
+    block_given? ? result : attributes
   end
   
 private
