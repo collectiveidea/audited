@@ -14,6 +14,14 @@ module CollectiveIdea #:nodoc:
         #     audit User, Widget
         #   end
         #
+        # You can optionally pass an options hash for each model to be
+        # audited:
+        #
+        #    audit User, Task, :user => { :except => :password }, :task => { :except => :position }
+        #
+        # See <tt>CollectiveIdea::Acts::Audited::ClassMethods#acts_as_audited</tt>
+        # for configuration options
+        #
         # You can also specify an options hash which will be passed on to
         # Rails' cache_sweeper call:
         #
@@ -22,7 +30,12 @@ module CollectiveIdea #:nodoc:
         def audit(*models)
           options = models.extract_options!
           models.each do |clazz|
-            clazz.send :acts_as_audited
+
+            # Handle model specific options
+            model_options = options.delete(clazz.to_s.downcase.to_sym)
+            model_options ||= {}
+
+            clazz.send :acts_as_audited, model_options
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
             clazz.send :disable_auditing_callbacks
             clazz.add_observer(AuditSweeper.instance)
