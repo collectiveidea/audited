@@ -29,36 +29,20 @@ module CollectiveIdea #:nodoc:
         #
         #    audit User, :only => [:create, :edit, :destroy]
         #
-        def audit(*models_with_options)
-
-          options = models_with_options.extract_options!
-          models  = models_with_options # remaining models (without options)
+        def audit(*models)
+          options = models.extract_options!
 
           # Parse the options hash looking for classes
           options.each_key do |key|
-            if key.is_a?(Class)
-              models << [key, options.delete(key)]
-            end
+            models << [key, options.delete(key)] if key.is_a?(Class)
           end
 
-          models.each do |model|
-
-	    # Handle models which may have options
-            if model.is_a?(Array)
-              clazz         = model.first
-              clazz_options = model.last
-            elsif model.is_a?(Class)
-              clazz         = model
-              clazz_options = {}
-            else
-              next
-            end
-
-            clazz.send :acts_as_audited, clazz_options
+          models.each do |model, model_options|
+            model.send :acts_as_audited, model_options || {}
 
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
-            clazz.send :disable_auditing_callbacks
-            clazz.add_observer(AuditSweeper.instance)
+            model.send :disable_auditing_callbacks
+            model.add_observer(AuditSweeper.instance)
           end
 
           class_eval do
