@@ -40,11 +40,12 @@ module CollectiveIdea #:nodoc:
       module ClassMethods
         # == Configuration options
         #
+        #
+        # * +only+ - Only audit the given attributes
         # * +except+ - Excludes fields from being saved in the audit log.
         #   By default, acts_as_audited will audit all but these fields: 
         # 
         #     [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
-        #
         #   You can add to those by passing one or an array of fields to skip.
         #
         #     class User < ActiveRecord::Base
@@ -68,9 +69,13 @@ module CollectiveIdea #:nodoc:
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled
-
-          except = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
-          except |= Array(options[:except]).collect(&:to_s) if options[:except]
+          
+          if options[:only]
+            except = self.column_names - options[:only].flatten.map(&:to_s)
+          else
+            except = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
+            except |= Array(options[:except]).collect(&:to_s) if options[:except]
+          end
           write_inheritable_attribute :non_audited_columns, except
 
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
