@@ -17,21 +17,19 @@ acts_as_audited is an ActiveRecord extension that logs all changes to your model
     script/generate audited_migration add_audits_table
     rake db:migrate
 
-== Auditing in Rails
+== Usage
 
 If you're using acts_as_audited within Rails, you can simply declare which models should be audited.  acts_as_audited can also automatically record the user that made the change if your controller has a <tt>current_user</tt> method.
 
   class ApplicationController < ActionController::Base
-    audit User, List, Item
+    audit User, List, Item => {:except => :password}
   protected
     def current_user
       @user ||= User.find(session[:user])
     end
   end
 
-== Customizing
-
-To get auditing outside of Rails, or to customize which fields are audited within Rails, you can explicitly declare <tt>acts_as_audited</tt> on your models:
+To get auditing outside of Rails you can explicitly declare <tt>acts_as_audited</tt> on your models:
 
     class User < ActiveRecord::Base
       acts_as_audited :except => [:password, :mistress]

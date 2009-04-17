@@ -20,6 +20,16 @@ module CollectiveIdea #:nodoc:
         #     audit Author, Book, :parents => { Book => :author }
         #   end
         #
+        # You can optionally pass options for each model to be audited:
+        #
+        #    audit User, Widget, Task => { :except => :position }
+        #
+        # NOTE: Models which do not have options must be listed first in the
+        # call to <tt>audit</tt>.
+        #
+        # See <tt>CollectiveIdea::Acts::Audited::ClassMethods#acts_as_audited</tt>
+        # for configuration options
+        #
         # You can also specify an options hash which will be passed on to
         # Rails' cache_sweeper call:
         #
@@ -27,12 +37,17 @@ module CollectiveIdea #:nodoc:
         #
         def audit(*models)
           options = models.extract_options!
-          parents = options.delete(:parents) || {}
-          models.each do |clazz|
-            clazz.send :acts_as_audited, :parent => parents[clazz]
+          # Parse the options hash looking for classes
+          options.each_key do |key|
+            models << [key, options.delete(key)] if key.is_a?(Class)
+          end
+
+          models.each do |model, model_options|
+            model.send :acts_as_audited, model_options || {}
+
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
-            clazz.send :disable_auditing_callbacks
-            clazz.add_observer(AuditSweeper.instance)
+            model.send :disable_auditing_callbacks
+            model.add_observer(AuditSweeper.instance)
           end
 
           class_eval do
