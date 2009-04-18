@@ -75,7 +75,7 @@ module CollectiveIdea #:nodoc:
 
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
-          Audit.audited_classes << self
+          Audit.audited_class_names << self.class_name
           
           if options[:parent]
             parent_class = options[:parent].to_s.classify.constantize

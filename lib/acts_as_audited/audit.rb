@@ -17,8 +17,12 @@ class Audit < ActiveRecord::Base
   
   serialize :changes
   
-  cattr_accessor :audited_classes
-  self.audited_classes = Set.new
+  cattr_accessor :audited_class_names
+  self.audited_class_names = Set.new
+
+  def self.audited_classes
+    self.audited_class_names.map(&:constantize)
+  end
   
   # Allows user to be set to either a string or an ActiveRecord object
   def user_as_string=(user) #:nodoc:
