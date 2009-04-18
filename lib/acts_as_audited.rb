@@ -75,7 +75,7 @@ module CollectiveIdea #:nodoc:
 
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
-          Audit.audited_classes << self
+          Audit.audited_class_names << self.class_name
           
           after_create :audit_create_callback
           before_update :audit_update_callback
