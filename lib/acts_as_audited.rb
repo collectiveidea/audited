@@ -75,7 +75,7 @@ module CollectiveIdea #:nodoc:
 
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
-          Audit.audited_class_names << self.class_name
+          Audit.audited_class_names << self.to_s
           
           if options[:parent]
             parent_class = options[:parent].to_s.classify.constantize
@@ -91,10 +91,6 @@ module CollectiveIdea #:nodoc:
               def audited_parent?
                 true
               end
-
-              #def child_record_audits
-              #  self.#{auditable_children_association}
-              #end
             EOS
             
             write_inheritable_attribute :auditable_parent, options[:parent]
