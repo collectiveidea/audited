@@ -77,5 +77,23 @@ describe Audit do
       audits['attribute'].should == 'value'
     end
   end
+  
+  describe "audited_classes" do
+    class CustomUser < ActiveRecord::Base
+    end
+    class CustomUserSubclass < CustomUser
+      acts_as_audited
+    end
+    
+    it "should include audited classes" do
+      Audit.audited_classes.should include(User)
+    end
+    
+    it "should include subclasses" do
+      Audit.audited_classes.should include(CustomUserSubclass)
+    end
+    
+  end
+  
 
 end
