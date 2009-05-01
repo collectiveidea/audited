@@ -63,7 +63,6 @@ describe CollectiveIdea::Acts::Audited do
     end
     
     it "should not save an audit if the value doesn't change after type casting" do
-      pending "Dirty tracking doesn't seem to account for type casting"
       @user.update_attributes! :logins => 0, :activated => true
       lambda { @user.update_attribute :logins, '0' }.should_not change { Audit.count }
       lambda { @user.update_attribute :activated, 1 }.should_not change { Audit.count }
@@ -120,7 +119,6 @@ describe CollectiveIdea::Acts::Audited do
     end
     
     it "should not be changed if the value doesn't change after type casting" do
-      pending "Dirty tracking doesn't seem to account for type casting"
       @user.update_attributes! :logins => 0, :activated => true
       @user.logins = '0'
       @user.should_not be_changed
