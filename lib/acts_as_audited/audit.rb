@@ -54,14 +54,26 @@ class Audit < ActiveRecord::Base
       auditable_id, auditable_type, version])
   end
   
+  # Returns a hash of the changed attributes with the new values
+  def new_attributes
+    (changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
+      attrs[attr] = Array(values).last
+      attrs
+    end
+  end
+
+  # Returns a hash of the changed attributes with the old values
+  def old_attributes
+    (changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
+      attrs[attr] = Array(values).first
+      attrs
+    end
+  end
+  
   def self.reconstruct_attributes(audits)
     attributes = {}
     result = audits.collect do |audit|
-      changes = (audit.changes || {}).inject({}) do |changes,(attr,values)|
-        changes[attr] = Array(values).last
-        changes
-      end
-      attributes.merge!(changes).merge!(:version => audit.version)
+      attributes.merge!(audit.new_attributes).merge!(:version => audit.version)
       yield attributes if block_given?
     end
     block_given? ? result : attributes

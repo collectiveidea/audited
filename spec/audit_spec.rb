@@ -92,7 +92,18 @@ describe Audit do
     it "should include subclasses" do
       Audit.audited_classes.should include(CustomUserSubclass)
     end
-    
+  end
+  
+  describe "new_attributes" do
+    it "should return a hash of the new values" do
+      Audit.new(:changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
+    end
+  end
+
+  describe "old_attributes" do
+    it "should return a hash of the old values" do
+      Audit.new(:changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
+    end
   end
   
 
