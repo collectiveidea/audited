@@ -1,18 +1,18 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
-describe Audit do
-  before do
+class AuditTest < Test::Unit::TestCase
+  def setup
     @user = User.new :name => "testing"
     @audit = Audit.new
   end
 
-  describe "user=" do
-    it "should be able to set the user to a model object" do
+  context "user=" do
+    should "be able to set the user to a model object" do
       @audit.user = @user
       @audit.user.should == @user
     end
     
-    it "should be able to set the user to nil" do
+    should "be able to set the user to nil" do
       @audit.user_id = 1
       @audit.user_type = 'User'
       @audit.username = 'joe'
@@ -25,27 +25,27 @@ describe Audit do
       @audit.username.should == nil
     end
     
-    it "should be able to set the user to a string" do
+    should "be able to set the user to a string" do
       @audit.user = 'testing'
       @audit.user.should == 'testing'
     end
 
-    it "should clear model when setting to a string" do
+    should "clear model when setting to a string" do
       @audit.user = @user
       @audit.user = 'testing'
-      @audit.user_id.should be_nil
-      @audit.user_type.should be_nil
+      @audit.user_id.should be(nil)
+      @audit.user_type.should be(nil)
     end
 
-    it "should clear the username when setting to a model" do
+    should "clear the username when setting to a model" do
       @audit.username = 'testing'
       @audit.user = @user
-      @audit.username.should be_nil
+      @audit.username.should be(nil)
     end
 
   end
 
-  it "revision" do
+  should "revision" do
     user = User.create :name => "1"
     5.times {|i| user.update_attribute :name, (i + 2).to_s  }
     user.audits.each do |audit|
@@ -53,15 +53,15 @@ describe Audit do
     end
   end
 
-  it "should be able to create revision for deleted records" do
+  should "be able to create revision for deleted records" do
     user = User.create :name => "1"
     user.destroy
     revision = user.audits.last.revision
     revision.name.should == user.name
-    revision.should be_new_record
+    revision.new_record?.should be(true)
   end
   
-  it "should set the version number on create" do
+  should "set the version number on create" do
     user = User.create! :name => "Set Version Number"
     user.audits.first.version.should == 1
     user.update_attribute :name, "Set to 2"
@@ -71,37 +71,37 @@ describe Audit do
     user.audits(true).last.version.should == 3
   end
   
-  describe "reconstruct_attributes" do
-    it "should work with with old way of storing just the new value" do
+  context "reconstruct_attributes" do
+    should "work with with old way of storing just the new value" do
       audits = Audit.reconstruct_attributes([Audit.new(:changes => {'attribute' => 'value'})])
       audits['attribute'].should == 'value'
     end
   end
   
-  describe "audited_classes" do
+  context "audited_classes" do
     class CustomUser < ActiveRecord::Base
     end
     class CustomUserSubclass < CustomUser
       acts_as_audited
     end
     
-    it "should include audited classes" do
+    should "include audited classes" do
       Audit.audited_classes.should include(User)
     end
     
-    it "should include subclasses" do
+    should "include subclasses" do
       Audit.audited_classes.should include(CustomUserSubclass)
     end
   end
   
-  describe "new_attributes" do
-    it "should return a hash of the new values" do
+  context "new_attributes" do
+    should "return a hash of the new values" do
       Audit.new(:changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
     end
   end
 
-  describe "old_attributes" do
-    it "should return a hash of the old values" do
+  context "old_attributes" do
+    should "return a hash of the old values" do
       Audit.new(:changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
     end
   end
