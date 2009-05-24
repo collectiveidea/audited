@@ -73,7 +73,5 @@ Make sure the tests pass against all versions of Rails since 2.1:
 
   $ rake test:multi_rails:all
 
-
-
 Please report bugs or feature suggestions on GitHub:
   http://github.com/collectiveidea/acts_as_audited/issues
