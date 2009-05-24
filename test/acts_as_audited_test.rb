@@ -189,7 +189,7 @@ module CollectiveIdea
 
         should "ignore attributes that have been deleted" do
           @user.audits.last.update_attributes :changes => {:old_attribute => 'old value'}
-          lambda { @user.revisions }.should_not raise_error(ActiveRecord::UnknownAttributeError)
+          lambda { @user.revisions }.should_not raise_error
         end
 
       end
