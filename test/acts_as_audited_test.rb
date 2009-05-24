@@ -63,11 +63,14 @@ module CollectiveIdea
           @user.audits.last.changes.should == {'name' => ['Brandon', 'Changed']}
         end
 
-        should "not save an audit if the value doesn't change after type casting" do
-          @user.update_attributes! :logins => 0, :activated => true
-          lambda { @user.update_attribute :logins, '0' }.should_not change { Audit.count }
-          lambda { @user.update_attribute :activated, 1 }.should_not change { Audit.count }
-          lambda { @user.update_attribute :activated, '1' }.should_not change { Audit.count }
+        # Dirty tracking in Rails 2.0-2.2 had issues with type casting
+        if ActiveRecord::VERSION::STRING >= '2.3'
+          should "not save an audit if the value doesn't change after type casting" do
+            @user.update_attributes! :logins => 0, :activated => true
+            lambda { @user.update_attribute :logins, '0' }.should_not change { Audit.count }
+            lambda { @user.update_attribute :activated, 1 }.should_not change { Audit.count }
+            lambda { @user.update_attribute :activated, '1' }.should_not change { Audit.count }
+          end
         end
 
       end
@@ -119,10 +122,13 @@ module CollectiveIdea
           @user.username_changed?.should be(false)
         end
 
-        should "not be changed if the value doesn't change after type casting" do
-          @user.update_attributes! :logins => 0, :activated => true
-          @user.logins = '0'
-          @user.changed?.should be(false)
+        # Dirty tracking in Rails 2.0-2.2 had issues with type casting
+        if ActiveRecord::VERSION::STRING >= '2.3'
+          should "not be changed if the value doesn't change after type casting" do
+            @user.update_attributes! :logins => 0, :activated => true
+            @user.logins = '0'
+            @user.changed?.should be(false)
+          end
         end
 
       end

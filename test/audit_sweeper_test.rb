@@ -13,16 +13,8 @@ end
 AuditsController.view_paths = [File.dirname(__FILE__)]
 ActionController::Routing::Routes.draw {|m| m.connect ':controller/:action/:id' }
 
-class AuditSweeperTest < ActionController::TestCase
+class AuditsControllerTest < ActionController::TestCase
 
-  def setup
-    @controller = AuditsController.new
-    @controller.logger = Logger.new(nil)
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-    @request.host = "www.example.com"
-  end
-  
   should "call acts as audited on non audited models" do
     Company.should be_kind_of(CollectiveIdea::Acts::Audited::SingletonMethods)
   end
