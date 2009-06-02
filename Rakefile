@@ -1,14 +1,15 @@
 require 'rake'
-require 'spec/rake/spectask'
+require 'load_multi_rails_rake_tasks'
+require 'rake/testtask'
 require 'rake/rdoctask'
 
-desc 'Default: run specs.'
-task :default => :spec
+desc 'Default: run tests.'
+task :default => :test
 
 desc 'Test the acts_as_audited plugin'
-Spec::Rake::SpecTask.new(:spec) do |t|
+Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
-  t.pattern = 'spec/**/*_spec.rb'
+  t.pattern = 'test/**/*_test.rb'
   t.verbose = true
 end
 

@@ -77,7 +77,15 @@ acts_as_audited works with Rails 2.1 or later.
 == Contributing
 
 Contributions are always welcome. Checkout the latest code on GitHub:
-  http://github.com/collectiveidea/acts_as_audited 
+  http://github.com/collectiveidea/acts_as_audited
 
-Please report bugs or feature suggestions at:
-  http://collectiveidea.lighthouseapp.com/projects/20257-acts_as_audited
+Please include tests with your patches. There are a few gems required to run the tests:
+  $ gem install multi_rails
+  $ gem install thoughtbot-shoulda jeremymcanally-matchy --source http://gems.github.com
+
+Make sure the tests pass against all versions of Rails since 2.1:
+
+  $ rake test:multi_rails:all
+
+Please report bugs or feature suggestions on GitHub:
+  http://github.com/collectiveidea/acts_as_audited/issues
