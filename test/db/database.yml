@@ -16,6 +16,6 @@ postgresql:
 mysql:
   :adapter: mysql
   :host: localhost
-  :username: rails
+  :username: root
   :password:
   :database: acts_as_audited_plugin_test

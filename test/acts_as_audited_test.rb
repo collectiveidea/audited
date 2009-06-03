@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 module CollectiveIdea
-  module Acts 
+  module Acts
     class AuditedTest < Test::Unit::TestCase
       should "include instance methods" do
         User.new.should be_kind_of(CollectiveIdea::Acts::Audited::InstanceMethods)
@@ -16,7 +16,7 @@ module CollectiveIdea
           User.non_audited_columns.should include(column)
         end
       end
-      
+
       should "not save non-audited columns" do
         create_user.audits.first.changes.keys.any?{|col| ['created_at', 'updated_at', 'password'].include? col}.should be(false)
       end
@@ -307,14 +307,44 @@ module CollectiveIdea
           set_table_name :users
           attr_accessible :name, :username, :password # declare attr_accessible before calling aaa
           acts_as_audited
-        end  
+        end
         should "not raise an error when attr_accessible is declared before acts_as_audited" do
           lambda{
             AccessibleUser.new(:name => 'NO FAIL!')
           }.should_not raise_error
         end
       end
-      
+
+      context "audit as" do
+        setup do
+          @user = User.create :name => 'Testing'
+        end
+
+        should "record user objects" do
+          Company.audit_as( @user ) do
+            company = Company.create :name => 'The auditors'
+            company.name = 'The Auditors'
+            company.save
+
+            company.audits.each do |audit|
+              audit.user.should == @user
+            end
+          end
+        end
+
+        should "record usernames" do
+          Company.audit_as( @user.name ) do
+            company = Company.create :name => 'The auditors'
+            company.name = 'The Auditors, Inc'
+            company.save
+
+            company.audits.each do |audit|
+              audit.username.should == @user.name
+            end
+          end
+        end
+      end
+
     end
   end
 end
