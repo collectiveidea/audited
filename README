@@ -35,6 +35,12 @@ To get auditing outside of Rails you can explicitly declare <tt>acts_as_audited<
       acts_as_audited :except => [:password, :mistress]
     end
 
+To record a user in the audits when the sweepers are not available, you can use <tt>as_user</tt>:
+
+    Audit.as_user( user ) do
+      # Perform changes on audited models
+    end
+
 See http://opensoul.org/2006/07/21/acts_as_audited for more information.
 
 == Parent record tracking
