@@ -221,6 +221,21 @@ module CollectiveIdea
           previous.version.should == 4
           previous.revision(:previous).version.should == 3
         end
+        
+        should "be able to set protected attributes" do
+          u = User.create(:name => 'Brandon')
+          u.update_attribute :logins, 1
+          u.update_attribute :logins, 2
+
+          u.revision(3).logins.should == 2
+          u.revision(2).logins.should == 1
+          u.revision(1).logins.should == 0
+        end
+        
+        should "set attributes directly" do
+          u = User.create(:name => '<Joe>')
+          u.revision(1).name.should == '&lt;Joe&gt;'
+        end
 
         should "set the attributes for each revision" do
           u = User.create(:name => 'Brandon', :username => 'brandon')

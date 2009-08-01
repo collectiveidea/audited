@@ -23,6 +23,12 @@ load(File.dirname(__FILE__) + "/db/schema.rb")
 
 class User < ActiveRecord::Base
   acts_as_audited :except => :password
+  
+  attr_protected :logins
+  
+  def name=(val)
+    write_attribute(:name, CGI.escapeHTML(val))
+  end
 end
 class Company < ActiveRecord::Base
 end
