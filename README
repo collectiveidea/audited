@@ -87,7 +87,7 @@ Contributions are always welcome. Checkout the latest code on GitHub:
 
 Please include tests with your patches. There are a few gems required to run the tests:
   $ gem install multi_rails
-  $ gem install thoughtbot-shoulda jeremymcanally-matchy --source http://gems.github.com
+  $ gem install thoughtbot-shoulda jnunemaker-matchy --source http://gems.github.com
 
 Make sure the tests pass against all versions of Rails since 2.1:
 

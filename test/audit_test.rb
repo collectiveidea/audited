@@ -44,23 +44,40 @@ class AuditTest < Test::Unit::TestCase
     end
 
   end
+  
+  context "revision" do
+    should "recreate attributes" do
+      user = User.create :name => "1"
+      5.times {|i| user.update_attribute :name, (i + 2).to_s  }
+      user.audits.each do |audit|
+        audit.revision.name.should == audit.version.to_s
+      end
+    end
+  
+    should "set protected attributes" do
+      u = User.create(:name => 'Brandon')
+      u.update_attribute :logins, 1
+      u.update_attribute :logins, 2
 
-  should "revision" do
-    user = User.create :name => "1"
-    5.times {|i| user.update_attribute :name, (i + 2).to_s  }
-    user.audits.each do |audit|
-      audit.revision.name.should == audit.version.to_s
+      u.audits[2].revision.logins.should == 2
+      u.audits[1].revision.logins.should == 1
+      u.audits[0].revision.logins.should == 0
+    end
+    
+    should "bypass attribute assignment wrappers" do
+      u = User.create(:name => '<Joe>')
+      u.audits.first.revision.name.should == '&lt;Joe&gt;'
+    end
+    
+    should "work for deleted records" do
+      user = User.create :name => "1"
+      user.destroy
+      revision = user.audits.last.revision
+      revision.name.should == user.name
+      revision.new_record?.should be(true)
     end
   end
-
-  should "be able to create revision for deleted records" do
-    user = User.create :name => "1"
-    user.destroy
-    revision = user.audits.last.revision
-    revision.name.should == user.name
-    revision.new_record?.should be(true)
-  end
-
+  
   should "set the version number on create" do
     user = User.create! :name => "Set Version Number"
     user.audits.first.version.should == 1

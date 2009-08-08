@@ -166,7 +166,7 @@ module CollectiveIdea #:nodoc:
         def revision_with(attributes)
           returning self.dup do |revision|
             revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
-            revision.attributes = attributes.reject {|attr,_| !respond_to?("#{attr}=") }
+            Audit.assign_revision_attributes(revision, attributes)
 
             # Remove any association proxies so that they will be recreated
             # and reference the correct object for this revision. The only way
