@@ -77,7 +77,7 @@ class AuditTest < Test::Unit::TestCase
       revision.new_record?.should be(true)
     end
   end
-  
+
   should "set the version number on create" do
     user = User.create! :name => "Set Version Number"
     user.audits.first.version.should == 1

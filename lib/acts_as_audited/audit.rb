@@ -55,9 +55,10 @@ class Audit < ActiveRecord::Base
   alias_method :user, :user_as_string
 
   def revision
+    attributes = self.class.reconstruct_attributes(ancestors).merge({:version => version})
     clazz = auditable_type.constantize
     returning clazz.find_by_id(auditable_id) || clazz.new do |m|
-      Audit.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge({:version => version}))
+      m.attributes = attributes
     end
   end
 
@@ -90,17 +91,6 @@ class Audit < ActiveRecord::Base
       yield attributes if block_given?
     end
     block_given? ? result : attributes
-  end
-  
-  def self.assign_revision_attributes(record, attributes)
-    attributes.each do |attr, val|
-      if record.respond_to?("#{attr}=")
-        record.attributes.has_key?(attr.to_s) ?
-          record[attr] = val :
-          record.send("#{attr}=", val)
-      end
-    end
-    record
   end
 
 private
