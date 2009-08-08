@@ -37,7 +37,7 @@ module CollectiveIdea #:nodoc:
             models << [key, options.delete(key)] if key.is_a?(Class)
           end
 
-          models.each do |model, model_options|
+          models.each do |(model, model_options)|
             model.send :acts_as_audited, model_options || {}
 
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
