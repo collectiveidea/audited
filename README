@@ -6,14 +6,15 @@ The purpose of this fork is to store both the previous values and the changed va
 
 == Installation
 
-* Install the plugin into your rails app
-  If you are using Rails 2.1:
+* acts_as_audited can be installed as a gem:
+    
+    # config/environment.rb
+    config.gem 'collectiveidea-acts_as_audited', :lib => false,
+      :source => 'http://gems.github.com'
+
+  or a plugin:
 
     script/plugin install git://github.com/collectiveidea/acts_as_audited.git
-
-  For versions prior to 2.1:
-
-    git clone git://github.com/collectiveidea/acts_as_audited.git vendor/plugins/acts_as_audited
 
 * Generate the migration
     script/generate audited_migration add_audits_table
