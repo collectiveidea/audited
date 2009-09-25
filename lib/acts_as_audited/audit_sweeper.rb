@@ -42,7 +42,10 @@ module CollectiveIdea #:nodoc:
 
             # disable ActiveRecord callbacks, which are replaced by the AuditSweeper
             model.send :disable_auditing_callbacks
-            model.add_observer(AuditSweeper.instance)
+            
+            # prevent observer from being registered multiple times
+            model.delete_observer(AuditSweeper.instance)
+            model.add_observer(AuditSweeper.instance)      
           end
 
           class_eval do
