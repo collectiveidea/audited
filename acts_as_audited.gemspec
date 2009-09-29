@@ -10,7 +10,6 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brandon Keepers"]
   s.date = %q{2009-09-28}
-  s.description = %q{ActiveRecord extension that logs all changes to your models in an audits table}
   s.email = %q{brandon@opensoul.org}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -32,7 +31,6 @@ Gem::Specification.new do |s|
      "lib/acts_as_audited/audit.rb",
      "lib/acts_as_audited/audit_sweeper.rb",
      "rails/init.rb",
-     "test.txt",
      "test/acts_as_audited_test.rb",
      "test/audit_sweeper_test.rb",
      "test/audit_test.rb",
