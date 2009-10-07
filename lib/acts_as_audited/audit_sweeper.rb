@@ -73,7 +73,7 @@ class AuditSweeper < ActionController::Caching::Sweeper #:nodoc:
   end
 
   def current_user
-    controller.send :current_user if controller.respond_to?(:current_user)
+    controller.send :current_user if controller.respond_to?(:current_user, true)
   end
 
 end
