@@ -9,8 +9,7 @@ The purpose of this fork is to store both the previous values and the changed va
 * acts_as_audited can be installed as a gem:
     
     # config/environment.rb
-    config.gem 'collectiveidea-acts_as_audited', :lib => false,
-      :source => 'http://gems.github.com'
+    config.gem 'acts_as_audited', :lib => false, :source => 'http://gemcutter.org'
 
   or a plugin:
 
