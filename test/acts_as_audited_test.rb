@@ -22,7 +22,7 @@ module CollectiveIdea
       end
       
       context "on create" do
-        setup { @user = create_user }
+        setup { @user = create_user :audit_comment => "Create" }
 
         should_change 'Audit.count', :by => 1
 
@@ -37,11 +37,19 @@ module CollectiveIdea
         should "store all the audited attributes" do
           @user.audits.first.changes.should == @user.audited_attributes
         end
+
         
         should "not audit an attribute which is excepted if specified on create and on destroy" do
           on_create_destroy_except_name = OnCreateDestroyExceptName.create(:name => 'Bart')
           on_create_destroy_except_name.audits.first.changes.keys.any?{|col| ['name'].include? col}.should be(false)
         end
+
+   
+        should "store comment"
+          @user.audits.first.comment.should == "Create"
+        end
+      end
+
 
         should "not save an audit if only specified on update and on destroy" do
           lambda { on_update_destroy = OnUpdateDestroy.create(:name => 'Bart') }.should_not change { Audit.count }
@@ -50,7 +58,7 @@ module CollectiveIdea
       
       context "on update" do
         setup do
-          @user = create_user(:name => 'Brandon')
+          @user = create_user(:name => 'Brandon', :audit_comment => "Update")
         end
 
         should "save an audit" do
@@ -70,6 +78,10 @@ module CollectiveIdea
         should "store the changed attributes" do
           @user.update_attributes :name => 'Changed'
           @user.audits.last.changes.should == {'name' => ['Brandon', 'Changed']}
+        end
+
+        should "store audit comment" do
+          @user.audits.last.comment.should == "Update"
         end
 
         # Dirty tracking in Rails 2.0-2.2 had issues with type casting
@@ -314,6 +326,52 @@ module CollectiveIdea
           end.should_not change { Audit.count }
         end
       end
+
+      context "comment required" do
+        class CommentRequiredUser < ActiveRecord::Base
+          set_table_name :users
+          acts_as_audited :comment_required => true
+        end
+    
+        context "on create" do
+          should "not validate when audit_comment is not supplied" do
+            CommentRequiredUser.new.valid?.should == false
+          end
+         
+          should "validate when audit_comment is supplied" do 
+            CommentRequiredUser.new(:audit_comment => "Create").valid?.should == true
+          end
+        end
+        
+        context "on update" do
+          @user = CommentRequiredUser.create(:audit_comment => "Create")
+          should "not validate when audit_comment is not supplied" do
+            @user.update_attributes(:name => "Test")
+            @user.valid?.should == false
+          end
+         
+          should "validate when audit_comment is supplied" do 
+            @user.update_attributes(:name => "foo", :audit_comment => "Update")
+            @user.valid?.should == true
+          end
+          @user.audit_comment = "Destroy"
+          @user.destroy
+        end
+
+        context "on destroy" do
+          @user = CommentRequiredUser.create(:audit_comment => "Create")
+          should "not validate when audit_comment is unset" do
+            @user.destroy
+            @user.frozen?.should == false
+          end
+         
+          should "validate when audit_comment is supplied" do 
+            @user.audit_comment = "Destroy"
+            @user.frozen?.should == true
+          end
+        end
+
+            
 
       context "attr_protected and attr_accessible" do
         class UnprotectedUser < ActiveRecord::Base

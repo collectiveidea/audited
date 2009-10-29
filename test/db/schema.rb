@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :action, :string
     t.column :changes, :text
     t.column :version, :integer, :default => 0
+    t.column :comments, :string
     t.column :created_at, :datetime
   end
   

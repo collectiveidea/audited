@@ -79,6 +79,13 @@ module CollectiveIdea #:nodoc:
           end
           write_inheritable_attribute :non_audited_columns, except
 
+          if options[:comment_required]
+            validates_presence_of :audit_comment
+            before_destroy :require_comment
+          end
+
+          attr_accessor :audit_comment
+
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
           Audit.audited_class_names << self.to_s
@@ -185,22 +192,41 @@ module CollectiveIdea #:nodoc:
         end
 
         def audit_create
-          write_audit(:action => 'create', :changes => audited_attributes)
+          write_audit(:action => 'create', :changes => audited_attributes, 
+            :comment => audit_comment)
         end
 
         def audit_update
           unless (changes = audited_changes).empty?
-            write_audit(:action => 'update', :changes => changes)
+            write_audit(:action => 'update', :changes => changes, 
+              :comment => audit_comment)
           end
         end
 
         def audit_destroy
-          write_audit(:action => 'destroy', :changes => audited_attributes)
+          write_audit(:action => 'destroy', :changes => audited_attributes,
+            :comment => audit_comment)
         end
 
         def write_audit(attrs)
+          self.audit_comment = nil
           self.audits.create attrs if auditing_enabled
         end
+  
+        def require_comment
+          if audit_comment.blank?
+            errors.add(:audit_comment, "Comment required before destruction")
+            return false
+          end
+        end
+
+        CALLBACKS.each do |attr_name|
+          alias_method "#{attr_name}_callback".to_sym, attr_name
+        end
+
+        def empty_callback #:nodoc:
+        end
+
       end # InstanceMethods
 
       module SingletonMethods

@@ -9,6 +9,7 @@ class <%= class_name %> < ActiveRecord::Migration
       t.column :action, :string
       t.column :changes, :text
       t.column :version, :integer, :default => 0
+      t.column :comment, :string
       t.column :created_at, :datetime
     end
     
