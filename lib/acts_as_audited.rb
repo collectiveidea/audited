@@ -28,6 +28,9 @@ module CollectiveIdea #:nodoc:
     #     acts_as_audited
     #   end
     #
+    # To store an audit comment set model.audit_comment to your comment before
+    # a create, update or destroy operation.
+    #
     # See <tt>CollectiveIdea::Acts::Audited::ClassMethods#acts_as_audited</tt>
     # for configuration options
     module Audited #:nodoc:
@@ -55,6 +58,9 @@ module CollectiveIdea #:nodoc:
         #   raising an error.  If you declare +attr_accessibe+ before calling +acts_as_audited+, it
         #   will automatically default to false.  You only need to explicitly set this if you are
         #   calling +attr_accessible+ after.
+        #
+        # * +require_comment+ - Ensures that audit_comment is supplied before
+        #   any create, update or destroy operation.
         #
         #     class User < ActiveRecord::Base
         #       acts_as_audited :protect => false
@@ -85,7 +91,7 @@ module CollectiveIdea #:nodoc:
           end
 
           attr_accessor :audit_comment
-          unless accessible_attributes.nil?
+          unless accessible_attributes.nil? || options[:protect]
             attr_accessible :audit_comment
           end
 
