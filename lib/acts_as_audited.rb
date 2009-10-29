@@ -85,6 +85,9 @@ module CollectiveIdea #:nodoc:
           end
 
           attr_accessor :audit_comment
+          unless accessible_attributes.nil?
+            attr_accessible :audit_comment
+          end
 
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
