@@ -44,14 +44,6 @@ If your model declares +attr_accessible+ after +acts_as_audited+, you need to se
     attr_accessible :name
   end
 
-=== ActiveScaffold
-
-Many users have also reported problems with acts_as_audited and ActiveScaffold, which appears to be caused by a limitation in ActiveScaffold not supporting polymorphic associations. To get it to work with ActiveScaffold:
-
-  class ApplicationController < ActionController::Base
-    audit MyModel, :only => [:create, :update, :destroy]
-  end
-
 == Compatability
 
 acts_as_audited works with Rails 2.1 or later.
