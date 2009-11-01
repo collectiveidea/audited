@@ -48,6 +48,11 @@ If your model declares +attr_accessible+ after +acts_as_audited+, you need to se
 
 acts_as_audited works with Rails 2.1 or later.
 
+== Getting Help
+
+Join the mailing list for getting help or offering suggestions:
+  http://groups.google.com/group/acts_as_audited
+
 == Contributing
 
 Contributions are always welcome. Checkout the latest code on GitHub:
