@@ -45,7 +45,7 @@ module CollectiveIdea
         end
 
    
-        should "store comment"
+        should "store comment" do
           @user.audits.first.comment.should == "Create"
         end
       end
@@ -344,34 +344,35 @@ module CollectiveIdea
         end
         
         context "on update" do
-          @user = CommentRequiredUser.create(:audit_comment => "Create")
+          setup do
+            @user = CommentRequiredUser.create(:audit_comment => "Create")
+          end
           should "not validate when audit_comment is not supplied" do
-            @user.update_attributes(:name => "Test")
-            @user.valid?.should == false
+            @user.update_attributes(:name => "Test").should == false
           end
          
           should "validate when audit_comment is supplied" do 
-            @user.update_attributes(:name => "foo", :audit_comment => "Update")
-            @user.valid?.should == true
+            @user.update_attributes(:name => "foo", :audit_comment => "Update").should == true
           end
-          @user.audit_comment = "Destroy"
-          @user.destroy
+          
         end
 
         context "on destroy" do
-          @user = CommentRequiredUser.create(:audit_comment => "Create")
+          setup do
+            @user = CommentRequiredUser.create(:audit_comment => "Create")
+          end
+
           should "not validate when audit_comment is unset" do
-            @user.destroy
-            @user.frozen?.should == false
+            @user.destroy.should == false
           end
          
           should "validate when audit_comment is supplied" do 
             @user.audit_comment = "Destroy"
-            @user.frozen?.should == true
+            @user.destroy.should == @user
           end
         end
 
-            
+      end
 
       context "attr_protected and attr_accessible" do
         class UnprotectedUser < ActiveRecord::Base
