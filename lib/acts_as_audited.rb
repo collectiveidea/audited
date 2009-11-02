@@ -157,7 +157,7 @@ module CollectiveIdea #:nodoc:
           attributes.except(*non_audited_columns)
         end
 
-      protected
+        protected
 
         def revision_with(attributes)
           returning self.dup do |revision|
@@ -178,7 +178,7 @@ module CollectiveIdea #:nodoc:
           end
         end
 
-      private
+        private
 
         def audited_changes
           changed_attributes.except(*non_audited_columns).inject({}) do |changes,(attr, old_value)|
