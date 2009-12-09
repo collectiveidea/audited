@@ -6,16 +6,21 @@ The purpose of this fork is to store both the previous values and the changed va
 
 == Installation
 
-* acts_as_audited can be installed as a gem:
-    
-    gem install EmFi-acts_as_audited
-
-  or a plugin:
-
     script/plugin install git://github.com/EmFi/acts_as_audited.git
 
 * Generate the migration
+** If installing without a previous version of acts_as_audited or you do not 
+mind overwriting your audits table:
+
     script/generate audited_migration add_audits_table
+
+** If upgrading from a version of acts_as_audited that does not contain comment
+functionality:
+
+    script/generate audited_migration_update update_audits_table
+
+** After running one of the generators:
+
     rake db:migrate
 
 == Usage
