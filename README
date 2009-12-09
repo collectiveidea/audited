@@ -26,7 +26,10 @@ Declare <tt>acts_as_audited</tt> on your models:
       acts_as_audited :except => [:password, :mistress]
     end
     
-Within a web request, will automatically record the user that made the change if your controller has a <tt>current_user</tt> method.
+Within a web request, will automatically record the user that made the change if your controller has a <tt>current_user</tt> method. Comments can be added to an audit by setting model.audit_comments 
+before create/update/destroy. If the :comment_required option is given to acts_as_audited, 
+the save/update/destroy action will fail with add an error on model.audit_comment and triggering a 
+transaction rollback if model.audit_comment is nil.
 
 To record a user in the audits outside of a web request, you can use <tt>as_user</tt>:
 
