@@ -2,7 +2,7 @@
 
 acts_as_audited is an ActiveRecord extension that logs all changes to your models in an audits table.
 
-The purpose of this fork is to store both the previous values and the changed value, making each audit record selfcontained.
+The purpose of this fork is to add comments to audits.
 
 == Installation
 
