@@ -20,7 +20,7 @@ module CollectiveIdea
       should "not save non-audited columns" do
         create_user.audits.first.changes.keys.any?{|col| ['created_at', 'updated_at', 'password'].include? col}.should be(false)
       end
-
+      
       context "on create" do
         setup { @user = create_user }
 
@@ -37,8 +37,17 @@ module CollectiveIdea
         should "store all the audited attributes" do
           @user.audits.first.changes.should == @user.audited_attributes
         end
-      end
+        
+        should "not audit an attribute which is excepted if specified on create and on destroy" do
+          on_create_destroy_except_name = OnCreateDestroyExceptName.create(:name => 'Bart')
+          on_create_destroy_except_name.audits.first.changes.keys.any?{|col| ['name'].include? col}.should be(false)
+        end
 
+        should "not save an audit if only specified on update and on destroy" do
+          lambda { on_update_destroy = OnUpdateDestroy.create(:name => 'Bart') }.should_not change { Audit.count }
+        end
+      end
+      
       context "on update" do
         setup do
           @user = create_user(:name => 'Brandon')
@@ -73,6 +82,10 @@ module CollectiveIdea
           end
         end
 
+        should "not save an audit if only specified on create and on destroy" do
+           on_create_destroy = OnCreateDestroy.create(:name => 'Bart')
+          lambda { on_create_destroy.update_attributes :name => 'Changed' }.should_not change { Audit.count }
+        end
       end
 
       context "on destroy" do
@@ -100,6 +113,11 @@ module CollectiveIdea
           @user.destroy
           revision = @user.audits.first.revision
           revision.name.should == @user.name
+        end
+        
+        should "not save an audit if only specified on create and on update" do
+          on_create_update = OnCreateUpdate.create(:name => 'Bart')
+          lambda { on_create_update.destroy }.should_not change { Audit.count }
         end
       end
 

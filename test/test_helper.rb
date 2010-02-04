@@ -30,8 +30,25 @@ class User < ActiveRecord::Base
     write_attribute(:name, CGI.escapeHTML(val))
   end
 end
+
 class Company < ActiveRecord::Base
   acts_as_audited
+end
+
+class OnUpdateDestroy < ActiveRecord::Base
+  acts_as_audited :on => [:update, :destroy]
+end
+
+class OnCreateDestroy < ActiveRecord::Base
+  acts_as_audited :on => [:create, :destroy]
+end
+
+class OnCreateDestroyExceptName < ActiveRecord::Base
+  acts_as_audited :except => :name, :on => [:create, :destroy]
+end
+
+class OnCreateUpdate < ActiveRecord::Base
+  acts_as_audited :on => [:create, :update]
 end
 
 class Test::Unit::TestCase

@@ -69,7 +69,7 @@ module CollectiveIdea #:nodoc:
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled
-
+          
           if options[:only]
             except = self.column_names - options[:only].flatten.map(&:to_s)
           else
@@ -83,9 +83,9 @@ module CollectiveIdea #:nodoc:
           attr_protected :audit_ids if options[:protect]
           Audit.audited_class_names << self.to_s
 
-          after_create  :audit_create
-          before_update :audit_update
-          after_destroy :audit_destroy
+          after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
+          before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
+          after_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
 
           attr_accessor :version
 
