@@ -295,15 +295,6 @@ module CollectiveIdea
             User.without_auditing { User.create(:name => 'Brandon') }
           end.should_not change { Audit.count }
         end
-
-        should "not save an audit when callbacks are disabled" do
-          begin
-            User.disable_auditing_callbacks
-            lambda { create_user }.should_not change { Audit.count }
-          ensure
-            User.enable_auditing_callbacks
-          end
-        end
       end
 
       context "attr_protected and attr_accessible" do
