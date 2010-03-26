@@ -31,6 +31,7 @@ class User < ActiveRecord::Base
   end
 end
 class Company < ActiveRecord::Base
+  acts_as_audited
 end
 
 class Test::Unit::TestCase

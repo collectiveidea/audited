@@ -103,9 +103,9 @@ module CollectiveIdea #:nodoc:
             write_inheritable_attribute :auditable_parent, nil
           end
           
-          after_create :audit_create_callback
-          before_update :audit_update_callback
-          after_destroy :audit_destroy_callback
+          after_create  :audit_create
+          before_update :audit_update
+          after_destroy :audit_destroy
 
           attr_accessor :version
 
@@ -213,31 +213,23 @@ module CollectiveIdea #:nodoc:
           audits.find(:all, :conditions => ['version <= ?', version])
         end
 
-        def audit_create(user = nil)
-          write_audit(:action => 'create', :auditable_parent => auditable_parent, :changes => audited_attributes, :user => user)
+        def audit_create
+          write_audit(:action => 'create', :auditable_parent => auditable_parent, :changes => audited_attributes)
         end
 
-        def audit_update(user = nil)
+        def audit_update
           unless (changes = audited_changes).empty?
-            write_audit(:action => 'update', :auditable_parent => auditable_parent, :changes => changes, :user => user)
+            write_audit(:action => 'update', :auditable_parent => auditable_parent, :changes => changes)
           end
         end
 
-        def audit_destroy(user = nil)
-          write_audit(:action => 'destroy', :auditable_parent => auditable_parent, :user => user, :changes => audited_attributes)
+        def audit_destroy
+          write_audit(:action => 'destroy', :auditable_parent => auditable_parent, :changes => audited_attributes)
         end
 
         def write_audit(attrs)
           self.audits.create attrs if auditing_enabled
         end
-
-        CALLBACKS.each do |attr_name|
-          alias_method "#{attr_name}_callback".to_sym, attr_name
-        end
-
-        def empty_callback #:nodoc:
-        end
-
       end # InstanceMethods
 
       module SingletonMethods
@@ -264,22 +256,6 @@ module CollectiveIdea #:nodoc:
 
         def enable_auditing
           write_inheritable_attribute :auditing_enabled, true
-        end
-
-        def disable_auditing_callbacks
-          class_eval do
-            CALLBACKS.each do |attr_name|
-              alias_method "#{attr_name}_callback", :empty_callback
-            end
-          end
-        end
-
-        def enable_auditing_callbacks
-          class_eval do
-            CALLBACKS.each do |attr_name|
-              alias_method "#{attr_name}_callback".to_sym, attr_name
-            end
-          end
         end
 
         # All audit operations during the block are recorded as being
