@@ -11,7 +11,7 @@ module CollectiveIdea
         User.should be_kind_of(CollectiveIdea::Acts::Audited::SingletonMethods)
       end
 
-      ['created_at', 'updated_at', 'lock_version', 'id', 'password'].each do |column|
+      ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
         should "not audit #{column}" do
           User.non_audited_columns.should include(column)
         end

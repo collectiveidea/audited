@@ -73,7 +73,8 @@ module CollectiveIdea #:nodoc:
           if options[:only]
             except = self.column_names - options[:only].flatten.map(&:to_s)
           else
-            except = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
+            except = [self.primary_key, inheritance_column, 'lock_version',
+              'created_at', 'updated_at', 'created_on', 'updated_on']
             except |= Array(options[:except]).collect(&:to_s) if options[:except]
           end
           write_inheritable_attribute :non_audited_columns, except
