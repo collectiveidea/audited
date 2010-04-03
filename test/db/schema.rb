@@ -13,22 +13,6 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :name, :string
   end
 
-  create_table :on_update_destroys, :force => true do |t|
-    t.column :name, :string
-  end
-
-  create_table :on_create_destroys, :force => true do |t|
-    t.column :name, :string
-  end
-
-  create_table :on_create_updates, :force => true do |t|
-    t.column :name, :string
-  end
-
-  create_table :on_create_destroy_except_names, :force => true do |t|
-    t.column :name, :string
-  end
-
   create_table :audits, :force => true do |t|
     t.column :auditable_id, :integer
     t.column :auditable_type, :string
