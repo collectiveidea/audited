@@ -29,7 +29,6 @@ module CollectiveIdea
         should 'create associated audit' do
           @user.audits.count.should == 1
         end
-
         should "set the action to 'create'" do
           @user.audits.first.action.should == 'create'
         end
@@ -47,8 +46,7 @@ module CollectiveIdea
    
         should "store comment" do
           @user.audits.first.comment.should == "Create"
-        end
-      end
+        end      
 
 
         should "not save an audit if only specified on update and on destroy" do
@@ -95,7 +93,7 @@ module CollectiveIdea
         end
 
         should "not save an audit if only specified on create and on destroy" do
-           on_create_destroy = OnCreateDestroy.create(:name => 'Bart')
+          on_create_destroy = OnCreateDestroy.create(:name => 'Bart')
           lambda { on_create_destroy.update_attributes :name => 'Changed' }.should_not change { Audit.count }
         end
       end
@@ -338,7 +336,7 @@ module CollectiveIdea
             CommentRequiredUser.new.valid?.should == false
           end
          
-          should "validate when audit_comment is supplied" do 
+          should "validate when audit_comment is supplied" do
             CommentRequiredUser.new(:audit_comment => "Create").valid?.should == true
           end
         end
@@ -351,7 +349,7 @@ module CollectiveIdea
             @user.update_attributes(:name => "Test").should == false
           end
          
-          should "validate when audit_comment is supplied" do 
+          should "validate when audit_comment is supplied" do
             @user.update_attributes(:name => "foo", :audit_comment => "Update").should == true
           end
           
@@ -366,7 +364,7 @@ module CollectiveIdea
             @user.destroy.should == false
           end
          
-          should "validate when audit_comment is supplied" do 
+          should "validate when audit_comment is supplied" do
             @user.audit_comment = "Destroy"
             @user.destroy.should == @user
           end
