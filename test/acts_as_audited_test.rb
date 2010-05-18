@@ -151,6 +151,28 @@ module CollectiveIdea
 
       end
 
+      context "associated_with" do
+        setup do
+          @user = create_user
+          @owned_company = OwnedCompany.create(:name => 'The auditors', :owner_id => @user.id)
+        end
+
+        should "record the associated object on create" do
+          owned_company = OwnedCompany.create(:name => 'The auditors', :owner_id => @user.id)
+          owned_company.audits.first.association.should == @user
+        end
+
+        should "store the associated object on update" do
+          @owned_company.update_attribute(:name, 'The Auditors')
+          @owned_company.audits.last.association.should == @user
+        end
+
+        should "store the associated object on destroy" do
+          @owned_company.destroy
+          @owned_company.audits.last.association.should == @user
+        end
+      end
+
       context "revisions" do
         setup do
           @user = create_versions

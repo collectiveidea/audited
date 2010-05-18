@@ -35,6 +35,12 @@ class Company < ActiveRecord::Base
   acts_as_audited
 end
 
+class OwnedCompany < ActiveRecord::Base
+  set_table_name 'companies'
+  belongs_to :owner, :class_name => "User"
+  acts_as_audited :associated_with => :owner
+end
+
 class OnUpdateDestroy < ActiveRecord::Base
   set_table_name 'companies'
   acts_as_audited :on => [:update, :destroy]

@@ -69,6 +69,7 @@ module CollectiveIdea #:nodoc:
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled
+          class_inheritable_reader :audit_associated_with
           
           if options[:only]
             except = self.column_names - options[:only].flatten.map(&:to_s)
@@ -78,6 +79,8 @@ module CollectiveIdea #:nodoc:
             except |= Array(options[:except]).collect(&:to_s) if options[:except]
           end
           write_inheritable_attribute :non_audited_columns, except
+
+          write_inheritable_attribute :audit_associated_with, options[:associated_with]
 
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
@@ -199,6 +202,7 @@ module CollectiveIdea #:nodoc:
         end
 
         def write_audit(attrs)
+          attrs[:association] = self.send(audit_associated_with) unless audit_associated_with.nil?
           self.audits.create attrs if auditing_enabled
         end
       end # InstanceMethods
