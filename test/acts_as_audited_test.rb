@@ -153,23 +153,42 @@ module CollectiveIdea
 
       context "associated_with" do
         setup do
-          @user = create_user
-          @owned_company = OwnedCompany.create(:name => 'The auditors', :owner_id => @user.id)
+          @owner = Owner.create(:name => 'Owner')
+          @owned_company = OwnedCompany.create(:name => 'The auditors', :owner_id => @owner.id)
         end
 
         should "record the associated object on create" do
-          owned_company = OwnedCompany.create(:name => 'The auditors', :owner_id => @user.id)
-          owned_company.audits.first.association.should == @user
+          owned_company = OwnedCompany.create(:name => 'The auditors', :owner_id => @owner.id)
+          owned_company.audits.first.association.should == @owner
         end
 
         should "store the associated object on update" do
           @owned_company.update_attribute(:name, 'The Auditors')
-          @owned_company.audits.last.association.should == @user
+          @owned_company.audits.last.association.should == @owner
         end
 
         should "store the associated object on destroy" do
           @owned_company.destroy
-          @owned_company.audits.last.association.should == @user
+          @owned_company.audits.last.association.should == @owner
+        end
+      end
+
+      context "has_associated_audits" do
+        should "list the associated audits" do
+          owner = Owner.create(:name => 'Owner')
+          owned_company = OwnedCompany.create(:name => 'The auditors', :owner_id => owner.id)
+          owner.associated_audits.length.should == 1
+          owner.associated_audits.first.auditable.should == owned_company
+        end
+
+        should "list the associated audits from most recent to least recent" do
+          owner = Owner.create(:name => 'Owner')
+          owned_company = OwnedCompany.create(:name => 'The auditors', :owner_id => owner.id)
+          sleep 1 # or else the create and destroy have the same time in sqlite
+          owned_company.destroy
+          owner.associated_audits.length.should == 2
+          owner.associated_audits.first.action.should == "destroy"
+          owner.associated_audits.last.action.should == "create"
         end
       end
 

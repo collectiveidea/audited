@@ -31,13 +31,18 @@ class User < ActiveRecord::Base
   end
 end
 
+class Owner < ActiveRecord::Base
+  set_table_name 'users'
+  has_associated_audits
+end
+
 class Company < ActiveRecord::Base
   acts_as_audited
 end
 
 class OwnedCompany < ActiveRecord::Base
   set_table_name 'companies'
-  belongs_to :owner, :class_name => "User"
+  belongs_to :owner, :class_name => "Owner"
   acts_as_audited :associated_with => :owner
 end
 
