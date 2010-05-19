@@ -29,6 +29,7 @@ ActiveRecord::Schema.define(:version => 0) do
   end
   
   add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
+  add_index :audits, [:association_id, :association_type], :name => 'association_index'
   add_index :audits, [:user_id, :user_type], :name => 'user_index'
   add_index :audits, :created_at  
 end
