@@ -280,6 +280,12 @@ module CollectiveIdea
           u.revision(1).username.should == 'brandon'
         end
 
+        should "be able to get datetime for first revision" do
+          suspended_at = Time.now
+          u = User.create(:suspended_at => suspended_at)
+          u.revision(1).suspended_at.should == suspended_at
+        end
+
         should "not raise an error when no previous audits exist" do
           @user.audits.destroy_all
           lambda{ @user.revision(:previous) }.should_not raise_error
