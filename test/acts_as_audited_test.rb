@@ -280,7 +280,7 @@ module CollectiveIdea
           u.revision(1).username.should == 'brandon'
         end
 
-        should "be able to get datetime for first revision" do
+        should "be able to get time for first revision" do
           suspended_at = Time.now
           u = User.create(:suspended_at => suspended_at)
           u.revision(1).suspended_at.should == suspended_at

@@ -67,7 +67,7 @@ class Audit < ActiveRecord::Base
   # Returns a hash of the changed attributes with the new values
   def new_attributes
     (changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
-      attrs[attr] = values.kind_of?(Time) ? values : Array(values).last
+      attrs[attr] = values.is_a?(Array) ? values.last : values
       attrs
     end
   end
