@@ -14,6 +14,8 @@ begin
     gem.email = "brandon@opensoul.org"
     gem.homepage = "http://github.com/collectiveidea/acts_as_audited"
     gem.authors = ["Brandon Keepers"]
+    gem.rdoc_options << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
+
     gem.add_dependency 'activerecord', '>=2.1'
     gem.add_development_dependency "thoughtbot-shoulda"
     gem.add_development_dependency "jnunemaker-matchy"
@@ -51,7 +53,7 @@ desc 'Generate documentation for the acts_as_audited plugin.'
 Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'doc'
   rdoc.title    = 'acts_as_audited'
-  rdoc.options << '--line-numbers' << '--inline-source'
-  rdoc.rdoc_files.include('README')
+  rdoc.options << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
+  rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
