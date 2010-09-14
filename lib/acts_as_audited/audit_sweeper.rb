@@ -3,7 +3,7 @@ module CollectiveIdea #:nodoc:
     module Audited #:nodoc:
       def audit(*models)
         ActiveSupport::Deprecation.warn("#audit is deprecated. Declare #acts_as_audited in your models.", caller)
-        
+
         options = models.extract_options!
 
         # Parse the options hash looking for classes
@@ -20,12 +20,16 @@ module CollectiveIdea #:nodoc:
 end
 
 class AuditSweeper < ActionController::Caching::Sweeper #:nodoc:
+
+  cattr_accessor :current_user_method
+  self.current_user_method = :current_user
+
   def before_create(audit)
     audit.user ||= current_user
   end
 
   def current_user
-    controller.send :current_user if controller.respond_to?(:current_user, true)
+    controller.send self.class.current_user_method if controller.respond_to?(self.class.current_user_method, true)
   end
 end
 
