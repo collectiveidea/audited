@@ -28,6 +28,9 @@ module CollectiveIdea #:nodoc:
     #     acts_as_audited
     #   end
     #
+    # To store an audit comment set model.audit_comment to your comment before
+    # a create, update or destroy operation.
+    #
     # See <tt>CollectiveIdea::Acts::Audited::ClassMethods#acts_as_audited</tt>
     # for configuration options
     module Audited #:nodoc:
@@ -56,6 +59,9 @@ module CollectiveIdea #:nodoc:
         #   will automatically default to false.  You only need to explicitly set this if you are
         #   calling +attr_accessible+ after.
         #
+        # * +require_comment+ - Ensures that audit_comment is supplied before
+        #   any create, update or destroy operation.
+        #
         #     class User < ActiveRecord::Base
         #       acts_as_audited :protect => false
         #       attr_accessible :name
@@ -69,14 +75,25 @@ module CollectiveIdea #:nodoc:
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled
-
+          
           if options[:only]
             except = self.column_names - options[:only].flatten.map(&:to_s)
           else
-            except = [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
+            except = [self.primary_key, inheritance_column, 'lock_version',
+              'created_at', 'updated_at', 'created_on', 'updated_on']
             except |= Array(options[:except]).collect(&:to_s) if options[:except]
           end
           write_inheritable_attribute :non_audited_columns, except
+
+          if options[:comment_required]
+            validates_presence_of :audit_comment
+            before_destroy :require_comment
+          end
+
+          attr_accessor :audit_comment
+          unless accessible_attributes.nil? || options[:protect]
+            attr_accessible :audit_comment
+          end
 
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
@@ -103,9 +120,9 @@ module CollectiveIdea #:nodoc:
             write_inheritable_attribute :auditable_parent, nil
           end
           
-          after_create  :audit_create
-          before_update :audit_update
-          after_destroy :audit_destroy
+          after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
+          before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
+          after_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
 
           attr_accessor :version
 
@@ -161,7 +178,7 @@ module CollectiveIdea #:nodoc:
           attributes.except(*non_audited_columns)
         end
 
-      protected
+        protected
 
         def revision_with(attributes)
           returning self.dup do |revision|
@@ -214,22 +231,41 @@ module CollectiveIdea #:nodoc:
         end
 
         def audit_create
-          write_audit(:action => 'create', :auditable_parent => auditable_parent, :changes => audited_attributes)
+          write_audit(:action => 'create', :changes => audited_attributes, 
+            :comment => audit_comment, :auditable_parent => auditable_parent)
         end
 
         def audit_update
           unless (changes = audited_changes).empty?
-            write_audit(:action => 'update', :auditable_parent => auditable_parent, :changes => changes)
+            write_audit(:action => 'update', :changes => changes, 
+              :comment => audit_comment, :auditable_parent => auditable_parent)
           end
         end
 
         def audit_destroy
-          write_audit(:action => 'destroy', :auditable_parent => auditable_parent, :changes => audited_attributes)
+          write_audit(:action => 'destroy', :changes => audited_attributes,
+            :comment => audit_comment, :auditable_parent => auditable_parent)
         end
 
         def write_audit(attrs)
+          self.audit_comment = nil
           self.audits.create attrs if auditing_enabled
         end
+  
+        def require_comment
+          if audit_comment.blank?
+            errors.add(:audit_comment, "Comment required before destruction")
+            return false
+          end
+        end
+
+        CALLBACKS.each do |attr_name|
+          alias_method "#{attr_name}_callback".to_sym, attr_name
+        end
+
+        def empty_callback #:nodoc:
+        end
+
       end # InstanceMethods
 
       module SingletonMethods

@@ -4,6 +4,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :username, :string
     t.column :password, :string
     t.column :activated, :boolean
+    t.column :suspended_at, :datetime
     t.column :logins, :integer, :default => 0
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
@@ -33,6 +34,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :action, :string
     t.column :changes, :text
     t.column :version, :integer, :default => 0
+    t.column :comment, :string
     t.column :created_at, :datetime
   end
   

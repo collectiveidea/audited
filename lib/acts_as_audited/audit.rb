@@ -24,9 +24,6 @@ class Audit < ActiveRecord::Base
     self.audited_class_names.map(&:constantize)
   end
 
-  cattr_accessor :audit_as_user
-  self.audit_as_user = nil
-
   # All audits made during the block called will be recorded as made
   # by +user+. This method is hopefully threadsafe, making it ideal
   # for background operations that require audit information.
@@ -71,7 +68,7 @@ class Audit < ActiveRecord::Base
   # Returns a hash of the changed attributes with the new values
   def new_attributes
     (changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
-      attrs[attr] = Array(values).last
+      attrs[attr] = values.is_a?(Array) ? values.last : values
       attrs
     end
   end

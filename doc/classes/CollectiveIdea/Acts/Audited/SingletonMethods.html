@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Module: CollectiveIdea::Acts::Audited::SingletonMethods</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../../../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Module</strong></td>
+          <td class="class-name-in-header">CollectiveIdea::Acts::Audited::SingletonMethods</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../../../../files/lib/acts_as_audited_rb.html">
+                lib/acts_as_audited.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000021">audit_as</a>&nbsp;&nbsp;
+      <a href="#M000017">audited_columns</a>&nbsp;&nbsp;
+      <a href="#M000019">disable_auditing</a>&nbsp;&nbsp;
+      <a href="#M000020">enable_auditing</a>&nbsp;&nbsp;
+      <a href="#M000018">without_auditing</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000021" class="method-detail">
+        <a name="M000021"></a>
+
+        <div class="method-heading">
+          <a href="#M000021" class="method-signature">
+          <span class="method-name">audit_as</span><span class="method-args">( user, &amp;block )</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+All audit operations during the block are recorded as being made by
+<tt>user</tt>. This is not model specific, the method is a convenience
+wrapper around <a href="../../../Audit.html">Audit</a>.as_user.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000021-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000021-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/acts_as_audited.rb, line 269</span>
+269:         <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">audit_as</span>( <span class="ruby-identifier">user</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span> )
+270:           <span class="ruby-constant">Audit</span>.<span class="ruby-identifier">as_user</span>( <span class="ruby-identifier">user</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span> )
+271:         <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000017" class="method-detail">
+        <a name="M000017"></a>
+
+        <div class="method-heading">
+          <a href="#M000017" class="method-signature">
+          <span class="method-name">audited_columns</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns an array of columns that are audited. See non_audited_columns
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000017-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000017-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/acts_as_audited.rb, line 242</span>
+242:         <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">audited_columns</span>
+243:           <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">columns</span>.<span class="ruby-identifier">select</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">c</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">non_audited_columns</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">c</span>.<span class="ruby-identifier">name</span>) }
+244:         <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000019" class="method-detail">
+        <a name="M000019"></a>
+
+        <div class="method-heading">
+          <a href="#M000019" class="method-signature">
+          <span class="method-name">disable_auditing</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000019-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000019-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/acts_as_audited.rb, line 258</span>
+258:         <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">disable_auditing</span>
+259:           <span class="ruby-identifier">write_inheritable_attribute</span> <span class="ruby-identifier">:auditing_enabled</span>, <span class="ruby-keyword kw">false</span>
+260:         <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000020" class="method-detail">
+        <a name="M000020"></a>
+
+        <div class="method-heading">
+          <a href="#M000020" class="method-signature">
+          <span class="method-name">enable_auditing</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000020-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000020-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/acts_as_audited.rb, line 262</span>
+262:         <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">enable_auditing</span>
+263:           <span class="ruby-identifier">write_inheritable_attribute</span> <span class="ruby-identifier">:auditing_enabled</span>, <span class="ruby-keyword kw">true</span>
+264:         <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000018" class="method-detail">
+        <a name="M000018"></a>
+
+        <div class="method-heading">
+          <a href="#M000018" class="method-signature">
+          <span class="method-name">without_auditing</span><span class="method-args">(&amp;block)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Executes the block with auditing disabled.
+</p>
+<pre>
+  Foo.without_auditing do
+    @foo.save
+  end
+</pre>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000018-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000018-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/acts_as_audited.rb, line 252</span>
+252:         <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">without_auditing</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+253:           <span class="ruby-identifier">auditing_was_enabled</span> = <span class="ruby-identifier">auditing_enabled</span>
+254:           <span class="ruby-identifier">disable_auditing</span>
+255:           <span class="ruby-identifier">returning</span>(<span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span>) { <span class="ruby-identifier">enable_auditing</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">auditing_was_enabled</span> }
+256:         <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>
