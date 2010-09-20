@@ -174,6 +174,13 @@ class AuditTest < Test::Unit::TestCase
         STDERR.puts "Thread safety tests cannot be run with SQLite"
       end
     end
+
+    should "return value from yield block" do
+      Audit.as_user(@user.name) do
+        42
+      end.should == 42
+    end
+
   end
 
 end

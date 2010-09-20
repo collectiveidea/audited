@@ -29,9 +29,10 @@ class Audit < ActiveRecord::Base
   def self.as_user(user, &block)
     Thread.current[:acts_as_audited_user] = user
 
-    yield
+    yieldval = yield
 
     Thread.current[:acts_as_audited_user] = nil
+    yieldval
   end
 
   # Allows user to be set to either a string or an ActiveRecord object
