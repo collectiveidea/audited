@@ -24,7 +24,7 @@ module CollectiveIdea
       context "on create" do
         setup { @user = create_user :audit_comment => "Create" }
 
-        should_change 'Audit.count', :by => 1
+        should_change('audit counts', :by => 1) { Audit.count }
 
         should 'create associated audit' do
           @user.audits.count.should == 1
