@@ -75,6 +75,8 @@ module CollectiveIdea #:nodoc:
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled
+          class_inheritable_reader :table
+          class_inheritable_reader :audit_class
           
           if options[:only]
             except = self.column_names - options[:only].flatten.map(&:to_s)
@@ -95,9 +97,24 @@ module CollectiveIdea #:nodoc:
             attr_accessible :audit_comment
           end
 
-          has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
+          t = options[:table] || :audits
+          klass_name = t.to_s.classify
+          unless Object.const_defined? klass_name
+            # create child class
+            klass = Class.new ActiveRecord::Base do
+              include AuditModule
+            end
+            Object.const_set klass_name, klass
+          end
+          k = klass_name.constantize
+
+          write_inheritable_attribute :table, t
+          write_inheritable_attribute :audit_class, k
+
+          has_many t, :as => :auditable, :order => "#{k.quoted_table_name}.version"
+
           attr_protected :audit_ids if options[:protect]
-          Audit.audited_class_names << self.to_s
+          k.audited_class_names << self.to_s
 
           after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
           before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
@@ -113,6 +130,14 @@ module CollectiveIdea #:nodoc:
       end
 
       module InstanceMethods
+        # has_many audits
+        def audit_relation
+          relation = self.class.send(:table)
+          self.send(relation)
+        end
+        def audit_class
+          self.class.audit_class
+        end
 
         # Temporarily turns off auditing while saving.
         def save_without_auditing
@@ -137,20 +162,20 @@ module CollectiveIdea #:nodoc:
         #   end
         #
         def revisions(from_version = 1)
-          audits = self.audits.find(:all, :conditions => ['version >= ?', from_version])
+          audits = self.audit_relation.find(:all, :conditions => ['version >= ?', from_version])
           return [] if audits.empty?
-          revision = self.audits.find_by_version(from_version).revision
-          Audit.reconstruct_attributes(audits) {|attrs| revision.revision_with(attrs) }
+          revision = self.audit_relation.find_by_version(from_version).revision
+          audit_class.reconstruct_attributes(audits) {|attrs| revision.revision_with(attrs) }
         end
 
         # Get a specific revision specified by the version number, or +:previous+
         def revision(version)
-          revision_with Audit.reconstruct_attributes(audits_to(version))
+          revision_with audit_class.reconstruct_attributes(audits_to(version))
         end
 
         def revision_at(date_or_time)
-          audits = self.audits.find(:all, :conditions => ["created_at <= ?", date_or_time])
-          revision_with Audit.reconstruct_attributes(audits) unless audits.empty?
+          audits = self.audit_relation.find(:all, :conditions => ["created_at <= ?", date_or_time])
+          revision_with audit_class.reconstruct_attributes(audits) unless audits.empty?
         end
 
         def audited_attributes
@@ -162,7 +187,7 @@ module CollectiveIdea #:nodoc:
         def revision_with(attributes)
           returning self.dup do |revision|
             revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
-            Audit.assign_revision_attributes(revision, attributes)
+            audit_class.assign_revision_attributes(revision, attributes)
 
             # Remove any association proxies so that they will be recreated
             # and reference the correct object for this revision. The only way
@@ -192,12 +217,12 @@ module CollectiveIdea #:nodoc:
             version = if self.version
               self.version - 1
             else
-              previous = audits.find(:first, :offset => 1,
-                :order => "#{Audit.quoted_table_name}.version DESC")
+              previous = audit_relation.find(:first, :offset => 1,
+                :order => "#{audit_class.quoted_table_name}.version DESC")
               previous ? previous.version : 1
             end
           end
-          audits.find(:all, :conditions => ['version <= ?', version])
+          audit_relation.find(:all, :conditions => ['version <= ?', version])
         end
 
         def audit_create
@@ -219,7 +244,7 @@ module CollectiveIdea #:nodoc:
 
         def write_audit(attrs)
           self.audit_comment = nil
-          self.audits.create attrs if auditing_enabled
+          self.audit_relation.create attrs if auditing_enabled
         end
   
         def require_comment
@@ -268,7 +293,7 @@ module CollectiveIdea #:nodoc:
         # made by +user+. This is not model specific, the method is a
         # convenience wrapper around #Audit.as_user.
         def audit_as( user, &block )
-          Audit.as_user( user, &block )
+          audit_class.as_user( user, &block )
         end
 
       end

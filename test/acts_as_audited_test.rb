@@ -432,6 +432,15 @@ module CollectiveIdea
         end
       end
 
+      context "custom table names" do
+        should "use custom table names if specified" do
+          class AuditProfile < ActiveRecord::Base
+          end
+
+          profile = Profile.create! :email => "edbond@gmail.com"
+          AuditProfile.count.should == 1
+        end
+      end
     end
   end
 end

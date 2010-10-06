@@ -35,6 +35,10 @@ class Company < ActiveRecord::Base
   acts_as_audited
 end
 
+class Profile < ActiveRecord::Base
+  acts_as_audited :table => "audit_profiles"
+end
+
 class OnUpdateDestroy < ActiveRecord::Base
   set_table_name 'companies'
   acts_as_audited :on => [:update, :destroy]

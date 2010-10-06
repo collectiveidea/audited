@@ -1,3 +1,4 @@
+require 'audit_module'
 require 'acts_as_audited/audit'
 require 'acts_as_audited'
 
