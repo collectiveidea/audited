@@ -90,7 +90,7 @@ class AuditTest < Test::Unit::TestCase
 
   context "reconstruct_attributes" do
     should "work with with old way of storing just the new value" do
-      audits = Audit.reconstruct_attributes([Audit.new(:changes => {'attribute' => 'value'})])
+      audits = Audit.reconstruct_attributes([Audit.new(:audited_changes => {'attribute' => 'value'})])
       audits['attribute'].should == 'value'
     end
   end
@@ -113,13 +113,13 @@ class AuditTest < Test::Unit::TestCase
 
   context "new_attributes" do
     should "return a hash of the new values" do
-      Audit.new(:changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
+      Audit.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
     end
   end
 
   context "old_attributes" do
     should "return a hash of the old values" do
-      Audit.new(:changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
+      Audit.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
     end
   end
 

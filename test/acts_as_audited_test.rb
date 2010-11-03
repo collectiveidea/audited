@@ -18,7 +18,7 @@ module CollectiveIdea
       end
 
       should "not save non-audited columns" do
-        create_user.audits.first.changes.keys.any?{|col| ['created_at', 'updated_at', 'password'].include? col}.should be(false)
+        create_user.audits.first.audited_changes.keys.any?{|col| ['created_at', 'updated_at', 'password'].include? col}.should be(false)
       end
       
       context "on create" do
@@ -34,13 +34,13 @@ module CollectiveIdea
         end
 
         should "store all the audited attributes" do
-          @user.audits.first.changes.should == @user.audited_attributes
+          @user.audits.first.audited_changes.should == @user.audited_attributes
         end
 
         
         should "not audit an attribute which is excepted if specified on create and on destroy" do
           on_create_destroy_except_name = OnCreateDestroyExceptName.create(:name => 'Bart')
-          on_create_destroy_except_name.audits.first.changes.keys.any?{|col| ['name'].include? col}.should be(false)
+          on_create_destroy_except_name.audits.first.audited_changes.keys.any?{|col| ['name'].include? col}.should be(false)
         end
 
    
@@ -75,7 +75,7 @@ module CollectiveIdea
 
         should "store the changed attributes" do
           @user.update_attributes :name => 'Changed'
-          @user.audits.last.changes.should == {'name' => ['Brandon', 'Changed']}
+          @user.audits.last.audited_changes.should == {'name' => ['Brandon', 'Changed']}
         end
 
         should "store audit comment" do
@@ -115,7 +115,7 @@ module CollectiveIdea
 
         should "store all of the audited attributes" do
           @user.destroy
-          @user.audits.last.changes.should == @user.audited_attributes
+          @user.audits.last.audited_changes.should == @user.audited_attributes
         end
 
         should "be able to reconstruct destroyed record without history" do
@@ -216,7 +216,7 @@ module CollectiveIdea
         end
 
         should "ignore attributes that have been deleted" do
-          @user.audits.last.update_attributes :changes => {:old_attribute => 'old value'}
+          @user.audits.last.update_attributes :audited_changes => {:old_attribute => 'old value'}
           lambda { @user.revisions }.should_not raise_error
         end
 

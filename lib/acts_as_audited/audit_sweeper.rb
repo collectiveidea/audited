@@ -20,6 +20,7 @@ module CollectiveIdea #:nodoc:
 end
 
 class AuditSweeper < ActionController::Caching::Sweeper #:nodoc:
+  observe Audit
 
   cattr_accessor :current_user_method
   self.current_user_method = :current_user
@@ -37,4 +38,3 @@ ActionController::Base.class_eval do
   extend CollectiveIdea::ActionController::Audited
   cache_sweeper :audit_sweeper
 end
-Audit.add_observer(AuditSweeper.instance)

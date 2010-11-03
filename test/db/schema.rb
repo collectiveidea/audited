@@ -21,7 +21,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :user_type, :string
     t.column :username, :string
     t.column :action, :string
-    t.column :changes, :text
+    t.column :audited_changes, :text
     t.column :version, :integer, :default => 0
     t.column :comment, :string
     t.column :created_at, :datetime
