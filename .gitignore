@@ -1,5 +1,5 @@
 acts_as_audited_plugin.sqlite3.db
-spec/debug.log
+*.log
 doc/
 coverage/
 pkg
