@@ -75,7 +75,7 @@ module CollectiveIdea #:nodoc:
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled
-          
+
           if options[:only]
             except = self.column_names - options[:only].flatten.map(&:to_s)
           else
@@ -160,8 +160,9 @@ module CollectiveIdea #:nodoc:
         protected
 
         def revision_with(attributes)
-          returning self.dup do |revision|
+          self.dup.tap do |revision|
             revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
+            revision.send :instance_variable_set, '@new_record', false unless self.destroyed?
             Audit.assign_revision_attributes(revision, attributes)
 
             # Remove any association proxies so that they will be recreated
@@ -201,13 +202,13 @@ module CollectiveIdea #:nodoc:
         end
 
         def audit_create
-          write_audit(:action => 'create', :audited_changes => audited_attributes, 
+          write_audit(:action => 'create', :audited_changes => audited_attributes,
             :comment => audit_comment)
         end
 
         def audit_update
           unless (changes = audited_changes).empty?
-            write_audit(:action => 'update', :audited_changes => changes, 
+            write_audit(:action => 'update', :audited_changes => changes,
               :comment => audit_comment)
           end
         end
@@ -221,7 +222,7 @@ module CollectiveIdea #:nodoc:
           self.audit_comment = nil
           self.audits.create attrs if auditing_enabled
         end
-  
+
         def require_comment
           if audit_comment.blank?
             errors.add(:audit_comment, "Comment required before destruction")
@@ -253,7 +254,7 @@ module CollectiveIdea #:nodoc:
         def without_auditing(&block)
           auditing_was_enabled = auditing_enabled
           disable_auditing
-          returning(block.call) { enable_auditing if auditing_was_enabled }
+          block.call.tap { enable_auditing if auditing_was_enabled }
         end
 
         def disable_auditing
@@ -274,4 +275,12 @@ module CollectiveIdea #:nodoc:
       end
     end
   end
+end
+
+require 'acts_as_audited/audit'
+
+ActiveRecord::Base.send :include, CollectiveIdea::Acts::Audited
+
+if defined?(ActionController) and defined?(ActionController::Base)
+  require 'acts_as_audited/audit_sweeper'
 end
