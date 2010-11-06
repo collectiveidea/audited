@@ -3,3 +3,5 @@ test/debug.log
 doc/
 coverage/
 pkg
+*.swp
+.bundle
