@@ -1,0 +1,21 @@
+sqlite:
+  adapter: sqlite
+  database: acts_as_audited_plugin.sqlite.db
+sqlite3mem:
+  adapter: sqlite3
+  database: ":memory:"
+sqlite3:
+  adapter: sqlite3
+  database: acts_as_audited_plugin.sqlite3.db
+postgresql:
+  adapter: postgresql
+  username: postgres
+  password: postgres
+  database: acts_as_audited_plugin_test
+  min_messages: ERROR
+mysql:
+  adapter: mysql
+  host: localhost
+  username: root
+  password:
+  database: acts_as_audited_plugin_test

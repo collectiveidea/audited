@@ -1,10 +1,10 @@
 require 'rake'
-require 'load_multi_rails_rake_tasks'
-require 'rake/testtask'
+require 'rspec/core/rake_task'
+
 require 'rake/rdoctask'
 
-desc 'Default: run tests.'
-task :default => :test
+desc 'Default: run specs'
+task :default => :spec
 
 begin
   require 'jeweler'
@@ -16,9 +16,8 @@ begin
     gem.authors = ["Brandon Keepers"]
     gem.rdoc_options << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
 
-    gem.add_dependency 'activerecord', '>=2.1'
-    gem.add_development_dependency "thoughtbot-shoulda"
-    gem.add_development_dependency "jnunemaker-matchy"
+    gem.add_dependency 'activerecord', '~> 3.0.0'
+    gem.add_development_dependency "rspec", '~> 2.0.0'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   # Jeweler::GemcutterTasks.new
@@ -26,27 +25,15 @@ rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
 end
 
-desc 'Test the acts_as_audited plugin'
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.pattern = 'test/**/*_test.rb'
-  t.verbose = true
+RSpec::Core::RakeTask.new do |t|
+  t.rspec_opts = ["-c", "-f progress", "-r ./spec/spec_helper.rb"]
+  t.pattern = 'spec/*_spec.rb'
 end
 
-task :test => :check_dependencies
+task :spec => :check_dependencies
 
-begin
-  require 'rcov/rcovtask'
-  Rcov::RcovTask.new do |test|
-    test.libs << 'test'
-    test.pattern = 'test/**/*_test.rb'
-    test.verbose = true
-    test.rcov_opts = %w(--exclude test,/usr/lib/ruby,/Library/Ruby,$HOME/.gem --sort coverage)
-  end
-rescue LoadError
-  task :rcov do
-    abort "RCov is not available. In order to run rcov, you must: sudo gem install spicycode-rcov"
-  end
+RSpec::Core::RakeTask.new(:rcov) do |t|
+  t.rcov_opts =  %q[--exclude "spec"]
 end
 
 desc 'Generate documentation for the acts_as_audited plugin.'
