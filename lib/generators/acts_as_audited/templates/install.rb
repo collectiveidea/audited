@@ -1,4 +1,4 @@
-class <%= class_name %> < ActiveRecord::Migration
+class AddAuditsTable < ActiveRecord::Migration
   def self.up
     create_table :audits, :force => true do |t|
       t.column :auditable_id, :integer
@@ -12,10 +12,10 @@ class <%= class_name %> < ActiveRecord::Migration
       t.column :comment, :string
       t.column :created_at, :datetime
     end
-    
+
     add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
     add_index :audits, [:user_id, :user_type], :name => 'user_index'
-    add_index :audits, :created_at  
+    add_index :audits, :created_at
   end
 
   def self.down

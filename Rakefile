@@ -1,10 +1,10 @@
 require 'rake'
 require 'rspec/core/rake_task'
-
+require 'rake/testtask'
 require 'rake/rdoctask'
 
-desc 'Default: run specs'
-task :default => :spec
+desc 'Default: run specs and tests'
+task :default => [:spec, :test]
 
 begin
   require 'jeweler'
@@ -35,6 +35,16 @@ task :spec => :check_dependencies
 RSpec::Core::RakeTask.new(:rcov) do |t|
   t.rcov_opts =  %q[--exclude "spec"]
 end
+
+desc 'Test the acts_as_audited generators'
+Rake::TestTask.new(:test) do |t|
+  t.libs << 'lib'
+  t.libs << 'test'
+  t.pattern = 'test/*_test.rb'
+  t.verbose = true
+end
+
+task :test => :check_dependencies
 
 desc 'Generate documentation for the acts_as_audited plugin.'
 Rake::RDocTask.new(:rdoc) do |rdoc|
