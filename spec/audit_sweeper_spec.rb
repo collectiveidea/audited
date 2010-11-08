@@ -21,7 +21,7 @@ describe AuditsController do
   include RSpec::Rails::ControllerExampleGroup
 
   before(:each) do
-    AuditSweeper.current_user_method = :current_user
+    ActsAsAudited.current_user_method = :current_user
   end
 
   let( :user ) { create_user }
@@ -40,7 +40,7 @@ describe AuditsController do
 
     it "should support custom users for sweepers" do
       controller.send(:custom_user=, user)
-      AuditSweeper.current_user_method = :custom_user
+      ActsAsAudited.current_user_method = :custom_user
 
       expect {
         post :audit

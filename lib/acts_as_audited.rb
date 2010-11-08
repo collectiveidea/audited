@@ -23,6 +23,10 @@ require 'active_record'
 
 module ActsAsAudited
   VERSION = '2.0.0.rc1'
+
+  # The method to be called to return the current user for logging in the audits. :current_user by default
+  mattr_accessor :current_user_method
+  @@current_user_method = :current_user
 end
 
 require 'acts_as_audited/auditor'
