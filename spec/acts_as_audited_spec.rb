@@ -1,14 +1,14 @@
 require 'spec_helper'
 
-describe CollectiveIdea::Acts::Audited do
+describe ActsAsAudited::Auditor do
 
   describe "configuration" do
     it "should include instance methods" do
-      User.new.should be_a_kind_of( CollectiveIdea::Acts::Audited::InstanceMethods )
+      User.new.should be_a_kind_of( ActsAsAudited::Auditor::InstanceMethods )
     end
 
     it "should include class methods" do
-      User.should be_a_kind_of( CollectiveIdea::Acts::Audited::SingletonMethods )
+      User.should be_a_kind_of( ActsAsAudited::Auditor::SingletonMethods )
     end
 
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
