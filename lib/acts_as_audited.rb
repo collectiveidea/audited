@@ -23,7 +23,7 @@ require 'active_record'
 
 # To get started, please review ActsAsAudited::Auditor::ClassMethods#acts_as_audited
 module ActsAsAudited
-  VERSION = '2.0.0.rc1'
+  VERSION = '2.0.0.rc2'
 
   mattr_accessor :current_user_method
   # The method to be called to return the current user for logging in the audits.

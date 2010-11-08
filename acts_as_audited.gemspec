@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{acts_as_audited}
-  s.version = "2.0.0.rc1"
+  s.version = "2.0.0.rc2"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brandon Keepers"]
@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
      "lib/acts_as_audited/auditor.rb",
      "lib/generators/acts_as_audited/install_generator.rb",
      "lib/generators/acts_as_audited/templates/add_comment_to_audits.rb",
+     "lib/generators/acts_as_audited/templates/add_remote_address_to_audits.rb",
      "lib/generators/acts_as_audited/templates/install.rb",
      "lib/generators/acts_as_audited/templates/rename_changes_to_audited_changes.rb",
      "lib/generators/acts_as_audited/upgrade_generator.rb",
@@ -55,6 +56,7 @@ Gem::Specification.new do |s|
      "spec/spec_models.rb",
      "test/db/version_1.rb",
      "test/db/version_2.rb",
+     "test/db/version_3.rb",
      "test/install_generator_test.rb",
      "test/test_helper.rb",
      "test/upgrade_generator_test.rb"
@@ -84,6 +86,7 @@ Gem::Specification.new do |s|
      "spec/spec_models.rb",
      "test/db/version_1.rb",
      "test/db/version_2.rb",
+     "test/db/version_3.rb",
      "test/install_generator_test.rb",
      "test/test_helper.rb",
      "test/upgrade_generator_test.rb"
