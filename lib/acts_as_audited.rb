@@ -21,14 +21,21 @@
 
 require 'active_record'
 
+module ActsAsAudited
+  VERSION = '2.0.0.rc1'
+end
+
 require 'acts_as_audited/auditor'
 require 'acts_as_audited/audit'
-require 'acts_as_audited/audit_sweeper'
 
 ActiveRecord::Base.send :include, ActsAsAudited::Auditor
 
 if defined?(ActionController) and defined?(ActionController::Base)
+
+  require 'acts_as_audited/audit_sweeper'
+
   ActionController::Base.class_eval do
     cache_sweeper :audit_sweeper
   end
+
 end

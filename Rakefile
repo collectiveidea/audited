@@ -3,6 +3,10 @@ require 'rspec/core/rake_task'
 require 'rake/testtask'
 require 'rake/rdoctask'
 
+$:.unshift File.expand_path('../lib', __FILE__)
+
+require 'acts_as_audited'
+
 desc 'Default: run specs and tests'
 task :default => [:spec, :test]
 
@@ -15,9 +19,11 @@ begin
     gem.homepage = "http://github.com/collectiveidea/acts_as_audited"
     gem.authors = ["Brandon Keepers"]
     gem.rdoc_options << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
+    gem.version = ActsAsAudited::VERSION
 
     gem.add_dependency 'activerecord', '~> 3.0.0'
-    gem.add_development_dependency "rspec", '~> 2.0.0'
+    gem.add_development_dependency "rails", '~> 3.0.1'
+    gem.add_development_dependency "rspec-rails", '~> 2.0.0'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   # Jeweler::GemcutterTasks.new
