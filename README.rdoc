@@ -3,13 +3,13 @@
 +acts_as_audited+ is an ActiveRecord extension that logs all changes to your 
 models in an audits table, with optional revision comments. +acts_as_audited+
 has been updated to work with Rails 3, to use it with older version of Rails,
-please see the rails2 branch.
+please see the <tt>rails2</tt> branch.
 
 == Installation
 
 In <tt>Gemfile</tt>:
 
-    gem "acts_as_audited"
+    gem "acts_as_audited", "2.0.0.rc1"
 
 In your application root, run:
 
@@ -28,6 +28,14 @@ Generate the migration:
 * After running one of the generators:
 
     $ rake db:migrate
+
+== Upgrading
+
+Upgrading to Rails 3, or even between point releases of +acts_as_audited+, might require alterations to the audits table. After every upgrade please run the following generator:
+
+    $ rails g acts_as_audited:upgrade
+
+The upgrade generator will only generate migrations that are missing, or no migrations at all if you are up to date.
 
 == Usage
 
@@ -59,17 +67,17 @@ If your model declares +attr_accessible+ after +acts_as_audited+, you need to se
 
 == Compatability
 
-+acts_as_audited+ works with Rails 3.0.0 or later.
++acts_as_audited+ works with Rails 3.0.0 or later. For older versions of Rails, please see the <tt>rails2</tt> branch.
 
 == Getting Help
 
-Join the mailing list for getting help or offering suggestions:
-  http://groups.google.com/group/acts_as_audited
+Review the documentation at http://rdoc.info/github/collectiveidea/acts_as_audited
+
+Join the mailing list for getting help or offering suggestions - http://groups.google.com/group/acts_as_audited
 
 == Contributing
 
-Contributions are always welcome. Checkout the latest code on GitHub:
-  http://github.com/collectiveidea/acts_as_audited
+Contributions are always welcome. Checkout the latest code on GitHub - http://github.com/collectiveidea/acts_as_audited
 
 Please include tests with your patches. There are a few gems required to run the tests:
 
@@ -79,5 +87,4 @@ Make sure the tests pass against the version of Rails specified in the Gemfile
 
   $ rake spec test
 
-Please report bugs or feature suggestions on GitHub:
-  http://github.com/collectiveidea/acts_as_audited/issues
+Please report bugs or feature suggestions on GitHub - http://github.com/collectiveidea/acts_as_audited/issues

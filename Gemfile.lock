@@ -79,6 +79,7 @@ GEM
     treetop (1.4.8)
       polyglot (>= 0.3.1)
     tzinfo (0.3.23)
+    yard (0.6.1)
 
 PLATFORMS
   ruby
@@ -88,3 +89,4 @@ DEPENDENCIES
   rcov
   rspec-rails (= 2.0.1)
   sqlite3-ruby
+  yard

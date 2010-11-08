@@ -1,7 +1,6 @@
 require 'rake'
 require 'rspec/core/rake_task'
 require 'rake/testtask'
-require 'rake/rdoctask'
 
 $:.unshift File.expand_path('../lib', __FILE__)
 
@@ -28,7 +27,7 @@ begin
   end
   # Jeweler::GemcutterTasks.new
 rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
+  puts "Jeweler (or a dependency) not available. Install it with: bundle install"
 end
 
 RSpec::Core::RakeTask.new do |t|
@@ -53,11 +52,10 @@ end
 
 task :test => :check_dependencies
 
-desc 'Generate documentation for the acts_as_audited plugin.'
-Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'doc'
-  rdoc.title    = 'acts_as_audited'
-  rdoc.options << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
-  rdoc.rdoc_files.include('README.rdoc')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+begin
+  require 'yard'
+  YARD::Rake::YardocTask.new
+rescue LoadError
+  puts "YARD (or a dependency) not available. Install it with: bundle install"
 end
+

@@ -14,7 +14,8 @@ module ActsAsAudited
   module Auditor #:nodoc:
     CALLBACKS = [:audit_create, :audit_update, :audit_destroy]
 
-    def self.included(base) # :nodoc:
+    # @private
+    def self.included(base)
       base.extend ClassMethods
     end
 
@@ -126,11 +127,13 @@ module ActsAsAudited
         revision_with Audit.reconstruct_attributes(audits_to(version))
       end
 
+      # Find the oldest revision recorded prior to the date/time provided.
       def revision_at(date_or_time)
         audits = self.audits.find(:all, :conditions => ["created_at <= ?", date_or_time])
         revision_with Audit.reconstruct_attributes(audits) unless audits.empty?
       end
 
+      # List of attributes that are audited.
       def audited_attributes
         attributes.except(*non_audited_columns)
       end
@@ -235,17 +238,20 @@ module ActsAsAudited
         block.call.tap { enable_auditing if auditing_was_enabled }
       end
 
+      # Disable auditing.
       def disable_auditing
         write_inheritable_attribute :auditing_enabled, false
       end
 
+      # Enable auditing.
       def enable_auditing
         write_inheritable_attribute :auditing_enabled, true
       end
 
       # All audit operations during the block are recorded as being
       # made by +user+. This is not model specific, the method is a
-      # convenience wrapper around #Audit.as_user.
+      # convenience wrapper around
+      # @see Audit#as_user.
       def audit_as( user, &block )
         Audit.as_user( user, &block )
       end

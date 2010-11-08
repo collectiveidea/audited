@@ -1,4 +1,5 @@
-class AuditSweeper < ActionController::Caching::Sweeper #:nodoc:
+# @private
+class AuditSweeper < ActionController::Caching::Sweeper
   observe Audit
 
   def before_create(audit)

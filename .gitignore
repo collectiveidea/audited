@@ -6,3 +6,4 @@ pkg
 *.swp
 .bundle
 tmp/*
+.yardoc
