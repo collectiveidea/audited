@@ -39,6 +39,10 @@ module ActsAsAudited
         if columns.include?( 'changes' )
           yield :rename_changes_to_audited_changes
         end
+
+        unless columns.include?( 'remote_address' )
+          yield :add_remote_address_to_audits
+        end
       end
     end
   end

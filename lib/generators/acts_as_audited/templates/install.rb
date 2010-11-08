@@ -10,6 +10,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration
       t.column :audited_changes, :text
       t.column :version, :integer, :default => 0
       t.column :comment, :string
+      t.column :remote_address, :string
       t.column :created_at, :datetime
     end
 

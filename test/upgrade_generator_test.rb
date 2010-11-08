@@ -30,4 +30,14 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
       assert_match /rename_column :audits, :changes, :audited_changes/, content
     end
   end
+
+  test "should add a 'remote_address' to audits table" do
+    load_schema 3
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/add_remote_address_to_audits.rb" do |content|
+      assert_match /add_column :audits, :remote_address, :string/, content
+    end
+  end
 end

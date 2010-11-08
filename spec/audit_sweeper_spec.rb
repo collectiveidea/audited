@@ -48,6 +48,16 @@ describe AuditsController do
 
       assigns(:company).audits.last.user.should == user
     end
+
+    it "should record the remote address responsible for the change" do
+      request.env['REMOTE_ADDR'] = "1.2.3.4"
+      controller.send(:current_user=, user)
+
+      post :audit
+
+      assigns(:company).audits.last.remote_address.should == '1.2.3.4'
+    end
+
   end
 
   describe "POST update_user" do
@@ -59,5 +69,6 @@ describe AuditsController do
         post :update_user
       }.to_not change( Audit, :count )
     end
+
   end
 end
