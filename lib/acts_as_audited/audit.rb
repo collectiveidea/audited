@@ -33,9 +33,11 @@ class Audit < ActiveRecord::Base
     def as_user(user, &block)
       Thread.current[:acts_as_audited_user] = user
 
-      yield
+      yieldval = yield
 
       Thread.current[:acts_as_audited_user] = nil
+
+      yieldval
     end
 
     # @private

@@ -178,6 +178,13 @@ describe Audit do
         STDERR.puts "Thread safety tests cannot be run with SQLite"
       end
     end
+
+    it "should return the value from the yield block" do
+      Audit.as_user('foo') do
+        42
+      end.should == 42
+    end
+
   end
 
 end
