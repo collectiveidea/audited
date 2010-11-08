@@ -58,6 +58,8 @@ If your model declares +attr_accessible+ after +acts_as_audited+, you need to se
     attr_accessible :name
   end
 
+Another caveat is documented in issue 26[https://github.com/collectiveidea/acts_as_audited/issues#issue/26], where an audit created on the first request to the server does not have a user. Please review the Github issue for more details on how to fix this. It does not appear to affect Rails 3.
+
 == Compatability
 
 +acts_as_audited+ works with Rails 2.1 or later.
