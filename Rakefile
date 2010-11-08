@@ -39,6 +39,7 @@ end
 task :spec => :check_dependencies
 
 RSpec::Core::RakeTask.new(:rcov) do |t|
+  t.rcov = true
   t.rcov_opts =  %q[--exclude "spec"]
 end
 

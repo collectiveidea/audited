@@ -61,6 +61,7 @@ GEM
       rake (>= 0.8.4)
       thor (~> 0.14.0)
     rake (0.8.7)
+    rcov (0.9.9)
     rspec (2.0.1)
       rspec-core (~> 2.0.1)
       rspec-expectations (~> 2.0.1)
@@ -84,5 +85,6 @@ PLATFORMS
 
 DEPENDENCIES
   rails (= 3.0.1)
+  rcov
   rspec-rails (= 2.0.1)
   sqlite3-ruby
