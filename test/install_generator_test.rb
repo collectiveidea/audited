@@ -10,6 +10,8 @@ class InstallGeneratorTest < Rails::Generators::TestCase
   test "should generate a migration" do
     run_generator %w(install)
 
-    assert_migration "db/migrate/install_acts_as_audited.rb"
+    assert_migration "db/migrate/install_acts_as_audited.rb" do |content|
+      assert_match /class InstallActsAsAudited/, content
+    end
   end
 end
