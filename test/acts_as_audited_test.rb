@@ -341,6 +341,12 @@ module CollectiveIdea
           should "not validate when audit_comment is not supplied" do
             CommentRequiredUser.new.valid?.should == false
           end
+
+          should "validate when audit_comment is not supplied, but auditing is disabled" do
+            CommentRequiredUser.disable_auditing
+            CommentRequiredUser.new.valid?.should == true
+            CommentRequiredUser.enable_auditing
+          end
          
           should "validate when audit_comment is supplied" do
             CommentRequiredUser.new(:audit_comment => "Create").valid?.should == true
@@ -351,8 +357,15 @@ module CollectiveIdea
           setup do
             @user = CommentRequiredUser.create(:audit_comment => "Create")
           end
+          
           should "not validate when audit_comment is not supplied" do
             @user.update_attributes(:name => "Test").should == false
+          end
+          
+          should "validate when audit_comment is not supplied, but auditing is disabled" do
+            CommentRequiredUser.disable_auditing
+            @user.update_attributes(:name => "Test").should == true
+            CommentRequiredUser.enable_auditing
           end
          
           should "validate when audit_comment is supplied" do
@@ -369,13 +382,18 @@ module CollectiveIdea
           should "not validate when audit_comment is unset" do
             @user.destroy.should == false
           end
+
+          should "validate when audit_comment is not supplied, but auditing is disabled" do
+            CommentRequiredUser.disable_auditing
+            @user.destroy.should == @user
+            CommentRequiredUser.enable_auditing
+          end
          
           should "validate when audit_comment is supplied" do
             @user.audit_comment = "Destroy"
             @user.destroy.should == @user
           end
         end
-
       end
 
       context "attr_protected and attr_accessible" do
