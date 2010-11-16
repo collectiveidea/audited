@@ -84,13 +84,9 @@ module CollectiveIdea #:nodoc:
             except |= Array(options[:except]).collect(&:to_s) if options[:except]
           end
           write_inheritable_attribute :non_audited_columns, except
-
-          if options[:comment_required]
-            validates_presence_of :audit_comment, :if => :auditing_enabled
-            before_destroy :require_comment
-          end
-
-          attr_accessor :audit_comment
+          
+          add_comment_required(options)
+          
           unless accessible_attributes.nil? || options[:protect]
             attr_accessible :audit_comment
           end
@@ -130,6 +126,18 @@ module CollectiveIdea #:nodoc:
           include CollectiveIdea::Acts::Audited::InstanceMethods
 
           write_inheritable_attribute :auditing_enabled, true
+        end
+        
+        def add_comment_required(options)
+          if options[:comment_required]
+            validation_method_condition = options[:on] ? (options[:on]-[:create] == [] ? :create : (options[:on]-[:update] == [] ? :update : :save)) : :save
+            validates_presence_of :audit_comment, 
+                                  :on => validation_method_condition,
+                                  :if => Proc.new{|model| auditing_enabled && (model.new_record? || !(model.changes.keys - non_audited_columns).empty?)}
+            before_destroy :require_comment
+          end
+
+          attr_accessor :audit_comment
         end
       end
 

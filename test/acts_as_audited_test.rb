@@ -337,6 +337,11 @@ module CollectiveIdea
           acts_as_audited :comment_required => true
         end
     
+        class CommentRequiredUserOnUpdate < ActiveRecord::Base
+          set_table_name :users
+          acts_as_audited :comment_required => true, :only => [:name], :on => [:update]
+        end
+    
         context "on create" do
           should "not validate when audit_comment is not supplied" do
             CommentRequiredUser.new.valid?.should == false
@@ -350,6 +355,10 @@ module CollectiveIdea
          
           should "validate when audit_comment is supplied" do
             CommentRequiredUser.new(:audit_comment => "Create").valid?.should == true
+          end
+          
+          should "validate when comment is required, but only on update" do
+            CommentRequiredUserOnUpdate.new.valid?.should == true
           end
         end
         
@@ -372,6 +381,20 @@ module CollectiveIdea
             @user.update_attributes(:name => "foo", :audit_comment => "Update").should == true
           end
           
+          should "not validate when comment is required, but only on update" do
+            user = CommentRequiredUserOnUpdate.create
+            user.update_attributes(:name => "foo").should == false
+          end
+
+          should "validate when comment is required, but only on update and audit_comment is supplied" do
+            user = CommentRequiredUserOnUpdate.create
+            user.update_attributes(:name => "foo", :audit_comment => "Update").should == true
+          end
+
+          should "validate when comment is required, but only on updation of specified attributes" do
+            user = CommentRequiredUserOnUpdate.create
+            user.update_attributes(:username => "foouser").should == true
+          end
         end
 
         context "on destroy" do
