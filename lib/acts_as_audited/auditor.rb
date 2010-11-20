@@ -82,7 +82,7 @@ module ActsAsAudited
 
         after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
-        after_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
+        before_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
 
         attr_accessor :version
 
