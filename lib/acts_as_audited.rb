@@ -126,6 +126,7 @@ module CollectiveIdea #:nodoc:
           include CollectiveIdea::Acts::Audited::InstanceMethods
 
           write_inheritable_attribute :auditing_enabled, true
+          define_callbacks :after_audit
         end
         
         def add_comment_required(options)
@@ -257,7 +258,10 @@ module CollectiveIdea #:nodoc:
 
         def write_audit(attrs)
           self.audit_comment = nil
-          self.audits.create attrs if auditing_enabled
+          if auditing_enabled
+            self.audits.create attrs
+            run_callbacks(:after_audit)
+          end
         end
   
         def require_comment
