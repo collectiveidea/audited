@@ -88,3 +88,8 @@ Make sure the tests pass against the version of Rails specified in the Gemfile
   $ rake spec test
 
 Please report bugs or feature suggestions on GitHub - http://github.com/collectiveidea/acts_as_audited/issues
+
+== My Fork
+
+This fork was created to merge the associated audits feature from http://github.com/celect/acts_as_audited into the primary Rails 3 branch
+at http://github.com/collectiveidea/acts_as_audited.
