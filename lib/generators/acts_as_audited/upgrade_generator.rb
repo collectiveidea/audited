@@ -43,6 +43,14 @@ module ActsAsAudited
         unless columns.include?( 'remote_address' )
           yield :add_remote_address_to_audits
         end
+
+        unless columns.include?( 'association_id' )
+          if columns.include?('auditable_parent_id')
+            yield :rename_parent_to_association
+          else
+            yield :add_association_to_audits
+          end
+        end
       end
     end
   end
