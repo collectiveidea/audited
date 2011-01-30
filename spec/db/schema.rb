@@ -12,11 +12,14 @@ ActiveRecord::Schema.define(:version => 0) do
 
   create_table :companies, :force => true do |t|
     t.column :name, :string
+    t.column :owner_id, :integer
   end
 
   create_table :audits, :force => true do |t|
     t.column :auditable_id, :integer
     t.column :auditable_type, :string
+    t.column :association_id, :integer
+    t.column :association_type, :string
     t.column :user_id, :integer
     t.column :user_type, :string
     t.column :username, :string

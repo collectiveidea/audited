@@ -54,6 +54,7 @@ module ActsAsAudited
 
         class_inheritable_reader :non_audited_columns
         class_inheritable_reader :auditing_enabled
+        class_inheritable_reader :audit_associated_with
 
         if options[:only]
           except = self.column_names - options[:only].flatten.map(&:to_s)
@@ -63,6 +64,7 @@ module ActsAsAudited
           except |= Array(options[:except]).collect(&:to_s) if options[:except]
         end
         write_inheritable_attribute :non_audited_columns, except
+        write_inheritable_attribute :audit_associated_with, options[:associated_with]
 
         if options[:comment_required]
           validates_presence_of :audit_comment
@@ -89,6 +91,11 @@ module ActsAsAudited
 
         write_inheritable_attribute :auditing_enabled, true
       end
+
+      def has_associated_audits
+        has_many :associated_audits, :as => :association, :class_name => "Audit", :order => "created_at DESC"
+      end
+
     end
 
     module InstanceMethods
@@ -200,6 +207,7 @@ module ActsAsAudited
       end
 
       def write_audit(attrs)
+        attrs[:association] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
         self.audits.create attrs if auditing_enabled
       end
