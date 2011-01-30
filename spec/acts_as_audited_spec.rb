@@ -171,9 +171,6 @@ describe ActsAsAudited::Auditor do
 
   describe "has associated audits" do
     
-    # let(:owner) { Owner.create(:name => 'Owner') }
-    # let(:owned_company) { OwnedCompany.create(:name => 'The auditors', :owner => owner) }
-    
     it "should list the associated audits" do
       owner = Owner.create!(:name => 'Owner')
       owned_company = OwnedCompany.create!(:name => 'The auditors', :owner => owner)
