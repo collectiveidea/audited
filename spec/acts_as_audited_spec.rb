@@ -171,16 +171,15 @@ describe ActsAsAudited::Auditor do
 
   describe "has associated audits" do
     
+    let!(:owner) { Owner.create!(:name => 'Owner') }
+    let!(:owned_company) { OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
+    
     it "should list the associated audits" do
-      owner = Owner.create!(:name => 'Owner')
-      owned_company = OwnedCompany.create!(:name => 'The auditors', :owner => owner)
       owner.associated_audits.length.should == 1
       owner.associated_audits.first.auditable.should == owned_company
     end
 
     it "should list the associated audits from most recent to least recent" do
-      owner = Owner.create!(:name => 'Owner')
-      owned_company = OwnedCompany.create!(:name => 'The auditors', :owner => owner)
       sleep 1 # or else the create and destroy have the same time in sqlite
       owned_company.destroy
       owner.associated_audits.length.should == 2
