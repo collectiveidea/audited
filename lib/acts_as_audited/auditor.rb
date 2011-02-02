@@ -50,7 +50,7 @@ module ActsAsAudited
         # don't allow multiple calls
         return if self.included_modules.include?(ActsAsAudited::Auditor::InstanceMethods)
 
-        options = {:protect => accessible_attributes.nil?}.merge(options)
+        options = {:protect => accessible_attributes.empty?}.merge(options)
 
         class_inheritable_reader :non_audited_columns
         class_inheritable_reader :auditing_enabled
@@ -70,7 +70,7 @@ module ActsAsAudited
         end
 
         attr_accessor :audit_comment
-        unless accessible_attributes.nil? || options[:protect]
+        unless accessible_attributes.empty? || options[:protect]
           attr_accessible :audit_comment
         end
 
@@ -80,7 +80,7 @@ module ActsAsAudited
 
         after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
-        after_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
+        before_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
 
         attr_accessor :version
 
