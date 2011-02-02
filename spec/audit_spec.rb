@@ -86,7 +86,7 @@ describe Audit do
     user.audits(true).first.version.should be(1)
     user.audits(true).last.version.should be(2)
     user.destroy
-    user.audits(true).last.version.should be(3)
+    Audit.where(:auditable_type => 'User', :auditable_id => user.id).last.version.should be(3)
   end
 
   describe "reconstruct_attributes" do

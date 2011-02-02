@@ -74,7 +74,7 @@ module ActsAsAudited
           attr_accessible :audit_comment
         end
 
-        has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
+        has_many :audits, :as => :auditable
         attr_protected :audit_ids if options[:protect]
         Audit.audited_class_names << self.to_s
 
@@ -116,7 +116,7 @@ module ActsAsAudited
       #   end
       #
       def revisions(from_version = 1)
-        audits = self.audits.find(:all, :conditions => ['version >= ?', from_version])
+        audits = self.audits.where(['version >= ?', from_version])
         return [] if audits.empty?
         revision = self.audits.find_by_version(from_version).revision
         Audit.reconstruct_attributes(audits) {|attrs| revision.revision_with(attrs) }
@@ -129,7 +129,7 @@ module ActsAsAudited
 
       # Find the oldest revision recorded prior to the date/time provided.
       def revision_at(date_or_time)
-        audits = self.audits.find(:all, :conditions => ["created_at <= ?", date_or_time])
+        audits = self.audits.where("created_at <= ?", date_or_time)
         revision_with Audit.reconstruct_attributes(audits) unless audits.empty?
       end
 
@@ -143,7 +143,10 @@ module ActsAsAudited
       def revision_with(attributes)
         self.dup.tap do |revision|
           revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
-          revision.send :instance_variable_set, '@new_record', false unless self.destroyed?
+          revision.send :instance_variable_set, '@persisted', !self.destroyed?
+          revision.send :instance_variable_set, '@readonly', false
+          revision.send :instance_variable_set, '@destroyed', false
+          revision.send :instance_variable_set, '@marked_for_destruction', false
           Audit.assign_revision_attributes(revision, attributes)
 
           # Remove any association proxies so that they will be recreated
@@ -174,12 +177,11 @@ module ActsAsAudited
           version = if self.version
             self.version - 1
           else
-            previous = audits.find(:first, :offset => 1,
-              :order => "#{Audit.quoted_table_name}.version DESC")
+            previous = audits.descending.offset(1).first
             previous ? previous.version : 1
           end
         end
-        audits.find(:all, :conditions => ['version <= ?', version])
+        audits.where(['version <= ?', version])
       end
 
       def audit_create
