@@ -9,7 +9,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
   end
-  
+
   create_table :companies, :force => true do |t|
     t.column :name, :string
   end
@@ -24,10 +24,11 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :audited_changes, :text
     t.column :version, :integer, :default => 0
     t.column :comment, :string
+    t.column :remote_address, :string
     t.column :created_at, :datetime
   end
-  
+
   add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
   add_index :audits, [:user_id, :user_type], :name => 'user_index'
-  add_index :audits, :created_at  
+  add_index :audits, :created_at
 end
