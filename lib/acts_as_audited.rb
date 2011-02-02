@@ -19,6 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+require 'active_support/core_ext/module'
 require 'active_record'
 
 # To get started, please review ActsAsAudited::Auditor::ClassMethods#acts_as_audited
