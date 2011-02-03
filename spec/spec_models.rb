@@ -27,6 +27,11 @@ class AccessibleUser < ActiveRecord::Base
   acts_as_audited
 end
 
+class NoAttributeProtectionUser < ActiveRecord::Base
+  set_table_name :users
+  acts_as_audited
+end
+
 class Company < ActiveRecord::Base
   acts_as_audited
 end
