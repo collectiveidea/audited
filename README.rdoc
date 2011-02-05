@@ -3,13 +3,13 @@
 +acts_as_audited+ is an ActiveRecord extension that logs all changes to your 
 models in an audits table, with optional revision comments. +acts_as_audited+
 has been updated to work with Rails 3, to use it with older version of Rails,
-please see the <tt>rails2</tt> branch.
+please see the <tt>1.1-stable</tt> branch.
 
 == Installation
 
 In <tt>Gemfile</tt>:
 
-    gem "acts_as_audited", "2.0.0.rc1"
+    gem "acts_as_audited", "2.0.0.rc5"
 
 In your application root, run:
 
@@ -50,6 +50,19 @@ before create/update/destroy. If the <tt>:comment_required</tt> option is given 
 the save/update/destroy action will fail with add an error on <tt>model.audit_comment</tt> and triggering a 
 transaction rollback if <tt>model.audit_comment</tt> is nil.
 
+To record an audit for an associated model, use the <tt>:associated_with</tt> option.
+
+    class User < ActiveRecord::Base
+      acts_as_audited :associated_with => :company
+    end
+
+If desired, the associated model can access its audits using <tt>has_associated_audits</tt>.
+
+    class Company < ActiveRecord::Base
+      has_many :users
+      has_associated_audits
+    end
+
 To record a user in the audits outside of a web request, you can use +as_user+:
 
     Audit.as_user(user) do
@@ -69,7 +82,7 @@ Another caveat is documented in issue 26[https://github.com/collectiveidea/acts_
 
 == Compatability
 
-+acts_as_audited+ works with Rails 3.0.0 or later. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
++acts_as_audited+ works with Rails 3.0.3. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
 
 == Getting Help
 
@@ -77,9 +90,15 @@ Review the documentation at http://rdoc.info/github/collectiveidea/acts_as_audit
 
 Join the mailing list for getting help or offering suggestions - http://groups.google.com/group/acts_as_audited
 
+== Branches
+
+The <tt>master</tt> branch is considered stable, and you should be able to use it at any time. The <tt>development</tt> branch will contain all active development and might be a moving target from time to time.
+
 == Contributing
 
 Contributions are always welcome. Checkout the latest code on GitHub - http://github.com/collectiveidea/acts_as_audited
+
+When contributing a bug-fix, please use a topic branch created off our <tt>master</tt> branch. When developing a new feature, please create a topic branch of our <tt>development</tt> branch (and rebase before submiting a pull request).
 
 Please include tests with your patches. There are a few gems required to run the tests:
 
@@ -90,3 +109,4 @@ Make sure the tests pass against the version of Rails specified in the Gemfile
   $ rake spec test
 
 Please report bugs or feature suggestions on GitHub - http://github.com/collectiveidea/acts_as_audited/issues
+
