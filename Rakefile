@@ -16,7 +16,7 @@ begin
     gem.summary = %Q{ActiveRecord extension that logs all changes to your models in an audits table}
     gem.email = "brandon@opensoul.org"
     gem.homepage = "http://github.com/collectiveidea/acts_as_audited"
-    gem.authors = ["Brandon Keepers"]
+    gem.authors = ["Brandon Keepers", "Kenneth Kalmer"]
     gem.rdoc_options << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
     gem.version = ActsAsAudited::VERSION
 
