@@ -19,11 +19,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+require 'active_support/core_ext/module'
 require 'active_record'
 
 # To get started, please review ActsAsAudited::Auditor::ClassMethods#acts_as_audited
 module ActsAsAudited
-  VERSION = '2.0.0.rc2'
+  VERSION = '2.0.0.rc4'
 
   mattr_accessor :current_user_method
   # The method to be called to return the current user for logging in the audits.

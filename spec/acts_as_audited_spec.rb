@@ -22,6 +22,26 @@ describe ActsAsAudited::Auditor do
     end
   end
 
+  describe :new do
+    it "should allow mass assignment of all unprotected attributes" do
+      yesterday = 1.day.ago
+
+      u = NoAttributeProtectionUser.new(:name         => 'name',
+                                        :username     => 'username',
+                                        :password     => 'password',
+                                        :activated    => true,
+                                        :suspended_at => yesterday,
+                                        :logins       => 2)
+      
+      u.name.should eq('name')
+      u.username.should eq('username')
+      u.password.should eq('password')
+      u.activated.should eq(true)
+      u.suspended_at.should eq(yesterday)
+      u.logins.should eq(2)
+    end
+  end
+
   describe "on create" do
     let( :user ) { create_user :audit_comment => "Create" }
 

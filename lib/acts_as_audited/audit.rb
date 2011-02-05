@@ -21,6 +21,10 @@ class Audit < ActiveRecord::Base
   cattr_accessor :audited_class_names
   self.audited_class_names = Set.new
 
+  # Order by ver
+  default_scope order(:version)
+  scope :descending, reorder("version DESC")
+
   class << self
 
     # Returns the list of classes that are being audited
@@ -95,8 +99,7 @@ class Audit < ActiveRecord::Base
 
   # Return all audits older than the current one.
   def ancestors
-    self.class.find(:all, :order => 'version',
-      :conditions => ['auditable_id = ? and auditable_type = ? and version <= ?',
+    self.class.where(['auditable_id = ? and auditable_type = ? and version <= ?',
       auditable_id, auditable_type, version])
   end
 
