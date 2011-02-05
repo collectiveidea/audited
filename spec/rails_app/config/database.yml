@@ -1,21 +1,24 @@
-sqlite:
-  adapter: sqlite
-  database: acts_as_audited_plugin.sqlite.db
-sqlite3mem:
+sqlite3mem: &SQLITE3MEM
   adapter: sqlite3
   database: ":memory:"
-sqlite3:
+
+sqlite3: &SQLITE
   adapter: sqlite3
   database: acts_as_audited_plugin.sqlite3.db
-postgresql:
+
+postgresql: &POSTGRES
   adapter: postgresql
   username: postgres
   password: postgres
   database: acts_as_audited_plugin_test
   min_messages: ERROR
-mysql:
+
+mysql: &MYSQL
   adapter: mysql
   host: localhost
   username: root
   password:
   database: acts_as_audited_plugin_test
+
+test:
+  <<: *<%= ENV['DB'] || 'SQLITE3MEM' %>

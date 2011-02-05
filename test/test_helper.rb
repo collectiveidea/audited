@@ -1,75 +1,19 @@
-ENV["RAILS_ENV"] = "test"
-$:.unshift(File.dirname(__FILE__) + '/../lib')
-require 'rubygems'
-require 'multi_rails_init'
-require 'active_record'
-require 'active_record/version'
-require 'active_record/fixtures'
-require 'action_controller'
-require 'action_controller/test_process'
-require 'action_view'
-require 'test/unit'
-require 'shoulda'
+ENV['RAILS_ENV'] = 'test'
 
-gem 'jnunemaker-matchy'
-require 'matchy'
-require File.dirname(__FILE__) + '/../init.rb'
+$:.unshift File.dirname(__FILE__)
 
-config = YAML::load(IO.read(File.dirname(__FILE__) + '/db/database.yml'))
-ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
-ActiveRecord::Base.establish_connection(config[ENV['DB'] || 'sqlite3mem'])
-ActiveRecord::Migration.verbose = false
-load(File.dirname(__FILE__) + "/db/schema.rb")
+require File.expand_path('../../spec/rails_app/config/environment', __FILE__)
+require 'rails/test_help'
 
-class User < ActiveRecord::Base
-  acts_as_audited :except => :password
-  
-  attr_protected :logins
-  
-  def name=(val)
-    write_attribute(:name, CGI.escapeHTML(val))
+require 'acts_as_audited'
+
+class ActiveSupport::TestCase
+
+  setup do
+    ActiveRecord::Migration.verbose = false
   end
-end
 
-class Company < ActiveRecord::Base
-  acts_as_audited
-end
-
-class OnUpdateDestroy < ActiveRecord::Base
-  set_table_name 'companies'
-  acts_as_audited :on => [:update, :destroy]
-end
-
-class OnCreateDestroy < ActiveRecord::Base
-  set_table_name 'companies'
-  acts_as_audited :on => [:create, :destroy]
-end
-
-class OnCreateDestroyExceptName < ActiveRecord::Base
-  set_table_name 'companies'
-  acts_as_audited :except => :name, :on => [:create, :destroy]
-end
-
-class OnCreateUpdate < ActiveRecord::Base
-  set_table_name 'companies'
-  acts_as_audited :on => [:create, :update]
-end
-
-class Test::Unit::TestCase
-  # def change(receiver=nil, message=nil, &block)
-  #   ChangeExpectation.new(self, receiver, message, &block)
-  # end
-  
-  def create_user(attrs = {})
-    User.create({:name => 'Brandon', :username => 'brandon', :password => 'password'}.merge(attrs))
-  end
-  
-  def create_versions(n = 2)
-    returning User.create(:name => 'Foobar 1') do |u|
-      (n - 1).times do |i|
-        u.update_attribute :name, "Foobar #{i + 2}"
-      end
-      u.reload
-    end
+  def load_schema( version )
+    load File.dirname(__FILE__) + "/db/version_#{version}.rb"
   end
 end

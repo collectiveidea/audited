@@ -1,34 +1,41 @@
 = acts_as_audited
 
-+acts_as_audited+ is an ActiveRecord extension that logs all changes to your models in an audits table, with optional revision comments.
++acts_as_audited+ is an ActiveRecord extension that logs all changes to your 
+models in an audits table, with optional revision comments. +acts_as_audited+
+has been updated to work with Rails 3, to use it with older version of Rails,
+please see the <tt>rails2</tt> branch.
 
 == Installation
 
-In <tt>environment.rb</tt>:
+In <tt>Gemfile</tt>:
 
-    Rails::Initializer.run do |config|
-      ...
-      config.gem 'acts_as_audited'
-      ...
-    end
+    gem "acts_as_audited", "2.0.0.rc1"
 
-At your application root, run:
+In your application root, run:
 
-    $ rake gems:install
+    $ bundle install
 
 Generate the migration:
 
 * If installing without a previous version of +acts_as_audited+ or you do not mind overwriting your audits table:
 
-    $ script/generate audited_migration add_audits_table
+    $ rails g acts_as_audited:install
 
-* If upgrading from a version of +acts_as_audited+ that does not contain comment functionality:
+* If upgrading from a previous version of +acts_as_audited+ you might need some alterations to the audits table:
 
-    $ script/generate audited_migration_update update_audits_table
+    $ rails g acts_as_audited:upgrade
 
 * After running one of the generators:
 
     $ rake db:migrate
+
+== Upgrading
+
+Upgrading to Rails 3, or even between point releases of +acts_as_audited+, might require alterations to the audits table. After every upgrade please run the following generator:
+
+    $ rails g acts_as_audited:upgrade
+
+The upgrade generator will only generate migrations that are missing, or no migrations at all if you are up to date.
 
 == Usage
 
@@ -37,7 +44,7 @@ Declare +acts_as_audited+ on your models:
     class User < ActiveRecord::Base
       acts_as_audited :except => [:password, :mistress]
     end
-    
+
 Within a web request, will automatically record the user that made the change if your controller has a +current_user+ method. Comments can be added to an audit by setting <tt>model.audit_comments</tt> 
 before create/update/destroy. If the <tt>:comment_required</tt> option is given to +acts_as_audited+, 
 the save/update/destroy action will fail with add an error on <tt>model.audit_comment</tt> and triggering a 
@@ -62,25 +69,24 @@ Another caveat is documented in issue 26[https://github.com/collectiveidea/acts_
 
 == Compatability
 
-+acts_as_audited+ works with Rails 2.1 or later.
++acts_as_audited+ works with Rails 3.0.0 or later. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
 
 == Getting Help
 
-Join the mailing list for getting help or offering suggestions:
-  http://groups.google.com/group/acts_as_audited
+Review the documentation at http://rdoc.info/github/collectiveidea/acts_as_audited
+
+Join the mailing list for getting help or offering suggestions - http://groups.google.com/group/acts_as_audited
 
 == Contributing
 
-Contributions are always welcome. Checkout the latest code on GitHub:
-  http://github.com/collectiveidea/acts_as_audited
+Contributions are always welcome. Checkout the latest code on GitHub - http://github.com/collectiveidea/acts_as_audited
 
 Please include tests with your patches. There are a few gems required to run the tests:
-  $ gem install multi_rails
-  $ gem install thoughtbot-shoulda jnunemaker-matchy --source http://gems.github.com
 
-Make sure the tests pass against all versions of Rails since 2.1:
+  $ bundle install
 
-  $ rake test:multi_rails:all
+Make sure the tests pass against the version of Rails specified in the Gemfile
 
-Please report bugs or feature suggestions on GitHub:
-  http://github.com/collectiveidea/acts_as_audited/issues
+  $ rake spec test
+
+Please report bugs or feature suggestions on GitHub - http://github.com/collectiveidea/acts_as_audited/issues
