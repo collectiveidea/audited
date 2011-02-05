@@ -36,6 +36,18 @@ class Company < ActiveRecord::Base
   acts_as_audited
 end
 
+class Owner < ActiveRecord::Base
+  set_table_name 'users'
+  has_associated_audits
+end
+
+class OwnedCompany < ActiveRecord::Base
+  set_table_name 'companies'
+  belongs_to :owner, :class_name => "Owner"
+  attr_accessible :name, :owner # declare attr_accessible before calling aaa
+  acts_as_audited :associated_with => :owner
+end
+
 class OnUpdateDestroy < ActiveRecord::Base
   set_table_name 'companies'
   acts_as_audited :on => [:update, :destroy]
