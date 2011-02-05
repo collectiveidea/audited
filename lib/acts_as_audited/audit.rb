@@ -12,8 +12,8 @@ require 'set'
 class Audit < ActiveRecord::Base
   belongs_to :auditable, :polymorphic => true
   belongs_to :user, :polymorphic => true
-  belongs_to :auditable_parent, :polymorphic => true
-  
+  belongs_to :association, :polymorphic => true
+
   before_create :set_version_number, :set_audit_user
 
   serialize :audited_changes
@@ -88,7 +88,7 @@ class Audit < ActiveRecord::Base
   alias_method :user_as_model, :user
   alias_method :user, :user_as_string
 
-  # Return an instantance of what the object looked like at this revision. If
+  # Return an instance of what the object looked like at this revision. If
   # the object has been destroyed, this will be a new record.
   def revision
     clazz = auditable_type.constantize

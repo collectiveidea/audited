@@ -40,4 +40,15 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
       assert_match /add_column :audits, :remote_address, :string/, content
     end
   end
+
+  test "should add 'associated_id' and 'associated_type' to audits table" do
+    load_schema 4
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/add_association_to_audits.rb" do |content|
+      assert_match /add_column :audits, :association_id, :integer/, content
+      assert_match /add_column :audits, :association_type, :string/, content
+    end
+  end
 end

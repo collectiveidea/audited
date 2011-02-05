@@ -170,6 +170,35 @@ describe ActsAsAudited::Auditor do
     end
   end
 
+  describe "associated with" do
+    let(:owner) { Owner.create(:name => 'Owner') }
+    let(:owned_company) { OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
+
+    it "should record the associated object on create" do
+      owned_company.audits.first.association.should == owner
+    end
+
+    it "should store the associated object on update" do
+      owned_company.update_attribute(:name, 'The Auditors')
+      owned_company.audits.last.association.should == owner
+    end
+    
+    it "should store the associated object on destroy" do
+      owned_company.destroy
+      owned_company.audits.last.association.should == owner
+    end
+  end
+
+  describe "has associated audits" do
+    let!(:owner) { Owner.create!(:name => 'Owner') }
+    let!(:owned_company) { OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
+
+    it "should list the associated audits" do
+      owner.associated_audits.length.should == 1
+      owner.associated_audits.first.auditable.should == owned_company
+    end
+  end
+
   describe "revisions" do
     let( :user ) { create_versions }
 

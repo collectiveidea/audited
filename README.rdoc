@@ -50,6 +50,19 @@ before create/update/destroy. If the <tt>:comment_required</tt> option is given 
 the save/update/destroy action will fail with add an error on <tt>model.audit_comment</tt> and triggering a 
 transaction rollback if <tt>model.audit_comment</tt> is nil.
 
+To record an audit for an associated model, use the <tt>:associated_with</tt> option.
+
+    class User < ActiveRecord::Base
+      acts_as_audited :associated_with => :company
+    end
+
+If desired, the associated model can access its audits using <tt>has_associated_audits</tt>.
+
+    class Company < ActiveRecord::Base
+      has_many :users
+      has_associated_audits
+    end
+
 To record a user in the audits outside of a web request, you can use +as_user+:
 
     Audit.as_user(user) do
@@ -90,3 +103,8 @@ Make sure the tests pass against the version of Rails specified in the Gemfile
   $ rake spec test
 
 Please report bugs or feature suggestions on GitHub - http://github.com/collectiveidea/acts_as_audited/issues
+
+== My Fork
+
+This fork was created to merge the associated audits feature from http://github.com/celect/acts_as_audited into the primary Rails 3 branch
+at http://github.com/collectiveidea/acts_as_audited.
