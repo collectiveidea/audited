@@ -84,7 +84,7 @@ class Audit < ActiveRecord::Base
   alias_method :user_as_model, :user
   alias_method :user, :user_as_string
 
-  # Return an instantance of what the object looked like at this revision. If
+  # Return an instance of what the object looked like at this revision. If
   # the object has been destroyed, this will be a new record.
   def revision
     clazz = auditable_type.constantize
