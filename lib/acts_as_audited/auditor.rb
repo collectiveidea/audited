@@ -67,7 +67,7 @@ module ActsAsAudited
         write_inheritable_attribute :audit_associated_with, options[:associated_with]
 
         if options[:comment_required]
-          validates_presence_of :audit_comment
+          validates_presence_of :audit_comment, :if => :auditing_enabled
           before_destroy :require_comment
         end
 
@@ -215,7 +215,7 @@ module ActsAsAudited
       end
 
       def require_comment
-        if audit_comment.blank?
+        if auditing_enabled && audit_comment.blank?
           errors.add(:audit_comment, "Comment required before destruction")
           return false
         end

@@ -32,7 +32,7 @@ describe ActsAsAudited::Auditor do
                                         :activated    => true,
                                         :suspended_at => yesterday,
                                         :logins       => 2)
-      
+
       u.name.should eq('name')
       u.username.should eq('username')
       u.password.should eq('password')
@@ -182,7 +182,7 @@ describe ActsAsAudited::Auditor do
       owned_company.update_attribute(:name, 'The Auditors')
       owned_company.audits.last.association.should == owner
     end
-    
+
     it "should store the associated object on destroy" do
       owned_company.destroy
       owned_company.audits.last.association.should == owner
@@ -382,10 +382,16 @@ describe ActsAsAudited::Auditor do
       it "should validate when audit_comment is supplied" do
         CommentRequiredUser.new( :audit_comment => 'Create').should be_valid
       end
+
+      it "should validate when audit_comment is not supplied, and auditing is disabled" do
+        CommentRequiredUser.disable_auditing
+        CommentRequiredUser.new.should be_valid
+        CommentRequiredUser.enable_auditing
+      end
     end
 
     describe "on update" do
-      let( :user ) { CommentRequiredUser.create!( :audit_comment => 'Create' )}
+      let( :user ) { CommentRequiredUser.create!( :audit_comment => 'Create' ) }
 
       it "should not validate when audit_comment is not supplied" do
         user.update_attributes(:name => 'Test').should be_false
@@ -393,6 +399,12 @@ describe ActsAsAudited::Auditor do
 
       it "should validate when audit_comment is supplied" do
         user.update_attributes(:name => 'Test', :audit_comment => 'Update').should be_true
+      end
+
+      it "should validate when audit_comment is not supplied, and auditing is disabled" do
+        CommentRequiredUser.disable_auditing
+        user.update_attributes(:name => 'Test').should be_true
+        CommentRequiredUser.enable_auditing
       end
     end
 
@@ -406,6 +418,12 @@ describe ActsAsAudited::Auditor do
       it "should validate when audit_comment is supplied" do
         user.audit_comment = "Destroy"
         user.destroy.should == user
+      end
+
+      it "should validate when audit_comment is not supplied, and auditing is disabled" do
+        CommentRequiredUser.disable_auditing
+        user.destroy.should == user
+        CommentRequiredUser.enable_auditing
       end
     end
 
