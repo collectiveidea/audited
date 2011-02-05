@@ -67,7 +67,7 @@ If your model declares +attr_accessible+ after +acts_as_audited+, you need to se
 
 == Compatability
 
-+acts_as_audited+ works with Rails 3.0.0 or later. For older versions of Rails, please see the <tt>rails2</tt> branch.
++acts_as_audited+ works with Rails 3.0.0 or later. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
 
 == Getting Help
 
