@@ -19,10 +19,6 @@ begin
     gem.authors = ["Brandon Keepers", "Kenneth Kalmer"]
     gem.rdoc_options << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
     gem.version = ActsAsAudited::VERSION
-
-    gem.add_dependency 'activerecord', '3.0.3'
-    gem.add_development_dependency "rails", '3.0.3'
-    gem.add_development_dependency "rspec-rails", '~> 2.4.0'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   # Jeweler::GemcutterTasks.new
