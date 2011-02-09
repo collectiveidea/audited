@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
     ".yardopts",
     "CHANGELOG",
     "Gemfile",
-    "Gemfile.lock",
     "LICENSE",
     "README.rdoc",
     "Rakefile",
