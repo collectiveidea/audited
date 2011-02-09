@@ -1,5 +1,6 @@
 acts_as_audited_plugin.sqlite3.db
 Gemfile.lock
+.rvmrc
 *.log
 doc/
 coverage/
