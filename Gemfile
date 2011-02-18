@@ -1,6 +1,6 @@
 source :gemcutter
 
-gem "rails", "3.0.3"
+gem "rails", ">= 3.0.3"
 
 group :development do
   gem "sqlite3-ruby"
