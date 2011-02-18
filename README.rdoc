@@ -9,7 +9,7 @@ please see the <tt>1.1-stable</tt> branch.
 
 In <tt>Gemfile</tt>:
 
-    gem "acts_as_audited", "2.0.0.rc5"
+    gem "acts_as_audited", "2.0.0.rc7"
 
 In your application root, run:
 
