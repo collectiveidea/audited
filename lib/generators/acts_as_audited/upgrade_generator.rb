@@ -51,6 +51,10 @@ module ActsAsAudited
             yield :add_association_to_audits
           end
         end
+
+        unless columns.include?( 'transaction_id' )
+          yield :add_transaction_id_to_audits
+        end
       end
     end
   end

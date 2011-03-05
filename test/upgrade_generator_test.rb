@@ -51,4 +51,15 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
       assert_match /add_column :audits, :association_type, :string/, content
     end
   end
+
+  test "should add 'transaction_id' to audits table" do
+    load_schema 5
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/add_transaction_id_to_audits.rb" do |content|
+      assert_match /add_column :audits, :transaction_id, :string/, content
+      assert_match /add_index :audits, :transaction_id/, content
+    end
+  end
 end

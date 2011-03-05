@@ -470,4 +470,20 @@ describe ActsAsAudited::Auditor do
     end
   end
 
+  describe "transaction" do
+    it "should set a provided transaction id and comment" do
+      transaction_id = "a transaction id"
+      transaction_comment = "a transaction comment"
+      User.audit_with( transaction_id, transaction_comment ) do
+        user = User.create :name => 'Test User'
+        company = Company.create :name => 'Test Company'
+        
+        audits = Array.new
+        audits.push(user.audits).push(company.audits).flatten.each do |audit|
+          audit.transaction_id.should == transaction_id
+          audit.comment.should == transaction_comment
+        end
+      end
+    end
+  end
 end

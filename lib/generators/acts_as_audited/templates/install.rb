@@ -14,12 +14,14 @@ class <%= migration_class_name %> < ActiveRecord::Migration
       t.column :comment, :string
       t.column :remote_address, :string
       t.column :created_at, :datetime
+      t.column :transaction_id, :string
     end
 
     add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
     add_index :audits, [:association_id, :association_type], :name => 'association_index'
     add_index :audits, [:user_id, :user_type], :name => 'user_index'
     add_index :audits, :created_at
+    add_index :audits, :transaction_id
   end
 
   def self.down

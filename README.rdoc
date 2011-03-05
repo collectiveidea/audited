@@ -77,6 +77,12 @@ To record a user in the audits outside of a web request, you can use +as_user+:
       # Perform changes on audited models
     end
 
+Sometimes it is necessary to combine several audits somehow. You can use +as_transaction+ to set the same +transaction_id+ and +comment+ to all done audits in the block:
+
+    Audit.as_transaction(transaction_id, comment) do
+      # Perform changes on audited models
+    end
+
 == Caveats
 
 If your model declares +attr_accessible+ after +acts_as_audited+, you need to set <tt>:protect</tt> to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +acts_as_audited+, but needs to be explicitly set if it is called after.

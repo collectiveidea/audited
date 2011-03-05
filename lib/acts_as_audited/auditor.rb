@@ -228,7 +228,6 @@ module ActsAsAudited
 
       def empty_callback #:nodoc:
       end
-
     end # InstanceMethods
 
     module SingletonMethods
@@ -267,6 +266,12 @@ module ActsAsAudited
         Audit.as_user( user, &block )
       end
 
+      # All audits made during the block get the same transaction id and
+      # comment. If no +id+ is provided a UUID as transaction id is generated.
+      # @see Audit#as_transaction.
+      def audit_with( transaction_id, transaction_comment, &block )
+        Audit.as_transaction( transaction_id, transaction_comment, &block )
+      end
     end
   end
 end
