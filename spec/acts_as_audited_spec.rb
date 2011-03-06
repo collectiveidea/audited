@@ -43,7 +43,7 @@ describe ActsAsAudited::Auditor do
   end
 
   describe "on create" do
-    let( :user ) { create_user :audit_comment => "Create" }
+    let( :user ) { create_user :audit_comment => "Create", :audit_tag => "Taggy" }
 
     it "should change the audit count" do
       expect {
@@ -67,6 +67,10 @@ describe ActsAsAudited::Auditor do
       user.audits.first.comment.should == 'Create'
     end
 
+    it "should store tag" do
+      user.audits.first.tag.should == 'Taggy'
+    end
+
     it "should not audit an attribute which is excepted if specified on create or destroy" do
       on_create_destroy_except_name = OnCreateDestroyExceptName.create(:name => 'Bart')
       on_create_destroy_except_name.audits.first.audited_changes.keys.any?{|col| ['name'].include? col}.should be_false
@@ -81,7 +85,7 @@ describe ActsAsAudited::Auditor do
 
   describe "on update" do
     before do
-      @user = create_user( :name => 'Brandon', :audit_comment => 'Update' )
+      @user = create_user( :name => 'Brandon', :audit_comment => 'Update', :audit_tag => 'Taggy' )
     end
 
     it "should save an audit" do
@@ -111,6 +115,10 @@ describe ActsAsAudited::Auditor do
 
     it "should store audit comment" do
       @user.audits.last.comment.should == 'Update'
+    end
+
+    it "should store audit tag" do
+      @user.audits.last.tag.should == 'Taggy'
     end
 
     it "should not save an audit if only specified on create/destroy" do
@@ -470,18 +478,18 @@ describe ActsAsAudited::Auditor do
     end
   end
 
-  describe "transaction" do
-    it "should set a provided transaction id and comment" do
-      transaction_id = "a transaction id"
-      transaction_comment = "a transaction comment"
-      User.audit_with( transaction_id, transaction_comment ) do
+  describe "group" do
+    it "should set a provided tag and comment" do
+      group_tag = "a group tag"
+      group_comment = "a group comment"
+      User.audit_with( group_tag, group_comment ) do
         user = User.create :name => 'Test User'
         company = Company.create :name => 'Test Company'
         
         audits = Array.new
         audits.push(user.audits).push(company.audits).flatten.each do |audit|
-          audit.transaction_id.should == transaction_id
-          audit.comment.should == transaction_comment
+          audit.tag.should == group_tag
+          audit.comment.should == group_comment
         end
       end
     end

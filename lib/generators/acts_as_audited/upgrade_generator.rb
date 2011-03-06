@@ -52,8 +52,8 @@ module ActsAsAudited
           end
         end
 
-        unless columns.include?( 'transaction_id' )
-          yield :add_transaction_id_to_audits
+        unless columns.include?( 'tag' )
+          yield :add_tag_to_audits
         end
       end
     end

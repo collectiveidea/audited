@@ -187,19 +187,19 @@ describe Audit do
 
   end
 
-  describe "as_transaction" do
+  describe "as_group" do
 
-    it "should record transaction id and comment" do
-      transaction_id = "a transaction id"
-      transaction_comment = "a transaction comment"
-      Audit.as_transaction( transaction_id, transaction_comment ) do
+    it "should record tag and comment" do
+      group_tag = "a group tag"
+      group_comment = "a group comment"
+      Audit.as_group( group_tag, group_comment ) do
         user = User.create :name => 'Test User'
         company = Company.create :name => 'Test Company'
 
         audits = Array.new
         audits.push(user.audits).push(company.audits).flatten.each do |audit|
-          audit.transaction_id.should == transaction_id
-          audit.comment.should == transaction_comment
+          audit.tag.should == group_tag
+          audit.comment.should == group_comment
         end
       end
     end
@@ -207,23 +207,23 @@ describe Audit do
     it "should be thread safe" do
       begin
         t1 = Thread.new do
-          transaction_id_1 = "transaction id 1"
-          transaction_comment_1 = "transaction comment 1"
-          Audit.as_transaction(transaction_id_1, transaction_comment_1) do
+          group_tag_1 = "group tag 1"
+          group_comment_1 = "group comment 1"
+          Audit.as_group(group_tag_1, group_comment_1) do
             sleep 1
             company = Company.create(:name => 'The Auditors, Inc')
-            company.audits.first.transaction_id.should == transaction_id_1
-            company.audits.first.comment.should == transaction_comment_1
+            company.audits.first.tag.should == group_tag_1
+            company.audits.first.comment.should == group_comment_1
           end
         end
 
         t2 = Thread.new do
-          transaction_id_2 = "transaction id 2"
-          transaction_comment_2 = "transaction comment 2"
-          Audit.as_transaction(transaction_id_2, transaction_comment_2) do
+          group_tag_2 = "group tag 2"
+          group_comment_2 = "group comment 2"
+          Audit.as_group(group_tag_2, group_comment_2) do
             company = Company.create(:name => 'The Competing Auditors, LLC')
-            company.audits.first.transaction_id.should == transaction_id_2
-            company.audits.first.comment.should == transaction_comment_2
+            company.audits.first.tag.should == group_tag_2
+            company.audits.first.comment.should == group_comment_2
             sleep 0.5
           end
         end
@@ -236,7 +236,7 @@ describe Audit do
     end
 
     it "should return the value from the yield block" do
-      Audit.as_transaction("transaction_id", "transaction_comment") do
+      Audit.as_group("group tag", "group comment") do
         42
       end.should == 42
     end

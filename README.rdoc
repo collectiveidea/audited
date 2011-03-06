@@ -56,7 +56,7 @@ Declare +acts_as_audited+ on your models:
 Within a web request, will automatically record the user that made the change if your controller has a +current_user+ method. Comments can be added to an audit by setting <tt>model.audit_comments</tt> 
 before create/update/destroy. If the <tt>:comment_required</tt> option is given to +acts_as_audited+, 
 the save/update/destroy action will fail with add an error on <tt>model.audit_comment</tt> and triggering a 
-transaction rollback if <tt>model.audit_comment</tt> is nil.
+transaction rollback if <tt>model.audit_comment</tt> is nil. An optional tag can be added to the audit by setting <tt>model.audit_tag</tt> before create/update/destroy.
 
 To record an audit for an associated model, use the <tt>:associated_with</tt> option.
 
@@ -77,7 +77,7 @@ To record a user in the audits outside of a web request, you can use +as_user+:
       # Perform changes on audited models
     end
 
-Sometimes it is necessary to combine several audits somehow. You can use +as_transaction+ to set the same +transaction_id+ and +comment+ to all done audits in the block:
+It is possible to group several audits and give them the same +tag+ and/or +comment+. You can use +as_group+ for that:
 
     Audit.as_transaction(transaction_id, comment) do
       # Perform changes on audited models

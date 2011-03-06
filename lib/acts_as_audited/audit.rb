@@ -14,7 +14,7 @@ class Audit < ActiveRecord::Base
   belongs_to :user, :polymorphic => true
   belongs_to :association, :polymorphic => true
 
-  before_create :set_version_number, :set_audit_user, :set_transaction
+  before_create :set_version_number, :set_audit_user, :set_audit_group
 
   serialize :audited_changes
 
@@ -45,16 +45,15 @@ class Audit < ActiveRecord::Base
       yieldval
     end
 
-    # All audits made during the block get the same transaction id and
-    # comment. If no +id+ is provided a UUID as transaction id is generated.
-    def as_transaction(id = nil, comment = nil, &block)
-      Thread.current[:transaction_id] = id
-      Thread.current[:transaction_comment] = comment
+    # All audits made during the block get the same +tag+ and +comment+.
+    def as_group(tag = nil, comment = nil, &block)
+      Thread.current[:acts_as_audited_tag] = tag
+      Thread.current[:acts_as_audited_comment] = comment
 
       yieldval = yield
 
-      Thread.current[:transaction_id] = nil
-      Thread.current[:transaction_comment] = nil
+      Thread.current[:acts_as_audited_tag] = nil
+      Thread.current[:acts_as_audited_comment] = nil
 
       yieldval
     end
@@ -149,9 +148,9 @@ private
     nil # prevent stopping callback chains
   end
 
-  def set_transaction
-    self.transaction_id = Thread.current[:transaction_id] if Thread.current[:transaction_id]
-    self.comment = Thread.current[:transaction_comment] if Thread.current[:transaction_comment]
+  def set_audit_group
+    self.tag = Thread.current[:acts_as_audited_tag] if Thread.current[:acts_as_audited_tag]
+    self.comment = Thread.current[:acts_as_audited_comment] if Thread.current[:acts_as_audited_comment]
     nil # prevent stopping callback chains
   end
 end
