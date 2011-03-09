@@ -176,6 +176,18 @@ describe ActsAsAudited::Auditor do
         on_create_update.destroy
       }.to_not change( Audit, :count )
     end
+
+    it "should store audit comment" do
+      @user.audit_comment = 'Destroy'
+      @user.destroy
+      @user.audits.last.comment.should == 'Destroy'
+    end
+
+    it "should store audit tag" do
+      @user.audit_tag = 'Taggy'
+      @user.destroy
+      @user.audits.last.tag.should == 'Taggy'
+    end
   end
 
   describe "associated with" do
