@@ -77,9 +77,9 @@ To record a user in the audits outside of a web request, you can use +as_user+:
       # Perform changes on audited models
     end
 
-It is possible to group several audits and give them the same +tag+ and/or +comment+. You can use +as_group+ for that:
+It is possible to group several audits and give them the same +tag+ and/or +comment+ in one step. You can use +as_group+ for that:
 
-    Audit.as_transaction(transaction_id, comment) do
+    Audit.as_group(tag, comment) do
       # Perform changes on audited models
     end
 
