@@ -26,6 +26,14 @@ require 'active_record'
 module ActsAsAudited
   VERSION = '2.0.0.rc7'
 
+  class << self
+    attr_accessor_with_default :ignored_attributes, ['lock_version',
+                                                     'created_at',
+                                                     'updated_at',
+                                                     'created_on',
+                                                     'updated_on']
+  end
+
   mattr_accessor :current_user_method
   # The method to be called to return the current user for logging in the audits.
   @@current_user_method = :current_user
