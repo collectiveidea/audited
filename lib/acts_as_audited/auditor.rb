@@ -9,6 +9,8 @@ module ActsAsAudited
   # To store an audit comment set model.audit_comment to your comment before
   # a create, update or destroy operation.
   #
+  # To store a tag set model.audit_tag before a create, update or destroy.
+  #
   # See <tt>ActsAsAudited::Auditor::ClassMethods#acts_as_audited</tt>
   # for configuration options
   module Auditor #:nodoc:
@@ -72,8 +74,10 @@ module ActsAsAudited
         end
 
         attr_accessor :audit_comment
+        attr_accessor :audit_tag
         unless accessible_attributes.empty? || options[:protect]
           attr_accessible :audit_comment
+          attr_accessible :audit_tag
         end
 
         has_many :audits, :as => :auditable
@@ -194,24 +198,25 @@ module ActsAsAudited
 
       def audit_create
         write_audit(:action => 'create', :audited_changes => audited_attributes,
-          :comment => audit_comment)
+          :comment => audit_comment, :tag => audit_tag)
       end
 
       def audit_update
         unless (changes = audited_changes).empty?
           write_audit(:action => 'update', :audited_changes => changes,
-            :comment => audit_comment)
+            :comment => audit_comment, :tag => audit_tag)
         end
       end
 
       def audit_destroy
         write_audit(:action => 'destroy', :audited_changes => audited_attributes,
-          :comment => audit_comment)
+          :comment => audit_comment, :tag => audit_tag)
       end
 
       def write_audit(attrs)
         attrs[:association] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
+        self.audit_tag = nil
         self.audits.create attrs if auditing_enabled
       end
 
@@ -228,7 +233,6 @@ module ActsAsAudited
 
       def empty_callback #:nodoc:
       end
-
     end # InstanceMethods
 
     module SingletonMethods
@@ -267,6 +271,11 @@ module ActsAsAudited
         Audit.as_user( user, &block )
       end
 
+      # All audits made during the block get the same +tag+ and +comment+.
+      # @see Audit#as_group.
+      def audit_with( tag, comment, &block )
+        Audit.as_group( tag, comment, &block )
+      end
     end
   end
 end

@@ -187,4 +187,60 @@ describe Audit do
 
   end
 
+  describe "as_group" do
+
+    it "should record tag and comment" do
+      group_tag = "a group tag"
+      group_comment = "a group comment"
+      Audit.as_group( group_tag, group_comment ) do
+        user = User.create :name => 'Test User'
+        company = Company.create :name => 'Test Company'
+
+        audits = Array.new
+        audits.push(user.audits).push(company.audits).flatten.each do |audit|
+          audit.tag.should == group_tag
+          audit.comment.should == group_comment
+        end
+      end
+    end
+
+    it "should be thread safe" do
+      begin
+        t1 = Thread.new do
+          group_tag_1 = "group tag 1"
+          group_comment_1 = "group comment 1"
+          Audit.as_group(group_tag_1, group_comment_1) do
+            sleep 1
+            company = Company.create(:name => 'The Auditors, Inc')
+            company.audits.first.tag.should == group_tag_1
+            company.audits.first.comment.should == group_comment_1
+          end
+        end
+
+        t2 = Thread.new do
+          group_tag_2 = "group tag 2"
+          group_comment_2 = "group comment 2"
+          Audit.as_group(group_tag_2, group_comment_2) do
+            company = Company.create(:name => 'The Competing Auditors, LLC')
+            company.audits.first.tag.should == group_tag_2
+            company.audits.first.comment.should == group_comment_2
+            sleep 0.5
+          end
+        end
+
+        t1.join
+        t2.join
+      rescue ActiveRecord::StatementInvalid
+        STDERR.puts "Thread safety tests cannot be run with SQLite"
+      end
+    end
+
+    it "should return the value from the yield block" do
+      Audit.as_group("group tag", "group comment") do
+        42
+      end.should == 42
+    end
+
+  end
+
 end

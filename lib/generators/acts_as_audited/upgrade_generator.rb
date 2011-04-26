@@ -51,6 +51,10 @@ module ActsAsAudited
             yield :add_association_to_audits
           end
         end
+
+        unless columns.include?( 'tag' )
+          yield :add_tag_to_audits
+        end
       end
     end
   end
