@@ -29,7 +29,7 @@ class AuditSweeper < ActionController::Caching::Sweeper #:nodoc:
   end
 
   def current_user
-    controller.send self.class.current_user_method if controller.respond_to?(self.class.current_user_method, true)
+    controller.send self.class.current_user_method if controller && controller.respond_to?(self.class.current_user_method, true)
   end
 end
 
