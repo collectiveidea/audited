@@ -3,7 +3,7 @@ $:.unshift(File.dirname(__FILE__) + '/../lib')
 require 'rubygems'
 require 'multi_rails_init'
 require 'active_record'
-require 'active_record/version'
+require 'active_record/audit_version'
 require 'active_record/fixtures'
 require 'action_controller'
 require 'action_controller/test_process'
@@ -64,7 +64,7 @@ class Test::Unit::TestCase
     User.create({:name => 'Brandon', :username => 'brandon', :password => 'password'}.merge(attrs))
   end
   
-  def create_versions(n = 2)
+  def create_audit_versions(n = 2)
     returning User.create(:name => 'Foobar 1') do |u|
       (n - 1).times do |i|
         u.update_attribute :name, "Foobar #{i + 2}"

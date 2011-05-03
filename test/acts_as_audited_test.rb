@@ -11,7 +11,7 @@ module CollectiveIdea
         User.should be_kind_of(CollectiveIdea::Acts::Audited::SingletonMethods)
       end
 
-      ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
+      ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_audit_version', 'id', 'password'].each do |column|
         should "not audit #{column}" do
           User.non_audited_columns.should include(column)
         end
@@ -83,7 +83,7 @@ module CollectiveIdea
         end
 
         # Dirty tracking in Rails 2.0-2.2 had issues with type casting
-        if ActiveRecord::VERSION::STRING >= '2.3'
+        if ActiveRecord::AUDIT_VERSION::STRING >= '2.3'
           should "not save an audit if the value doesn't change after type casting" do
             @user.update_attributes! :logins => 0, :activated => true
             lambda { @user.update_attribute :logins, '0' }.should_not change { Audit.count }
@@ -151,7 +151,7 @@ module CollectiveIdea
         end
 
         # Dirty tracking in Rails 2.0-2.2 had issues with type casting
-        if ActiveRecord::VERSION::STRING >= '2.3'
+        if ActiveRecord::AUDIT_VERSION::STRING >= '2.3'
           should "not be changed if the value doesn't change after type casting" do
             @user.update_attributes! :logins => 0, :activated => true
             @user.logins = '0'
@@ -163,12 +163,12 @@ module CollectiveIdea
 
       context "revisions" do
         setup do
-          @user = create_versions
+          @user = create_audit_versions
         end
 
         should "be an Array of Users" do
           @user.revisions.should be_kind_of(Array)
-          @user.revisions.each {|version| version.should be_kind_of(User) }
+          @user.revisions.each {|audit_version| audit_version.should be_kind_of(User) }
         end
 
         should "have one revision for a new record" do
@@ -224,7 +224,7 @@ module CollectiveIdea
 
       context "revision" do
         setup do
-          @user = create_versions(5)
+          @user = create_audit_versions(5)
         end
 
         should "maintain identity" do
@@ -234,20 +234,20 @@ module CollectiveIdea
         should "find the given revision" do
           revision = @user.revision(3)
           revision.should be_kind_of(User)
-          revision.version.should == 3
+          revision.audit_version.should == 3
           revision.name.should == 'Foobar 3'
         end
 
         should "find the previous revision with :previous" do
           revision = @user.revision(:previous)
-          revision.version.should == 4
+          revision.audit_version.should == 4
           revision.should == @user.revision(4)
         end
 
         should "be able to get the previous revision repeatedly" do
           previous = @user.revision(:previous)
-          previous.version.should == 4
-          previous.revision(:previous).version.should == 3
+          previous.audit_version.should == 4
+          previous.revision(:previous).audit_version.should == 3
         end
         
         should "be able to set protected attributes" do
@@ -306,7 +306,7 @@ module CollectiveIdea
           u = create_user
           Audit.update(u.audits.first.id, :created_at => 1.hour.ago)
           u.update_attributes :name => 'updated'
-          u.revision_at(2.minutes.ago).version.should == 1
+          u.revision_at(2.minutes.ago).audit_version.should == 1
         end
 
         should "be nil if given a time before audits" do

@@ -48,7 +48,7 @@ module CollectiveIdea #:nodoc:
         # * +except+ - Excludes fields from being saved in the audit log.
         #   By default, acts_as_audited will audit all but these fields:
         #
-        #     [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
+        #     [self.primary_key, inheritance_column, 'lock_audit_version', 'created_at', 'updated_at']
         #   You can add to those by passing one or an array of fields to skip.
         #
         #     class User < ActiveRecord::Base
@@ -79,7 +79,7 @@ module CollectiveIdea #:nodoc:
           if options[:only]
             except = self.column_names - options[:only].flatten.map(&:to_s)
           else
-            except = [self.primary_key, inheritance_column, 'lock_version',
+            except = [self.primary_key, inheritance_column, 'lock_audit_version',
               'created_at', 'updated_at', 'created_on', 'updated_on']
             except |= Array(options[:except]).collect(&:to_s) if options[:except]
           end
@@ -95,7 +95,7 @@ module CollectiveIdea #:nodoc:
             attr_accessible :audit_comment
           end
 
-          has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
+          has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.audit_version"
           attr_protected :audit_ids if options[:protect]
           Audit.audited_class_names << self.to_s
           
@@ -106,7 +106,7 @@ module CollectiveIdea #:nodoc:
             parent_class.class_eval <<-EOS
               has_many :#{auditable_children_association},
               :as => :auditable_parent,
-              :order => '#{Audit.quoted_table_name}.version desc',
+              :order => '#{Audit.quoted_table_name}.audit_version desc',
               :class_name => 'Audit'
 
               alias :child_record_audits :#{auditable_children_association}
@@ -124,7 +124,7 @@ module CollectiveIdea #:nodoc:
           before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
           after_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
 
-          attr_accessor :version
+          attr_accessor :audit_version
 
           extend CollectiveIdea::Acts::Audited::SingletonMethods
           include CollectiveIdea::Acts::Audited::InstanceMethods
@@ -154,19 +154,19 @@ module CollectiveIdea #:nodoc:
         #
         #   user.revisions.each do |revision|
         #     user.name
-        #     user.version
+        #     user.audit_version
         #   end
         #
-        def revisions(from_version = 1)
-          audits = self.audits.find(:all, :conditions => ['version >= ?', from_version])
+        def revisions(from_audit_version = 1)
+          audits = self.audits.find(:all, :conditions => ['audit_version >= ?', from_audit_version])
           return [] if audits.empty?
-          revision = self.audits.find_by_version(from_version).revision
+          revision = self.audits.find_by_audit_version(from_audit_version).revision
           Audit.reconstruct_attributes(audits) {|attrs| revision.revision_with(attrs) }
         end
 
-        # Get a specific revision specified by the version number, or +:previous+
-        def revision(version)
-          revision_with Audit.reconstruct_attributes(audits_to(version))
+        # Get a specific revision specified by the audit_version number, or +:previous+
+        def revision(audit_version)
+          revision_with Audit.reconstruct_attributes(audits_to(audit_version))
         end
 
         def revision_at(date_or_time)
@@ -217,17 +217,17 @@ module CollectiveIdea #:nodoc:
           end
         end
 
-        def audits_to(version = nil)
-          if version == :previous
-            version = if self.version
-              self.version - 1
+        def audits_to(audit_version = nil)
+          if audit_version == :previous
+            audit_version = if self.audit_version
+              self.audit_version - 1
             else
               previous = audits.find(:first, :offset => 1,
-                :order => "#{Audit.quoted_table_name}.version DESC")
-              previous ? previous.version : 1
+                :order => "#{Audit.quoted_table_name}.audit_version DESC")
+              previous ? previous.audit_version : 1
             end
           end
-          audits.find(:all, :conditions => ['version <= ?', version])
+          audits.find(:all, :conditions => ['audit_version <= ?', audit_version])
         end
 
         def audit_create
