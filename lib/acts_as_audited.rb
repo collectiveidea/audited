@@ -266,6 +266,12 @@ module CollectiveIdea #:nodoc:
         def empty_callback #:nodoc:
         end
 
+
+        def write_audit(attrs)
+          self.audits.create attrs if auditing_enabled && Audit.auditing_enabled?
+        end
+
+
       end # InstanceMethods
 
       module SingletonMethods
@@ -305,3 +311,19 @@ module CollectiveIdea #:nodoc:
     end
   end
 end
+
+class Audit
+  @@auditing_enabled = true
+  def self.auditing_enabled?
+    @@auditing_enabled
+  end
+
+  def self.disable_auditing
+    @@auditing_enabled = false
+  end
+
+  def self.enable_auditing
+    @@auditing_enabled = true
+  end
+end
+
