@@ -1,5 +1,5 @@
 Description:
-	The audited migration generator creates a migration to update the audits table to allow for audit comments. It should only be used if upgrading acts_as_audited from a versino which does not permit audit comments
+	The audited migration generator creates a migration to update the audits table to allow for audit comments. It should only be used if upgrading acts_as_audited from a version which does not permit audit comments
 
 Example:
     ./script/generate audited_migration_upgrade update_audits_table
