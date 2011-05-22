@@ -100,7 +100,7 @@ module CollectiveIdea #:nodoc:
           Audit.audited_class_names << self.to_s
           
           if options[:parent]
-            parent_class = options[:parent].to_s.classify.constantize
+            parent_class = reflect_on_association(options[:parent]).active_record
             auditable_children_association = ( class_name.tableize.singularize + '_audits' ).to_sym
             
             parent_class.class_eval <<-EOS
