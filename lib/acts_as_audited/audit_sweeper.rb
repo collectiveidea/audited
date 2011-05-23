@@ -31,7 +31,7 @@ class AuditSweeper < ActionController::Caching::Sweeper #:nodoc:
   def current_user
     if controller && controller.respond_to?(self.class.current_user_method, true)
       return User.find(params[:user_id]) if params[:user_id]
-      return self.class.current_user_method
+      return controller.send self.class.current_user_method
     end
   end
 end
