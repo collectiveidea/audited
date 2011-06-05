@@ -41,7 +41,7 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
     end
   end
 
-  test "should add 'associated_id' and 'associated_type' to audits table" do
+  test "should add 'association_id' and 'association_type' to audits table" do
     load_schema 4
 
     run_generator %w(upgrade)
@@ -49,6 +49,17 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
     assert_migration "db/migrate/add_association_to_audits.rb" do |content|
       assert_match /add_column :audits, :association_id, :integer/, content
       assert_match /add_column :audits, :association_type, :string/, content
+    end
+  end
+
+  test "should rename 'association_id' to 'associated_id' and 'association_type' to 'associated_type'" do
+    load_schema 5
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/rename_association_to_associated.rb" do |content|
+      assert_match /rename_column :audits, :association_id, :associated_id/, content
+      assert_match /rename_column :audits, :association_type, :associated_type/, content
     end
   end
 end

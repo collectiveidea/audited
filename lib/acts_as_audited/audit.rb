@@ -12,7 +12,7 @@ require 'set'
 class Audit < ActiveRecord::Base
   belongs_to :auditable, :polymorphic => true
   belongs_to :user, :polymorphic => true
-  belongs_to :association, :polymorphic => true
+  belongs_to :associated, :polymorphic => true
 
   before_create :set_version_number, :set_audit_user
 
