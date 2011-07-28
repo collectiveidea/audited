@@ -175,17 +175,17 @@ describe ActsAsAudited::Auditor do
     let(:owned_company) { OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
 
     it "should record the associated object on create" do
-      owned_company.audits.first.association.should == owner
+      owned_company.audits.first.associated.should == owner
     end
 
     it "should store the associated object on update" do
       owned_company.update_attribute(:name, 'The Auditors')
-      owned_company.audits.last.association.should == owner
+      owned_company.audits.last.associated.should == owner
     end
 
     it "should store the associated object on destroy" do
       owned_company.destroy
-      owned_company.audits.last.association.should == owner
+      owned_company.audits.last.associated.should == owner
     end
   end
 
