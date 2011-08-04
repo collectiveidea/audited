@@ -93,7 +93,7 @@ module ActsAsAudited
       end
 
       def has_associated_audits
-        has_many :associated_audits, :as => :association, :class_name => "Audit"
+        has_many :associated_audits, :as => :associated, :class_name => "Audit"
       end
 
     end
@@ -210,7 +210,7 @@ module ActsAsAudited
       end
 
       def write_audit(attrs)
-        attrs[:association] = self.send(audit_associated_with) unless audit_associated_with.nil?
+        attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
         self.audits.create attrs if auditing_enabled
       end
