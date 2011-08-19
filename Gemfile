@@ -1,4 +1,4 @@
-source :gemcutter
+source 'http://rubygems.org'
 
 gem "rails", ">= 3.0.3"
 
@@ -7,5 +7,4 @@ group :development do
   gem "rspec-rails", "~> 2.4.0"
   gem "rcov"
   gem "yard"
-  gem "jeweler"
 end
