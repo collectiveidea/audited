@@ -52,9 +52,13 @@ module ActsAsAudited
 
         options = {:protect => accessible_attributes.empty?}.merge(options)
 
-        class_inheritable_reader :non_audited_columns
-        class_inheritable_reader :auditing_enabled
-        class_inheritable_reader :audit_associated_with
+        #class_inheritable_reader :non_audited_columns
+        #class_inheritable_reader :auditing_enabled
+        #class_inheritable_reader :audit_associated_with
+
+        class_attribute :non_audited_columns, {:instance_writer => false}
+        class_attribute :auditing_enabled, {:instance_writer => false}
+        class_attribute :audit_associated_with, {:instance_writer => false}
 
         if options[:only]
           except = self.column_names - options[:only].flatten.map(&:to_s)
@@ -63,8 +67,10 @@ module ActsAsAudited
             'created_at', 'updated_at', 'created_on', 'updated_on']
           except |= Array(options[:except]).collect(&:to_s) if options[:except]
         end
-        write_inheritable_attribute :non_audited_columns, except
-        write_inheritable_attribute :audit_associated_with, options[:associated_with]
+        #write_inheritable_attribute :non_audited_columns, except
+        #write_inheritable_attribute :audit_associated_with, options[:associated_with]
+        self.non_audited_columns = except
+        self.audit_associated_with = options[:associated_with]
 
         if options[:comment_required]
           validates_presence_of :audit_comment, :if => :auditing_enabled
@@ -89,7 +95,8 @@ module ActsAsAudited
         extend ActsAsAudited::Auditor::SingletonMethods
         include ActsAsAudited::Auditor::InstanceMethods
 
-        write_inheritable_attribute :auditing_enabled, true
+        #write_inheritable_attribute :auditing_enabled, true
+        self.auditing_enabled = true
       end
 
       def has_associated_audits
@@ -251,12 +258,14 @@ module ActsAsAudited
 
       # Disable auditing.
       def disable_auditing
-        write_inheritable_attribute :auditing_enabled, false
+        #write_inheritable_attribute :auditing_enabled, false
+        self.auditing_enabled = false
       end
 
       # Enable auditing.
       def enable_auditing
-        write_inheritable_attribute :auditing_enabled, true
+        #write_inheritable_attribute :auditing_enabled, true
+        self.auditing_enabled = true
       end
 
       # All audit operations during the block are recorded as being
