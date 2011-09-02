@@ -103,7 +103,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rails (>= 3.1.0)
+  rails (>= 3.0.3)
   rcov
   rspec-rails (~> 2.4.0)
   sqlite3-ruby
