@@ -132,8 +132,11 @@ module ActsAsAudited
       def revisions(from_version = 1)
         audits = self.audits.where(['version >= ?', from_version])
         return [] if audits.empty?
-        revision = self.audits.find_by_version(from_version).revision
-        Audit.reconstruct_attributes(audits) {|attrs| revision.revision_with(attrs) }
+        revisions = []
+        audits.each do |audit|
+          revisions << audit.revision
+        end
+        revisions
       end
 
       # Get a specific revision specified by the version number, or +:previous+
