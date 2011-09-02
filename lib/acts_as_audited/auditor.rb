@@ -52,10 +52,6 @@ module ActsAsAudited
 
         options = {:protect => accessible_attributes.empty?}.merge(options)
 
-        #class_inheritable_reader :non_audited_columns
-        #class_inheritable_reader :auditing_enabled
-        #class_inheritable_reader :audit_associated_with
-
         class_attribute :non_audited_columns, {:instance_writer => false}
         class_attribute :auditing_enabled, {:instance_writer => false}
         class_attribute :audit_associated_with, {:instance_writer => false}
@@ -67,8 +63,6 @@ module ActsAsAudited
             'created_at', 'updated_at', 'created_on', 'updated_on']
           except |= Array(options[:except]).collect(&:to_s) if options[:except]
         end
-        #write_inheritable_attribute :non_audited_columns, except
-        #write_inheritable_attribute :audit_associated_with, options[:associated_with]
         self.non_audited_columns = except
         self.audit_associated_with = options[:associated_with]
 
@@ -95,7 +89,6 @@ module ActsAsAudited
         extend ActsAsAudited::Auditor::SingletonMethods
         include ActsAsAudited::Auditor::InstanceMethods
 
-        #write_inheritable_attribute :auditing_enabled, true
         self.auditing_enabled = true
       end
 
@@ -261,13 +254,11 @@ module ActsAsAudited
 
       # Disable auditing.
       def disable_auditing
-        #write_inheritable_attribute :auditing_enabled, false
         self.auditing_enabled = false
       end
 
       # Enable auditing.
       def enable_auditing
-        #write_inheritable_attribute :auditing_enabled, true
         self.auditing_enabled = true
       end
 
