@@ -9,39 +9,39 @@ h2. Installation
 
 In <tt>Gemfile</tt>:
 
-    gem "acts_as_audited", "2.0.0"
+@gem "acts_as_audited", "2.0.0"@
 
 In your application root, run:
 
-    $ bundle install
+@$ bundle install@
 
 Generate the migration:
 
 * If installing without a previous version of +acts_as_audited+ or you do not mind overwriting your audits table:
 
-    $ rails g acts_as_audited:install
+@$ rails g acts_as_audited:install@
 
 * If upgrading from a previous version of +acts_as_audited+ you might need some alterations to the audits table:
 
-    $ rails g acts_as_audited:upgrade
+@$ rails g acts_as_audited:upgrade@
 
 * After running one of the generators:
 
-    $ rake db:migrate
+@$ rake db:migrate@
 
 h2. Rails deprecation warning
 
 Currently the gem causes the following deprecation warning to be emitted:
 
-    DEPRECATION WARNING: reorder is deprecated. Please use except(:order).order(...) instead. (called from <class:Audit> at /Users/kenneth/Code/FOSS/acts_as_audited/lib/acts_as_audited/audit.rb:26)
+@DEPRECATION WARNING: reorder is deprecated. Please use except(:order).order(...) instead. (called from <class:Audit> at /Users/kenneth/Code/FOSS/acts_as_audited/lib/acts_as_audited/audit.rb:26)@
 
-I'm well aware of the fact, and working towards a solution. The issue has also been brought up on the Rails lighthouse as #6011[https://rails.lighthouseapp.com/projects/8994/tickets/6011-exceptorderorder-is-not-working-in-scopes]. I'm keeping an eye on the issue and working towards another possible solution.
+I'm well aware of the fact, and working towards a solution. The issue has also been brought up on the Rails lighthouse as "#6011":https://rails.lighthouseapp.com/projects/8994/tickets/6011-exceptorderorder-is-not-working-in-scopes. I'm keeping an eye on the issue and working towards another possible solution.
 
 h2. Upgrading
 
 Upgrading to Rails 3, or even between point releases of +acts_as_audited+, might require alterations to the audits table. After every upgrade please run the following generator:
 
-    $ rails g acts_as_audited:upgrade
+@$ rails g acts_as_audited:upgrade@
 
 The upgrade generator will only generate migrations that are missing, or no migrations at all if you are up to date.
 
@@ -49,9 +49,10 @@ h2. Usage
 
 Declare +acts_as_audited+ on your models:
 
-    class User < ActiveRecord::Base
-      acts_as_audited :except => [:password, :mistress]
-    end
+<pre><code>class User < ActiveRecord::Base
+  acts_as_audited :except => [:password, :mistress]
+end
+</code></pre>
 
 Within a web request, will automatically record the user that made the change if your controller has a +current_user+ method. Comments can be added to an audit by setting <tt>model.audit_comments</tt>
 before create/update/destroy. If the <tt>:comment_required</tt> option is given to +acts_as_audited+,
@@ -60,31 +61,35 @@ transaction rollback if <tt>model.audit_comment</tt> is nil.
 
 To record an audit for an associated model, use the <tt>:associated_with</tt> option.
 
-    class User < ActiveRecord::Base
-      acts_as_audited :associated_with => :company
-    end
+<pre><code>class User < ActiveRecord::Base
+  acts_as_audited :associated_with => :company
+end
+</code></pre>
 
 If desired, the associated model can access its audits using <tt>has_associated_audits</tt>.
 
-    class Company < ActiveRecord::Base
-      has_many :users
-      has_associated_audits
-    end
+<pre><code>class Company < ActiveRecord::Base
+  has_many :users
+  has_associated_audits
+end
+</code></pre>
 
 To record a user in the audits outside of a web request, you can use +as_user+:
 
-    Audit.as_user(user) do
-      # Perform changes on audited models
-    end
+<pre><code>Audit.as_user(user) do
+  # Perform changes on audited models
+end
+</code></pre>
 
 h2. Caveats
 
 If your model declares +attr_accessible+ after +acts_as_audited+, you need to set <tt>:protect</tt> to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +acts_as_audited+, but needs to be explicitly set if it is called after.
 
-  class User < ActiveRecord::Base
-    acts_as_audited :protect => false
-    attr_accessible :name
-  end
+<pre><code>class User < ActiveRecord::Base
+  acts_as_audited :protect => false
+  attr_accessible :name
+end
+</code></pre>
 
 Another caveat is documented in "issue 26":https://github.com/collectiveidea/acts_as_audited/issues#issue/26, where an audit created on the first request to the server does not have a user. Please review the Github issue for more details on how to fix this. It does not appear to affect Rails 3.
 
