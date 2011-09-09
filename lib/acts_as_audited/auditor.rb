@@ -52,9 +52,9 @@ module ActsAsAudited
 
         options = {:protect => accessible_attributes.empty?}.merge(options)
 
-        class_attribute :non_audited_columns, {:instance_writer => false}
-        class_attribute :auditing_enabled, {:instance_writer => false}
-        class_attribute :audit_associated_with, {:instance_writer => false}
+        class_attribute :non_audited_columns, :instance_writer => false
+        class_attribute :auditing_enabled, :instance_writer => false
+        class_attribute :audit_associated_with, :instance_writer => false
 
         if options[:only]
           except = self.column_names - options[:only].flatten.map(&:to_s)
