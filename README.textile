@@ -1,11 +1,11 @@
-= acts_as_audited
+h1. acts_as_audited
 
 +acts_as_audited+ is an ActiveRecord extension that logs all changes to your
 models in an audits table, with optional revision comments. +acts_as_audited+
 has been updated to work with Rails 3, to use it with older version of Rails,
 please see the <tt>1.1-stable</tt> branch.
 
-== Installation
+h2. Installation
 
 In <tt>Gemfile</tt>:
 
@@ -29,7 +29,7 @@ Generate the migration:
 
     $ rake db:migrate
 
-== Rails deprecation warning
+h2. Rails deprecation warning
 
 Currently the gem causes the following deprecation warning to be emitted:
 
@@ -37,7 +37,7 @@ Currently the gem causes the following deprecation warning to be emitted:
 
 I'm well aware of the fact, and working towards a solution. The issue has also been brought up on the Rails lighthouse as #6011[https://rails.lighthouseapp.com/projects/8994/tickets/6011-exceptorderorder-is-not-working-in-scopes]. I'm keeping an eye on the issue and working towards another possible solution.
 
-== Upgrading
+h2. Upgrading
 
 Upgrading to Rails 3, or even between point releases of +acts_as_audited+, might require alterations to the audits table. After every upgrade please run the following generator:
 
@@ -45,7 +45,7 @@ Upgrading to Rails 3, or even between point releases of +acts_as_audited+, might
 
 The upgrade generator will only generate migrations that are missing, or no migrations at all if you are up to date.
 
-== Usage
+h2. Usage
 
 Declare +acts_as_audited+ on your models:
 
@@ -77,7 +77,7 @@ To record a user in the audits outside of a web request, you can use +as_user+:
       # Perform changes on audited models
     end
 
-== Caveats
+h2. Caveats
 
 If your model declares +attr_accessible+ after +acts_as_audited+, you need to set <tt>:protect</tt> to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +acts_as_audited+, but needs to be explicitly set if it is called after.
 
@@ -86,35 +86,53 @@ If your model declares +attr_accessible+ after +acts_as_audited+, you need to se
     attr_accessible :name
   end
 
-Another caveat is documented in issue 26[https://github.com/collectiveidea/acts_as_audited/issues#issue/26], where an audit created on the first request to the server does not have a user. Please review the Github issue for more details on how to fix this. It does not appear to affect Rails 3.
+Another caveat is documented in "issue 26":https://github.com/collectiveidea/acts_as_audited/issues#issue/26, where an audit created on the first request to the server does not have a user. Please review the Github issue for more details on how to fix this. It does not appear to affect Rails 3.
 
-== Compatability
+h2. Compatability
 
-+acts_as_audited+ works with Rails 3.0.3. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
++acts_as_audited+ works with Rails 3.0.3 – 3.1.0. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
 
-== Getting Help
+h2. Getting Help
 
-Review the documentation at http://rdoc.info/github/collectiveidea/acts_as_audited
+Review the documentation at "http://rdoc.info/github/collectiveidea/acts_as_audited":http://rdoc.info/github/collectiveidea/acts_as_audited
 
-Join the mailing list for getting help or offering suggestions - http://groups.google.com/group/acts_as_audited
+Join "the mailing list":http://groups.google.com/group/acts_as_audited for getting help or offering suggestions.
 
-== Branches
+h2. Branches
 
-The <tt>master</tt> branch is considered stable, and you should be able to use it at any time. The <tt>development</tt> branch will contain all active development and might be a moving target from time to time.
+The <tt>master</tt> branch is considered stable, and you should be able to use it at any time.
 
-== Contributing
+h2. Contributing
 
-Contributions are always welcome. Checkout the latest code on GitHub - http://github.com/collectiveidea/acts_as_audited
+In the spirit of "free software":http://www.fsf.org/licensing/essays/free-sw.html, **everyone** is encouraged to help improve this project.
 
-When contributing a bug-fix, please use a topic branch created off our <tt>master</tt> branch. When developing a new feature, please create a topic branch of our <tt>development</tt> branch (and rebase before submiting a pull request).
+Here are some ways *you* can contribute:
 
-Please include tests with your patches. There are a few gems required to run the tests:
+* using alpha, beta, and prerelease versions
+* reporting bugs
+* suggesting new features
+* writing or editing documentation
+* writing specifications
+* writing code (**no patch is too small**: fix typos, add comments, clean up inconsistent whitespace)
+* refactoring code
+* closing "issues":https://github.com/collectiveidea/acts_as_audited/issues
+* reviewing patches
 
-  $ bundle install
+h2. Submitting an Issue
 
-Make sure the tests pass against the version of Rails specified in the Gemfile
+We use the "GitHub issue tracker":https://github.com/collectiveidea/acts_as_audited/issues to track bugs
+and features. Before submitting a bug report or feature request, check to make sure it hasn't already
+been submitted. You can indicate support for an existing issuse by voting it up. When submitting a
+bug report, please include a "Gist":https://gist.github.com/ that includes a stack trace and any
+details that may be necessary to reproduce the bug, including your gem version, Ruby version, and
+operating system. Ideally, a bug report should include a pull request with failing specs.
 
-  $ rake spec test
+h2. Submitting a Pull Request
 
-Please report bugs or feature suggestions on GitHub - http://github.com/collectiveidea/acts_as_audited/issues
-
+1. Fork the project.
+2. Create a topic branch.
+3. Implement your feature or bug fix.
+4. Add specs for your feature or bug fix.
+5. Run @bundle exec rake@. If your changes are not 100% covered and passing, go back to step 4.
+6. Commit and push your changes.
+7. Submit a pull request. Please do not include changes to the gemspec, version, or history file. (If you want to create your own version for some reason, please do so in a separate commit.)
