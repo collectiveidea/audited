@@ -58,6 +58,8 @@ class Audit < ActiveRecord::Base
     # @private
     def assign_revision_attributes(record, attributes)
       attributes.each do |attr, val|
+        record = record.dup if record.frozen?
+
         if record.respond_to?("#{attr}=")
           record.attributes.has_key?(attr.to_s) ?
             record[attr] = val :
