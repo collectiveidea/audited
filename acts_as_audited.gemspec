@@ -13,13 +13,13 @@ Gem::Specification.new do |s|
   s.email = %q{brandon@opensoul.org}
   s.extra_rdoc_files = [
     "LICENSE",
-     "README"
+     "README.rdoc"
   ]
   s.files = [
     ".gitignore",
      "CHANGELOG",
      "LICENSE",
-     "README",
+     "README.rdoc",
      "Rakefile",
      "VERSION",
      "acts_as_audited.gemspec",
