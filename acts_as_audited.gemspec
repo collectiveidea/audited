@@ -3,11 +3,11 @@
 Gem::Specification.new do |gem|
   gem.add_runtime_dependency(%q<rails>, [">= 3.0.3"])
 
-  gem.authors = ["Brandon Keepers", "Kenneth Kalmer"]
-  gem.email = 'brandon@opensoul.org'
+  gem.authors = ["Brandon Keepers", "Kenneth Kalmer", "Daniel Morrison", "Brian Ryckbost"]
+  gem.email = 'daniel@collectiveidea.com  '
   gem.required_rubygems_version = Gem::Requirement.new('>= 1.3.6')
   gem.files = `git ls-files`.split("\n")
-  gem.homepage = %q{http://github.com/collectiveidea/acts_as_audited}
+  gem.homepage = %q{https://github.com/collectiveidea/acts_as_audited}
   gem.rdoc_options = ["--main", "README.rdoc", "--line-numbers", "--inline-source"]
   gem.require_paths = ["lib"]
   gem.name = 'acts_as_audited'
