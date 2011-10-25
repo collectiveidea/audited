@@ -17,6 +17,15 @@ describe ActsAsAudited::Auditor do
       end
     end
 
+    it "should be configurable which attributes are not audited" do
+      ActsAsAudited.ignored_attributes = ['delta', 'top_secret', 'created_at']
+      class Secret < ActiveRecord::Base
+        acts_as_audited
+      end
+
+      Secret.non_audited_columns.should include('delta', 'top_secret', 'created_at')
+    end
+
     it "should not save non-audited columns" do
       create_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
     end
