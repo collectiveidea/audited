@@ -44,7 +44,7 @@ class AuditTest < Test::Unit::TestCase
     end
 
   end
-  
+
   context "revision" do
     should "recreate attributes" do
       user = User.create :name => "1"
@@ -53,7 +53,7 @@ class AuditTest < Test::Unit::TestCase
         audit.revision.name.should == audit.version.to_s
       end
     end
-  
+
     should "set protected attributes" do
       u = User.create(:name => 'Brandon')
       u.update_attribute :logins, 1
@@ -63,12 +63,12 @@ class AuditTest < Test::Unit::TestCase
       u.audits[1].revision.logins.should == 1
       u.audits[0].revision.logins.should == 0
     end
-    
+
     should "bypass attribute assignment wrappers" do
       u = User.create(:name => '<Joe>')
       u.audits.first.revision.name.should == '&lt;Joe&gt;'
     end
-    
+
     should "work for deleted records" do
       user = User.create :name => "1"
       user.destroy
@@ -77,7 +77,7 @@ class AuditTest < Test::Unit::TestCase
       revision.new_record?.should be(true)
     end
   end
-  
+
   should "set the version number on create" do
     user = User.create! :name => "Set Version Number"
     user.audits.first.version.should == 1
@@ -90,7 +90,7 @@ class AuditTest < Test::Unit::TestCase
 
   context "reconstruct_attributes" do
     should "work with with old way of storing just the new value" do
-      audits = Audit.reconstruct_attributes([Audit.new(:changes => {'attribute' => 'value'})])
+      audits = Audit.reconstruct_attributes([Audit.new(:audited_changes => {'attribute' => 'value'})])
       audits['attribute'].should == 'value'
     end
   end
@@ -113,13 +113,13 @@ class AuditTest < Test::Unit::TestCase
 
   context "new_attributes" do
     should "return a hash of the new values" do
-      Audit.new(:changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
+      Audit.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
     end
   end
 
   context "old_attributes" do
     should "return a hash of the old values" do
-      Audit.new(:changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
+      Audit.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
     end
   end
 

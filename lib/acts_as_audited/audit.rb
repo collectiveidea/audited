@@ -5,17 +5,17 @@ require 'set'
 # * <tt>auditable</tt>: the ActiveRecord model that was changed
 # * <tt>user</tt>: the user that performed the change; a string or an ActiveRecord model
 # * <tt>action</tt>: one of create, update, or delete
-# * <tt>changes</tt>: a serialized hash of all the changes
+# * <tt>audited_changes</tt>: a serialized hash of all the changes
 # * <tt>created_at</tt>: Time that the change was performed
 #
 class Audit < ActiveRecord::Base
   belongs_to :auditable, :polymorphic => true
   belongs_to :user, :polymorphic => true
   belongs_to :auditable_parent, :polymorphic => true
-  
+
   before_create :set_version_number, :set_audit_user
-  
-  serialize :changes
+
+  serialize :audited_changes
 
   cattr_accessor :audited_class_names
   self.audited_class_names = Set.new
@@ -67,7 +67,7 @@ class Audit < ActiveRecord::Base
 
   # Returns a hash of the changed attributes with the new values
   def new_attributes
-    (changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
+    (audited_changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
       attrs[attr] = values.is_a?(Array) ? values.last : values
       attrs
     end
@@ -75,7 +75,7 @@ class Audit < ActiveRecord::Base
 
   # Returns a hash of the changed attributes with the old values
   def old_attributes
-    (changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
+    (audited_changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
       attrs[attr] = Array(values).first
       attrs
     end
@@ -89,7 +89,7 @@ class Audit < ActiveRecord::Base
     end
     block_given? ? result : attributes
   end
-  
+
   def self.assign_revision_attributes(record, attributes)
     attributes.each do |attr, val|
       if record.respond_to?("#{attr}=")

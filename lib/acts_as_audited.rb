@@ -75,7 +75,7 @@ module CollectiveIdea #:nodoc:
 
           class_inheritable_reader :non_audited_columns
           class_inheritable_reader :auditing_enabled
-          
+
           if options[:only]
             except = self.column_names - options[:only].flatten.map(&:to_s)
           else
@@ -84,9 +84,9 @@ module CollectiveIdea #:nodoc:
             except |= Array(options[:except]).collect(&:to_s) if options[:except]
           end
           write_inheritable_attribute :non_audited_columns, except
-          
+
           add_comment_required(options)
-          
+
           unless accessible_attributes.nil? || options[:protect]
             attr_accessible :audit_comment
           end
@@ -94,11 +94,11 @@ module CollectiveIdea #:nodoc:
           has_many :audits, :as => :auditable, :order => "#{Audit.quoted_table_name}.version"
           attr_protected :audit_ids if options[:protect]
           Audit.audited_class_names << self.to_s
-          
+
           if options[:parent]
             parent_class = options[:parent].to_s.classify.constantize
             auditable_children_association = ( class_name.tableize.singularize + '_audits' ).to_sym
-            
+
             parent_class.class_eval <<-EOS
               has_many :#{auditable_children_association},
               :as => :auditable_parent,
@@ -110,12 +110,12 @@ module CollectiveIdea #:nodoc:
                 true
               end
             EOS
-            
+
             write_inheritable_attribute :auditable_parent, options[:parent]
           else
             write_inheritable_attribute :auditable_parent, nil
           end
-          
+
           after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
           before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
           after_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
@@ -128,11 +128,11 @@ module CollectiveIdea #:nodoc:
           write_inheritable_attribute :auditing_enabled, true
           define_callbacks :after_audit
         end
-        
+
         def add_comment_required(options)
           if options[:comment_required]
             validation_method_condition = options[:on] ? (options[:on]-[:create] == [] ? :create : (options[:on]-[:update] == [] ? :update : :save)) : :save
-            validates_presence_of :audit_comment, 
+            validates_presence_of :audit_comment,
                                   :on => validation_method_condition,
                                   :if => Proc.new{|model| auditing_enabled && (model.new_record? || !(model.changes.keys - non_audited_columns).empty?)}
             before_destroy :require_comment
@@ -209,7 +209,7 @@ module CollectiveIdea #:nodoc:
         end
 
       private
-        
+
         def auditable_parent
           case ( possible_parent = self.class.read_inheritable_attribute(:auditable_parent) )
           when Symbol
@@ -240,19 +240,19 @@ module CollectiveIdea #:nodoc:
         end
 
         def audit_create
-          write_audit(:action => 'create', :changes => audited_attributes, 
+          write_audit(:action => 'create', :audited_changes => audited_attributes,
             :comment => audit_comment, :auditable_parent => auditable_parent)
         end
 
         def audit_update
           unless (changes = audited_changes).empty?
-            write_audit(:action => 'update', :changes => changes, 
+            write_audit(:action => 'update', :audited_changes => changes,
               :comment => audit_comment, :auditable_parent => auditable_parent)
           end
         end
 
         def audit_destroy
-          write_audit(:action => 'destroy', :changes => audited_attributes,
+          write_audit(:action => 'destroy', :audited_changes => audited_attributes,
             :comment => audit_comment, :auditable_parent => auditable_parent)
         end
 
@@ -263,7 +263,7 @@ module CollectiveIdea #:nodoc:
             run_callbacks(:after_audit)
           end
         end
-  
+
         def require_comment
           if auditing_enabled && audit_comment.blank?
             errors.add(:audit_comment, "Comment required before destruction")
