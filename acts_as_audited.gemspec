@@ -13,6 +13,6 @@ Gem::Specification.new do |gem|
   gem.name = 'acts_as_audited'
   gem.summary = %q{ActiveRecord extension that logs all changes to your models in an audits table}
   gem.test_files = `git ls-files -- spec/* test/*`.split("\n")
-  gem.version = "2.0.0"
+  gem.version = "2.0.1.beta1"
 end
 
