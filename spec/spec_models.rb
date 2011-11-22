@@ -32,6 +32,16 @@ class NoAttributeProtectionUser < ActiveRecord::Base
   acts_as_audited
 end
 
+class UserWithAfterAudit < ActiveRecord::Base
+  set_table_name :users
+  acts_as_audited
+  attr_accessor :bogus_attr
+
+  def after_audit
+    self.bogus_attr = "do something"
+  end
+end
+
 class Company < ActiveRecord::Base
   acts_as_audited
 end

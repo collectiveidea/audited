@@ -89,6 +89,8 @@ module ActsAsAudited
         include ActsAsAudited::Auditor::InstanceMethods
 
         self.auditing_enabled = true
+        define_callbacks :audit
+        set_callback :audit, :after, :after_audit, :if => lambda { self.respond_to?(:after_audit) }
       end
 
       def has_associated_audits
@@ -214,7 +216,7 @@ module ActsAsAudited
       def write_audit(attrs)
         attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        self.audits.create attrs if auditing_enabled
+        run_callbacks(:audit)  { self.audits.create(attrs) } if auditing_enabled
       end
 
       def require_comment
