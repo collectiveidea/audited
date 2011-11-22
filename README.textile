@@ -1,0 +1,143 @@
+h1. acts_as_audited
+
++acts_as_audited+ is an ActiveRecord extension that logs all changes to your
+models in an audits table, with optional revision comments. +acts_as_audited+
+has been updated to work with Rails 3, to use it with older version of Rails,
+please see the <tt>1.1-stable</tt> branch.
+
+h2. Installation
+
+In <tt>Gemfile</tt>:
+
+@gem "acts_as_audited", "2.0.0"@
+
+In your application root, run:
+
+@$ bundle install@
+
+Generate the migration:
+
+* If installing without a previous version of +acts_as_audited+ or you do not mind overwriting your audits table:
+
+@$ rails g acts_as_audited:install@
+
+* If upgrading from a previous version of +acts_as_audited+ you might need some alterations to the audits table:
+
+@$ rails g acts_as_audited:upgrade@
+
+* After running one of the generators:
+
+@$ rake db:migrate@
+
+h2. Rails deprecation warning
+
+Currently the gem causes the following deprecation warning to be emitted:
+
+@DEPRECATION WARNING: reorder is deprecated. Please use except(:order).order(...) instead. (called from <class:Audit> at /Users/kenneth/Code/FOSS/acts_as_audited/lib/acts_as_audited/audit.rb:26)@
+
+I'm well aware of the fact, and working towards a solution. The issue has also been brought up on the Rails lighthouse as "#6011":https://rails.lighthouseapp.com/projects/8994/tickets/6011-exceptorderorder-is-not-working-in-scopes. I'm keeping an eye on the issue and working towards another possible solution.
+
+h2. Upgrading
+
+Upgrading to Rails 3, or even between point releases of +acts_as_audited+, might require alterations to the audits table. After every upgrade please run the following generator:
+
+@$ rails g acts_as_audited:upgrade@
+
+The upgrade generator will only generate migrations that are missing, or no migrations at all if you are up to date.
+
+h2. Usage
+
+Declare +acts_as_audited+ on your models:
+
+<pre><code>class User < ActiveRecord::Base
+  acts_as_audited :except => [:password, :mistress]
+end
+</code></pre>
+
+Within a web request, will automatically record the user that made the change if your controller has a +current_user+ method. Comments can be added to an audit by setting <tt>model.audit_comments</tt>
+before create/update/destroy. If the <tt>:comment_required</tt> option is given to +acts_as_audited+,
+the save/update/destroy action will fail with add an error on <tt>model.audit_comment</tt> and triggering a
+transaction rollback if <tt>model.audit_comment</tt> is nil.
+
+To record an audit for an associated model, use the <tt>:associated_with</tt> option.
+
+<pre><code>class User < ActiveRecord::Base
+  acts_as_audited :associated_with => :company
+end
+</code></pre>
+
+If desired, the associated model can access its audits using <tt>has_associated_audits</tt>.
+
+<pre><code>class Company < ActiveRecord::Base
+  has_many :users
+  has_associated_audits
+end
+</code></pre>
+
+To record a user in the audits outside of a web request, you can use +as_user+:
+
+<pre><code>Audit.as_user(user) do
+  # Perform changes on audited models
+end
+</code></pre>
+
+h2. Caveats
+
+If your model declares +attr_accessible+ after +acts_as_audited+, you need to set <tt>:protect</tt> to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +acts_as_audited+, but needs to be explicitly set if it is called after.
+
+<pre><code>class User < ActiveRecord::Base
+  acts_as_audited :protect => false
+  attr_accessible :name
+end
+</code></pre>
+
+Another caveat is documented in "issue 26":https://github.com/collectiveidea/acts_as_audited/issues#issue/26, where an audit created on the first request to the server does not have a user. Please review the Github issue for more details on how to fix this. It does not appear to affect Rails 3.
+
+h2. Compatability
+
++acts_as_audited+ works with Rails 3.0.3 – 3.1.0. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
+
+h2. Getting Help
+
+Review the documentation at "http://rdoc.info/github/collectiveidea/acts_as_audited":http://rdoc.info/github/collectiveidea/acts_as_audited
+
+Join "the mailing list":http://groups.google.com/group/acts_as_audited for getting help or offering suggestions.
+
+h2. Branches
+
+The <tt>master</tt> branch is considered stable, and you should be able to use it at any time.
+
+h2. Contributing
+
+In the spirit of "free software":http://www.fsf.org/licensing/essays/free-sw.html, **everyone** is encouraged to help improve this project.
+
+Here are some ways *you* can contribute:
+
+* using alpha, beta, and prerelease versions
+* reporting bugs
+* suggesting new features
+* writing or editing documentation
+* writing specifications
+* writing code (**no patch is too small**: fix typos, add comments, clean up inconsistent whitespace)
+* refactoring code
+* closing "issues":https://github.com/collectiveidea/acts_as_audited/issues
+* reviewing patches
+
+h2. Submitting an Issue
+
+We use the "GitHub issue tracker":https://github.com/collectiveidea/acts_as_audited/issues to track bugs
+and features. Before submitting a bug report or feature request, check to make sure it hasn't already
+been submitted. You can indicate support for an existing issuse by voting it up. When submitting a
+bug report, please include a "Gist":https://gist.github.com/ that includes a stack trace and any
+details that may be necessary to reproduce the bug, including your gem version, Ruby version, and
+operating system. Ideally, a bug report should include a pull request with failing specs.
+
+h2. Submitting a Pull Request
+
+1. Fork the project.
+2. Create a topic branch.
+3. Implement your feature or bug fix.
+4. Add specs for your feature or bug fix.
+5. Run @bundle exec rake@. If your changes are not 100% covered and passing, go back to step 4.
+6. Commit and push your changes.
+7. Submit a pull request. Please do not include changes to the gemspec, version, or history file. (If you want to create your own version for some reason, please do so in a separate commit.)

@@ -1,5 +1,11 @@
- acts_as_audited ChangeLog
+acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
+
+* 2011-09-09 - Rails 3.x support
+               Support for associated audits
+               Support for remote IP address storage
+               Plenty of bug fixes and refactoring
+               [kennethkalmer, ineu, PatrickMa, jrozner, dwarburton, bsiggelkow, dgm]
 * 2009-01-27 - Store old and new values for updates, and store all attributes on destroy.
                Refactored revisioning methods to work as expected
 * 2008-10-10 - changed to make it work in development mode
