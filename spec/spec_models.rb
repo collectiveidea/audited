@@ -10,6 +10,10 @@ class User < ActiveRecord::Base
   end
 end
 
+class BlankUser < ActiveRecord::Base
+  set_table_name :users
+end
+
 class CommentRequiredUser < ActiveRecord::Base
   set_table_name :users
   acts_as_audited :comment_required => true
