@@ -8,3 +8,4 @@ pkg
 tmp/*
 .yardoc
 .rvmrc
+.idea

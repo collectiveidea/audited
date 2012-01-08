@@ -214,7 +214,8 @@ module ActsAsAudited
       def write_audit(attrs)
         attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        self.audits.create attrs if auditing_enabled
+        if auditing_enabled
+          self.version = self.audits.create(attrs).version
       end
 
       def require_comment
