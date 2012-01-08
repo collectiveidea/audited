@@ -216,6 +216,7 @@ module ActsAsAudited
         self.audit_comment = nil
         if auditing_enabled
           self.version = self.audits.create(attrs).version
+        end
       end
 
       def require_comment
