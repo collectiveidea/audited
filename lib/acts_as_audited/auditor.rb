@@ -67,7 +67,7 @@ module ActsAsAudited
 
         if options[:comment_required]
           validates_presence_of :audit_comment, :if => :auditing_enabled
-          before_destroy :require_comment
+          before_destroy :require_comment if !options[:on] || (options[:on] && options[:on].include?(:destroy))
         end
 
         attr_accessor :audit_comment
