@@ -66,7 +66,9 @@ module ActsAsAudited
         self.audit_associated_with = options[:associated_with]
 
         if options[:comment_required]
-          validates_presence_of :audit_comment, :if => :auditing_enabled, :on => options[:on]
+          if !options[:on] || (options[:on] && (options[:on].include?(:destroy)||options[:on].include?(:create)))
+            validates_presence_of :audit_comment, :if => :auditing_enabled
+          end
           before_destroy :require_comment if !options[:on] || (options[:on] && options[:on].include?(:destroy))
         end
 
