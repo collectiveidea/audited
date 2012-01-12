@@ -27,7 +27,9 @@ module ActsAsAudited
   VERSION = '2.0.0'
 
   class << self
+  
     attr_writer :ignored_attributes
+    
     def ignored_attributes
       @ignored_attributes ||= ['lock_version',
                                'created_at',
@@ -35,6 +37,7 @@ module ActsAsAudited
                                'created_on',
                                'updated_on']
     end
+    
   end
 
   mattr_accessor :current_user_method
