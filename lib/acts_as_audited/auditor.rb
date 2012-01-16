@@ -147,6 +147,14 @@ module ActsAsAudited
         attributes.except(*non_audited_columns)
       end
 
+      def version
+        if @version.nil?
+          audit = audits.descending.first
+          @version = audit.version unless audit.nil?
+        end
+        @version
+      end
+
       protected
 
       def revision_with(attributes)
