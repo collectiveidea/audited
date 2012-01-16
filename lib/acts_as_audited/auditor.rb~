@@ -150,7 +150,7 @@ module ActsAsAudited
       def version
         if @version.nil?
           audit = audits.descending.first
-          @version = audit.nil? 0 || audit.version
+          @version = audit.version unless audit.nil?
         end
         @version
       end
