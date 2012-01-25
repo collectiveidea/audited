@@ -48,7 +48,7 @@ module ActsAsAudited
       #
       def acts_as_audited(options = {})
         # don't allow multiple calls
-        return if self.included_modules.include?(ActsAsAudited::Auditor::InstanceMethods)
+        return if !self.table_exists? or self.included_modules.include?(ActsAsAudited::Auditor::InstanceMethods)
 
         options = {:protect => accessible_attributes.empty?}.merge(options)
 
