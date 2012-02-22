@@ -25,6 +25,10 @@ class Audit < ActiveRecord::Base
   default_scope order(:version)
   scope :descending, reorder("version DESC")
 
+  scope :creates,   where(:action => 'create')
+  scope :updates,   where(:action => 'update')
+  scope :destroys,  where(:action => 'destroy')
+
   class << self
 
     # Returns the list of classes that are being audited
