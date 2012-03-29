@@ -208,7 +208,7 @@ module ActsAsAudited
       end
 
       def audit_update
-        unless (changes = audited_changes).empty? && audit_comment.present?
+        unless (changes = audited_changes).empty? && !audit_comment.present?
           write_audit(:action => 'update', :audited_changes => changes,
             :comment => audit_comment)
         end
