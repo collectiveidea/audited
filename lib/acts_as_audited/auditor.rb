@@ -75,7 +75,7 @@ module ActsAsAudited
           attr_accessible :audit_comment
         end
 
-        has_many :audits, :as => :auditable
+        has_many :audits, :as => :auditable, :dependent => :destroy
         attr_protected :audit_ids if options[:protect]
         Audit.audited_class_names << self.to_s
 
