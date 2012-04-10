@@ -27,12 +27,13 @@ module ActsAsAudited
   VERSION = '2.0.0'
 
   class << self
-    attr_accessor_with_default :ignored_attributes, ['lock_version',
-                                                     'created_at',
-                                                     'updated_at',
-                                                     'created_on',
-                                                     'updated_on']
+    attr_accessor :ignored_attributes
   end
+  @ignored_attributes ||= ['lock_version',
+                          'created_at',
+                          'updated_at',
+                          'created_on',
+                          'updated_on']
 
   mattr_accessor :current_user_method
   # The method to be called to return the current user for logging in the audits.
