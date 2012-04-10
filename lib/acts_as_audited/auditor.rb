@@ -34,7 +34,7 @@ module ActsAsAudited
       #       acts_as_audited :except => :password
       #     end
       # * +protect+ - If your model uses +attr_protected+, set this to false to prevent Rails from
-      #   raising an error.  If you declare +attr_accessibe+ before calling +acts_as_audited+, it
+      #   raising an error.  If you declare +attr_accessible+ before calling +acts_as_audited+, it
       #   will automatically default to false.  You only need to explicitly set this if you are
       #   calling +attr_accessible+ after.
       #
