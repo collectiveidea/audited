@@ -4,9 +4,7 @@ $:.unshift File.dirname(__FILE__)
 
 require 'rails_app/config/environment'
 require 'rspec/rails'
-
 require 'acts_as_audited'
-
 require 'audited_spec_helpers'
 
 RSpec.configure do |c|

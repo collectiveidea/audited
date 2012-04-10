@@ -4,7 +4,6 @@ require "rails/all"
 
 Bundler.require :default
 
-
 module RailsApp
   class Application < Rails::Application
     # Ensure the root is correct
