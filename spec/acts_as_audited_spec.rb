@@ -66,6 +66,10 @@ describe ActsAsAudited::Auditor do
 
     it "should set the action to create" do
       user.audits.first.action.should == 'create'
+      Audit.creates.reorder(:id).last.should == user.audits.first
+      user.audits.creates.count.should == 1
+      user.audits.updates.count.should == 0
+      user.audits.destroys.count.should == 0
     end
 
     it "should store all the audited attributes" do
@@ -111,6 +115,8 @@ describe ActsAsAudited::Auditor do
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
       @user.audits.last.action.should == 'update'
+      Audit.updates.reorder(:id).last.should == @user.audits.last
+      @user.audits.updates.last.should == @user.audits.last
     end
 
     it "should store the changed attributes" do
@@ -154,6 +160,8 @@ describe ActsAsAudited::Auditor do
       @user.destroy
 
       @user.audits.last.action.should == 'destroy'
+      Audit.destroys.reorder(:id).last.should == @user.audits.last
+      @user.audits.destroys.last.should == @user.audits.last
     end
 
     it "should store all of the audited attributes" do
