@@ -1,4 +1,4 @@
-ActiveRecord::Schema.define(:version => 0) do
+ActiveRecord::Schema.define(:audit_version => 0) do
   create_table :users, :force => true do |t|
     t.column :name, :string
     t.column :username, :string
@@ -33,7 +33,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :username, :string
     t.column :action, :string
     t.column :changes, :text
-    t.column :version, :integer, :default => 0
+    t.column :audit_version, :integer, :default => 0
     t.column :comment, :string
     t.column :created_at, :datetime
   end

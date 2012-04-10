@@ -50,7 +50,7 @@ class AuditTest < Test::Unit::TestCase
       user = User.create :name => "1"
       5.times {|i| user.update_attribute :name, (i + 2).to_s  }
       user.audits.each do |audit|
-        audit.revision.name.should == audit.version.to_s
+        audit.revision.name.should == audit.audit_version.to_s
       end
     end
   
@@ -78,14 +78,14 @@ class AuditTest < Test::Unit::TestCase
     end
   end
   
-  should "set the version number on create" do
-    user = User.create! :name => "Set Version Number"
-    user.audits.first.version.should == 1
+  should "set the audit_version number on create" do
+    user = User.create! :name => "Set Audit_Version Number"
+    user.audits.first.audit_version.should == 1
     user.update_attribute :name, "Set to 2"
-    user.audits(true).first.version.should == 1
-    user.audits(true).last.version.should == 2
+    user.audits(true).first.audit_version.should == 1
+    user.audits(true).last.audit_version.should == 2
     user.destroy
-    user.audits(true).last.version.should == 3
+    user.audits(true).last.audit_version.should == 3
   end
 
   context "reconstruct_attributes" do
