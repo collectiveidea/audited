@@ -75,7 +75,7 @@ module ActsAsAudited
           attr_accessible :audit_comment
         end
 
-        has_many :audits, :as => :auditable
+        has_many :audits, :as => :auditable, :dependent => :destroy
         attr_protected :audit_ids if options[:protect]
         Audit.audited_class_names << self.to_s
 
@@ -147,6 +147,14 @@ module ActsAsAudited
         attributes.except(*non_audited_columns)
       end
 
+      def version
+        if @version.nil?
+          audit = audits.descending.first
+          @version = audit.nil? 0 || audit.version
+        end
+        @version
+      end
+
       protected
 
       def revision_with(attributes)
@@ -200,7 +208,7 @@ module ActsAsAudited
       end
 
       def audit_update
-        unless (changes = audited_changes).empty?
+        unless (changes = audited_changes).empty? && !audit_comment.present?
           write_audit(:action => 'update', :audited_changes => changes,
             :comment => audit_comment)
         end
@@ -214,7 +222,9 @@ module ActsAsAudited
       def write_audit(attrs)
         attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        self.audits.create attrs if auditing_enabled
+        if auditing_enabled
+          self.version = self.audits.create(attrs).version
+        end
       end
 
       def require_comment
