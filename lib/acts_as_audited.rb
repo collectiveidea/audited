@@ -19,8 +19,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'active_support/deprecation'
-require 'active_support/core_ext/module'
 require 'active_record'
 
 # To get started, please review ActsAsAudited::Auditor::ClassMethods#acts_as_audited
@@ -28,7 +26,7 @@ module ActsAsAudited
   VERSION = '2.0.0'
 
   class << self
-    attr_accessor :ignored_attributes
+    attr_accessor :ignored_attributes, :current_user_method
   end
   @ignored_attributes ||= ['lock_version',
                           'created_at',
@@ -36,10 +34,8 @@ module ActsAsAudited
                           'created_on',
                           'updated_on']
 
-  mattr_accessor :current_user_method
   # The method to be called to return the current user for logging in the audits.
-  @@current_user_method = :current_user
-
+  @current_user_method = :current_user
 end
 
 require 'acts_as_audited/auditor'
