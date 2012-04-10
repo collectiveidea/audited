@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |gem|
-  gem.add_runtime_dependency(%q<rails>, [">= 3.0.3"])
+  gem.add_runtime_dependency "rails", "~> 3.0", ">= 3.0.3"
 
   gem.authors = ["Brandon Keepers", "Kenneth Kalmer", "Daniel Morrison", "Brian Ryckbost"]
   gem.email = 'daniel@collectiveidea.com  '
