@@ -50,10 +50,10 @@ module ActsAsAudited
         # don't allow multiple calls
         return if self.included_modules.include?(ActsAsAudited::Auditor::InstanceMethods)
 
-        options = {:protect => accessible_attributes.empty?}.merge(options)
+        options = { :protect => accessible_attributes.empty? }.merge(options)
 
-        class_attribute :non_audited_columns, :instance_writer => false
-        class_attribute :auditing_enabled, :instance_writer => false
+        class_attribute :non_audited_columns,   :instance_writer => false
+        class_attribute :auditing_enabled,      :instance_writer => false
         class_attribute :audit_associated_with, :instance_writer => false
 
         if options[:only]
@@ -94,11 +94,9 @@ module ActsAsAudited
       def has_associated_audits
         has_many :associated_audits, :as => :associated, :class_name => "Audit"
       end
-
     end
 
     module InstanceMethods
-
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
@@ -234,7 +232,7 @@ module ActsAsAudited
     end # InstanceMethods
 
     module SingletonMethods
-      # Returns an array of columns that are audited.  See non_audited_columns
+      # Returns an array of columns that are audited. See non_audited_columns
       def audited_columns
         self.columns.select { |c| !non_audited_columns.include?(c.name) }
       end
@@ -251,12 +249,10 @@ module ActsAsAudited
         block.call.tap { enable_auditing if auditing_was_enabled }
       end
 
-      # Disable auditing.
       def disable_auditing
         self.auditing_enabled = false
       end
 
-      # Enable auditing.
       def enable_auditing
         self.auditing_enabled = true
       end
@@ -268,7 +264,6 @@ module ActsAsAudited
       def audit_as( user, &block )
         Audit.as_user( user, &block )
       end
-
     end
   end
 end

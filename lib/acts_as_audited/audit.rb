@@ -10,8 +10,8 @@ require 'set'
 # * <tt>created_at</tt>: Time that the change was performed
 #
 class Audit < ActiveRecord::Base
-  belongs_to :auditable, :polymorphic => true
-  belongs_to :user, :polymorphic => true
+  belongs_to :auditable,  :polymorphic => true
+  belongs_to :user,       :polymorphic => true
   belongs_to :associated, :polymorphic => true
 
   before_create :set_version_number, :set_audit_user
@@ -21,16 +21,13 @@ class Audit < ActiveRecord::Base
   cattr_accessor :audited_class_names
   self.audited_class_names = Set.new
 
-  # Order by ver
   default_scope order(:version)
   scope :descending, reorder("version DESC")
-
-  scope :creates,   :conditions => {:action => 'create'}
-  scope :updates,   :conditions => {:action => 'update'}
-  scope :destroys,  :conditions => {:action => 'destroy'}
+  scope :creates,    :conditions => {:action => 'create'}
+  scope :updates,    :conditions => {:action => 'update'}
+  scope :destroys,   :conditions => {:action => 'destroy'}
 
   class << self
-
     # Returns the list of classes that are being audited
     def audited_classes
       audited_class_names.map(&:constantize)
@@ -72,7 +69,6 @@ class Audit < ActiveRecord::Base
       end
       record
     end
-
   end
 
   # Allows user to be set to either a string or an ActiveRecord object
@@ -98,8 +94,8 @@ class Audit < ActiveRecord::Base
   # the object has been destroyed, this will be a new record.
   def revision
     clazz = auditable_type.constantize
-    ( clazz.find_by_id(auditable_id) || clazz.new ).tap do |m|
-      Audit.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge({:version => version}))
+    (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
+      Audit.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge({ :version => version }))
     end
   end
 
@@ -126,7 +122,6 @@ class Audit < ActiveRecord::Base
   end
 
 private
-
   def set_version_number
     max = self.class.maximum(:version,
       :conditions => {
@@ -140,5 +135,4 @@ private
     self.user = Thread.current[:acts_as_audited_user] if Thread.current[:acts_as_audited_user]
     nil # prevent stopping callback chains
   end
-
 end
