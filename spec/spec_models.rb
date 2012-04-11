@@ -33,7 +33,7 @@ class NoAttributeProtectionUser < ActiveRecord::Base
 end
 
 class UserWithAfterAudit < ActiveRecord::Base
-  set_table_name :users
+  self.table_name = :users
   acts_as_audited
   attr_accessor :bogus_attr
 

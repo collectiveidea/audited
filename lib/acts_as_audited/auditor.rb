@@ -83,14 +83,17 @@ module ActsAsAudited
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
         before_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
 
+        # Define and set an after_audit callback. This might be useful if you want
+        # to notify a party after the audit has been created.
+        define_callbacks :audit
+        set_callback :audit, :after, :after_audit, :if => lambda { self.respond_to?(:after_audit) }
+
         attr_accessor :version
 
         extend ActsAsAudited::Auditor::SingletonMethods
         include ActsAsAudited::Auditor::InstanceMethods
 
         self.auditing_enabled = true
-        define_callbacks :audit
-        set_callback :audit, :after, :after_audit, :if => lambda { self.respond_to?(:after_audit) }
       end
 
       def has_associated_audits
