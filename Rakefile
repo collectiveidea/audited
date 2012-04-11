@@ -16,11 +16,6 @@ RSpec::Core::RakeTask.new do |t|
   t.pattern = 'spec/*_spec.rb'
 end
 
-RSpec::Core::RakeTask.new(:rcov) do |t|
-  t.rcov = true
-  t.rcov_opts =  %q[--exclude "spec"]
-end
-
 desc 'Test the acts_as_audited generators'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
@@ -28,11 +23,3 @@ Rake::TestTask.new(:test) do |t|
   t.pattern = 'test/*_test.rb'
   t.verbose = true
 end
-
-begin
-  require 'yard'
-  YARD::Rake::YardocTask.new
-rescue LoadError
-  puts "YARD (or a dependency) not available. Install it with: bundle install"
-end
-
