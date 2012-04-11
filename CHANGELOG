@@ -1,6 +1,6 @@
 acts_as_audited ChangeLog
 -------------------------------------------------------------------------------
-
+* 2012-04-10 - Add Audit scopes for creates, updates and destroys [chriswfx]
 * 2011-10-25 - Made ignored_attributes configurable [senny]
 * 2011-09-09 - Rails 3.x support
                Support for associated audits

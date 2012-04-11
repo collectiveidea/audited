@@ -96,7 +96,7 @@ Another caveat is documented in "issue 26":https://github.com/collectiveidea/act
 
 h2. Compatability
 
-+acts_as_audited+ works with Rails 3.0.3 – 3.1.0. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
++acts_as_audited+ works with Rails 3.0+. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
 
 h2. Getting Help
 
