@@ -487,4 +487,14 @@ describe ActsAsAudited::Auditor do
     end
   end
 
+  describe "after_audit" do
+    let( :user ) { user = UserWithAfterAudit.new }
+
+    it "should invoke after_audit callback on create" do
+      user.bogus_attr.should == nil
+      user.save.should == true
+      user.bogus_attr.should == "do something"
+    end
+  end
+
 end
