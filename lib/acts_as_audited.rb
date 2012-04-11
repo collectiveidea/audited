@@ -23,7 +23,7 @@ require 'active_record'
 
 # To get started, please review ActsAsAudited::Auditor::ClassMethods#acts_as_audited
 module ActsAsAudited
-  VERSION = '2.0.0'
+  VERSION = '2.1.0'
 
   class << self
     attr_accessor :ignored_attributes, :current_user_method
