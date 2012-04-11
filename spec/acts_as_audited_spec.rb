@@ -11,6 +11,21 @@ describe ActsAsAudited::Auditor do
       User.should be_a_kind_of( ActsAsAudited::Auditor::SingletonMethods )
     end
 
+    it "should not call column_names on initialization" do
+      model = Class.new(BlankUser)
+      model.should_not_receive(:column_names)
+      model.acts_as_audited :only => :name
+      Audit.audited_class_names.delete(model.to_s)
+    end
+
+    it "should access column names one time" do
+      model = Class.new(BlankUser)
+      model.acts_as_audited :only => :name
+      model.should_receive(:column_names).once.and_return(BlankUser.column_names)
+      2.times { model.non_audited_columns }
+      Audit.audited_class_names.delete(model.to_s)
+    end
+
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
       it "should not audit #{column}" do
         User.non_audited_columns.should include(column)
