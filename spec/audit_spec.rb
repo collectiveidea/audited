@@ -2,6 +2,18 @@ require 'spec_helper'
 
 describe Audit do
   let(:user) { User.new :name => 'Testing' }
+  let(:thread_id) { Thread.current.object_id }
+
+  describe "thread_id=" do
+    it "should be an integer" do
+      thread_id.is_a?(Integer).should be_true
+    end
+    
+    it "should be able to set the thread_id to a thread object_id" do
+      subject.thread_id = thread_id
+      subject.thread_id.should == thread_id
+    end     
+  end
 
   describe "user=" do
 
@@ -128,6 +140,20 @@ describe Audit do
       Audit.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
     end
 
+  end
+
+  describe "thread_id" do
+    
+    it "should record thread_ids" do
+      company = Company.create :name => 'The auditors'
+      company.name = 'The Auditors, Inc'
+      company.save
+
+      company.audits.each do |audit|
+        audit.thread_id.should == thread_id
+      end
+    end
+    
   end
 
   describe "as_user" do
