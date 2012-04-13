@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(:version => 0) do
   end
 
   create_table :audits, :force => true do |t|
+    t.column :thread_id, :integer, :limit => 8
     t.column :auditable_id, :integer
     t.column :auditable_type, :string
     t.column :associated_id, :integer
@@ -40,6 +41,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.column :created_at, :datetime
   end
 
+  add_index :audits, :thread_id
   add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
   add_index :audits, [:associated_id, :associated_type], :name => 'associated_index'
   add_index :audits, [:user_id, :user_type], :name => 'user_index'
