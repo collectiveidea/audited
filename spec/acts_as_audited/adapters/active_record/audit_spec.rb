@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActsAsAudited::Adapters::ActiveRecord::Audit do
-  let(:user) { User.new :name => 'Testing' }
+  let(:user) { Models::ActiveRecord::User.new :name => 'Testing' }
 
   describe "user=" do
 
@@ -12,7 +12,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
 
     it "should be able to set the user to nil" do
       subject.user_id = 1
-      subject.user_type = 'User'
+      subject.user_type = 'Models::ActiveRecord::User'
       subject.username = 'joe'
 
       subject.user = nil
@@ -46,7 +46,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
   describe "revision" do
 
     it "should recreate attributes" do
-      user = User.create :name => "1"
+      user = Models::ActiveRecord::User.create :name => "1"
       5.times { |i| user.update_attribute :name, (i + 2).to_s }
 
       user.audits.each do |audit|
@@ -55,7 +55,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
     end
 
     it "should set protected attributes" do
-      u = User.create(:name => 'Brandon')
+      u = Models::ActiveRecord::User.create(:name => 'Brandon')
       u.update_attribute :logins, 1
       u.update_attribute :logins, 2
 
@@ -65,12 +65,12 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
     end
 
     it "should bypass attribute assignment wrappers" do
-      u = User.create(:name => '<Joe>')
+      u = Models::ActiveRecord::User.create(:name => '<Joe>')
       u.audits.first.revision.name.should == '&lt;Joe&gt;'
     end
 
     it "should work for deleted records" do
-      user = User.create :name => "1"
+      user = Models::ActiveRecord::User.create :name => "1"
       user.destroy
       revision = user.audits.last.revision
       revision.name.should == user.name
@@ -80,13 +80,13 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
   end
 
   it "should set the version number on create" do
-    user = User.create! :name => 'Set Version Number'
+    user = Models::ActiveRecord::User.create! :name => 'Set Version Number'
     user.audits.first.version.should be(1)
     user.update_attribute :name, "Set to 2"
     user.audits(true).first.version.should be(1)
     user.audits(true).last.version.should be(2)
     user.destroy
-    ActsAsAudited.audit_class.where(:auditable_type => 'User', :auditable_id => user.id).last.version.should be(3)
+    ActsAsAudited.audit_class.where(:auditable_type => 'Models::ActiveRecord::User', :auditable_id => user.id).last.version.should be(3)
   end
 
   describe "reconstruct_attributes" do
@@ -99,14 +99,14 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
   end
 
   describe "audited_classes" do
-    class CustomUser < ActiveRecord::Base
+    class CustomUser < ::ActiveRecord::Base
     end
     class CustomUserSubclass < CustomUser
       acts_as_audited
     end
 
     it "should include audited classes" do
-      ActsAsAudited.audit_class.audited_classes.should include(User)
+      ActsAsAudited.audit_class.audited_classes.should include(Models::ActiveRecord::User)
     end
 
     it "should include subclasses" do
@@ -134,7 +134,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
 
     it "should record user objects" do
       ActsAsAudited.audit_class.as_user(user) do
-        company = Company.create :name => 'The auditors'
+        company = Models::ActiveRecord::Company.create :name => 'The auditors'
         company.name = 'The Auditors, Inc'
         company.save
 
@@ -146,7 +146,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
 
     it "should record usernames" do
       ActsAsAudited.audit_class.as_user(user.name) do
-        company = Company.create :name => 'The auditors'
+        company = Models::ActiveRecord::Company.create :name => 'The auditors'
         company.name = 'The Auditors, Inc'
         company.save
 
@@ -161,13 +161,13 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
         t1 = Thread.new do
           ActsAsAudited.audit_class.as_user(user) do
             sleep 1
-            Company.create(:name => 'The Auditors, Inc').audits.first.user.should == user
+            Models::ActiveRecord::Company.create(:name => 'The Auditors, Inc').audits.first.user.should == user
           end
         end
 
         t2 = Thread.new do
           ActsAsAudited.audit_class.as_user(user.name) do
-            Company.create(:name => 'The Competing Auditors, LLC').audits.first.username.should == user.name
+            Models::ActiveRecord::Company.create(:name => 'The Competing Auditors, LLC').audits.first.username.should == user.name
             sleep 0.5
           end
         end
