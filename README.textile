@@ -55,7 +55,7 @@ Declare +acts_as_audited+ on your models:
 end
 </code></pre>
 
-Within a web request, will automatically record the user that made the change if your controller has a +current_user+ method. Comments can be added to an audit by setting <tt>model.audit_comments</tt>
+Within a web request, will automatically record the user that made the change if your controller has a +current_user+ method. Comments can be added to an audit by setting <tt>model.audit_comment</tt>
 before create/update/destroy. If the <tt>:comment_required</tt> option is given to +acts_as_audited+,
 the save/update/destroy action will fail with add an error on <tt>model.audit_comment</tt> and triggering a
 transaction rollback if <tt>model.audit_comment</tt> is nil.
