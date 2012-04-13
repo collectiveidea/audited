@@ -39,9 +39,9 @@ end
 require 'acts_as_audited/adapters/active_record'
 
 if defined?(ActionController) and defined?(ActionController::Base)
-  require 'acts_as_audited/audit_sweeper'
+  require 'acts_as_audited/sweeper'
 
   ActionController::Base.class_eval do
-    cache_sweeper :audit_sweeper
+    cache_sweeper ActsAsAudited::Sweeper
   end
 end
