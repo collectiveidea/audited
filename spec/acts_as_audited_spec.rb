@@ -1,14 +1,14 @@
 require 'spec_helper'
 
-describe ActsAsAudited::Auditor do
+describe ActsAsAudited::Adapters::ActiveRecord::Auditor do
 
   describe "configuration" do
     it "should include instance methods" do
-      User.new.should be_a_kind_of( ActsAsAudited::Auditor::InstanceMethods )
+      User.new.should be_a_kind_of( ActsAsAudited::Adapters::ActiveRecord::Auditor::InstanceMethods )
     end
 
     it "should include class methods" do
-      User.should be_a_kind_of( ActsAsAudited::Auditor::SingletonMethods )
+      User.should be_a_kind_of( ActsAsAudited::Adapters::ActiveRecord::Auditor::SingletonMethods )
     end
 
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
@@ -57,7 +57,7 @@ describe ActsAsAudited::Auditor do
     it "should change the audit count" do
       expect {
         user
-      }.to change( Audit, :count ).by(1)
+      }.to change( ActsAsAudited.audit_class, :count ).by(1)
     end
 
     it "should create associated audit" do
@@ -66,7 +66,7 @@ describe ActsAsAudited::Auditor do
 
     it "should set the action to create" do
       user.audits.first.action.should == 'create'
-      Audit.creates.reorder(:id).last.should == user.audits.first
+      ActsAsAudited.audit_class.creates.reorder(:id).last.should == user.audits.first
       user.audits.creates.count.should == 1
       user.audits.updates.count.should == 0
       user.audits.destroys.count.should == 0
@@ -88,7 +88,7 @@ describe ActsAsAudited::Auditor do
     it "should not save an audit if only specified on update/destroy" do
       expect {
         OnUpdateDestroy.create!( :name => 'Bart' )
-      }.to_not change( Audit, :count )
+      }.to_not change( ActsAsAudited.audit_class, :count )
     end
   end
 
@@ -100,22 +100,22 @@ describe ActsAsAudited::Auditor do
     it "should save an audit" do
       expect {
         @user.update_attribute(:name, "Someone")
-      }.to change( Audit, :count ).by(1)
+      }.to change( ActsAsAudited.audit_class, :count ).by(1)
       expect {
         @user.update_attribute(:name, "Someone else")
-      }.to change( Audit, :count ).by(1)
+      }.to change( ActsAsAudited.audit_class, :count ).by(1)
     end
 
     it "should not save an audit if the record is not changed" do
       expect {
         @user.save!
-      }.to_not change( Audit, :count )
+      }.to_not change( ActsAsAudited.audit_class, :count )
     end
 
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
       @user.audits.last.action.should == 'update'
-      Audit.updates.reorder(:id).last.should == @user.audits.last
+      ActsAsAudited.audit_class.updates.reorder(:id).last.should == @user.audits.last
       @user.audits.updates.last.should == @user.audits.last
     end
 
@@ -132,14 +132,14 @@ describe ActsAsAudited::Auditor do
       on_create_destroy = OnCreateDestroy.create( :name => 'Bart' )
       expect {
         on_create_destroy.update_attributes :name => 'Changed'
-      }.to_not change( Audit, :count )
+      }.to_not change( ActsAsAudited.audit_class, :count )
     end
 
     it "should not save an audit if the value doesn't change after type casting" do
       @user.update_attributes! :logins => 0, :activated => true
-      expect { @user.update_attribute :logins, '0' }.to_not change( Audit, :count )
-      expect { @user.update_attribute :activated, 1 }.to_not change( Audit, :count )
-      expect { @user.update_attribute :activated, '1' }.to_not change( Audit, :count )
+      expect { @user.update_attribute :logins, '0' }.to_not change( ActsAsAudited.audit_class, :count )
+      expect { @user.update_attribute :activated, 1 }.to_not change( ActsAsAudited.audit_class, :count )
+      expect { @user.update_attribute :activated, '1' }.to_not change( ActsAsAudited.audit_class, :count )
     end
   end
 
@@ -151,7 +151,7 @@ describe ActsAsAudited::Auditor do
     it "should save an audit" do
       expect {
         @user.destroy
-      }.to change( Audit, :count )
+      }.to change( ActsAsAudited.audit_class, :count )
 
       @user.audits.size.should be(2)
     end
@@ -160,7 +160,7 @@ describe ActsAsAudited::Auditor do
       @user.destroy
 
       @user.audits.last.action.should == 'destroy'
-      Audit.destroys.reorder(:id).last.should == @user.audits.last
+      ActsAsAudited.audit_class.destroys.reorder(:id).last.should == @user.audits.last
       @user.audits.destroys.last.should == @user.audits.last
     end
 
@@ -183,7 +183,7 @@ describe ActsAsAudited::Auditor do
 
       expect {
         on_create_update.destroy
-      }.to_not change( Audit, :count )
+      }.to_not change( ActsAsAudited.audit_class, :count )
     end
   end
 
@@ -364,7 +364,7 @@ describe ActsAsAudited::Auditor do
     let( :user ) { create_user }
 
     it "should find the latest revision before the given time" do
-      Audit.update( user.audits.first.id, :created_at => 1.hour.ago )
+      ActsAsAudited.audit_class.update( user.audits.first.id, :created_at => 1.hour.ago )
       user.update_attributes :name => 'updated'
       user.revision_at( 2.minutes.ago ).version.should be(1)
     end
@@ -379,13 +379,13 @@ describe ActsAsAudited::Auditor do
       expect {
         u = User.new(:name => 'Brandon')
         u.save_without_auditing.should be_true
-      }.to_not change( Audit, :count )
+      }.to_not change( ActsAsAudited.audit_class, :count )
     end
 
     it "should not save an audit inside of the #without_auditing block" do
       expect {
         User.without_auditing { User.create!( :name => 'Brandon' ) }
-      }.to_not change( Audit, :count )
+      }.to_not change( ActsAsAudited.audit_class, :count )
     end
   end
 

@@ -33,7 +33,7 @@ describe AuditsController do
 
       expect {
         post :audit
-      }.to change( Audit, :count )
+      }.to change( ActsAsAudited.audit_class, :count )
 
       assigns(:company).audits.last.user.should == user
     end
@@ -44,7 +44,7 @@ describe AuditsController do
 
       expect {
         post :audit
-      }.to change( Audit, :count )
+      }.to change( ActsAsAudited.audit_class, :count )
 
       assigns(:company).audits.last.user.should == user
     end
@@ -67,7 +67,7 @@ describe AuditsController do
 
       expect {
         post :update_user
-      }.to_not change( Audit, :count )
+      }.to_not change( ActsAsAudited.audit_class, :count )
     end
 
   end

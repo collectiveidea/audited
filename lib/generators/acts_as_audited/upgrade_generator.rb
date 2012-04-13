@@ -29,8 +29,8 @@ module ActsAsAudited
       private
 
       def migrations_to_be_applied
-        Audit.reset_column_information
-        columns = ::Audit.columns.map(&:name)
+        ActsAsAudited::Adapters::ActiveRecord::Audit.reset_column_information
+        columns = ActsAsAudited::Adapters::ActiveRecord::Audit.columns.map(&:name)
 
         unless columns.include?( 'comment' )
           yield :add_comment_to_audits

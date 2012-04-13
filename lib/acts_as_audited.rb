@@ -19,14 +19,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'active_record'
-
-# To get started, please review ActsAsAudited::Auditor::ClassMethods#acts_as_audited
+# To get started, please review ActsAsAudited::Adapters::ActiveRecord::Auditor::ClassMethods#acts_as_audited
 module ActsAsAudited
-  VERSION = '2.1.0'
+  VERSION = '3.0.0'
 
   class << self
-    attr_accessor :ignored_attributes, :current_user_method
+    attr_accessor :ignored_attributes, :current_user_method, :audit_class
   end
   @ignored_attributes ||= ['lock_version',
                           'created_at',
@@ -38,10 +36,7 @@ module ActsAsAudited
   @current_user_method = :current_user
 end
 
-require 'acts_as_audited/auditor'
-require 'acts_as_audited/audit'
-
-ActiveRecord::Base.send :include, ActsAsAudited::Auditor
+require 'acts_as_audited/adapters/active_record'
 
 if defined?(ActionController) and defined?(ActionController::Base)
   require 'acts_as_audited/audit_sweeper'

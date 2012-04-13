@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Audit do
+describe ActsAsAudited::Adapters::ActiveRecord::Audit do
   let(:user) { User.new :name => 'Testing' }
 
   describe "user=" do
@@ -86,13 +86,13 @@ describe Audit do
     user.audits(true).first.version.should be(1)
     user.audits(true).last.version.should be(2)
     user.destroy
-    Audit.where(:auditable_type => 'User', :auditable_id => user.id).last.version.should be(3)
+    ActsAsAudited.audit_class.where(:auditable_type => 'User', :auditable_id => user.id).last.version.should be(3)
   end
 
   describe "reconstruct_attributes" do
 
     it "should work with the old way of storing just the new value" do
-      audits = Audit.reconstruct_attributes([Audit.new(:audited_changes => {'attribute' => 'value'})])
+      audits = ActsAsAudited.audit_class.reconstruct_attributes([ActsAsAudited.audit_class.new(:audited_changes => {'attribute' => 'value'})])
       audits['attribute'].should == 'value'
     end
 
@@ -106,18 +106,18 @@ describe Audit do
     end
 
     it "should include audited classes" do
-      Audit.audited_classes.should include(User)
+      ActsAsAudited.audit_class.audited_classes.should include(User)
     end
 
     it "should include subclasses" do
-      Audit.audited_classes.should include(CustomUserSubclass)
+      ActsAsAudited.audit_class.audited_classes.should include(CustomUserSubclass)
     end
   end
 
   describe "new_attributes" do
 
     it "should return a hash of the new values" do
-      Audit.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
+      ActsAsAudited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
     end
 
   end
@@ -125,7 +125,7 @@ describe Audit do
   describe "old_attributes" do
 
     it "should return a hash of the old values" do
-      Audit.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
+      ActsAsAudited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
     end
 
   end
@@ -133,7 +133,7 @@ describe Audit do
   describe "as_user" do
 
     it "should record user objects" do
-      Audit.as_user(user) do
+      ActsAsAudited.audit_class.as_user(user) do
         company = Company.create :name => 'The auditors'
         company.name = 'The Auditors, Inc'
         company.save
@@ -145,7 +145,7 @@ describe Audit do
     end
 
     it "should record usernames" do
-      Audit.as_user(user.name) do
+      ActsAsAudited.audit_class.as_user(user.name) do
         company = Company.create :name => 'The auditors'
         company.name = 'The Auditors, Inc'
         company.save
@@ -159,14 +159,14 @@ describe Audit do
     it "should be thread safe" do
       begin
         t1 = Thread.new do
-          Audit.as_user(user) do
+          ActsAsAudited.audit_class.as_user(user) do
             sleep 1
             Company.create(:name => 'The Auditors, Inc').audits.first.user.should == user
           end
         end
 
         t2 = Thread.new do
-          Audit.as_user(user.name) do
+          ActsAsAudited.audit_class.as_user(user.name) do
             Company.create(:name => 'The Competing Auditors, LLC').audits.first.username.should == user.name
             sleep 0.5
           end
@@ -180,7 +180,7 @@ describe Audit do
     end
 
     it "should return the value from the yield block" do
-      Audit.as_user('foo') do
+      ActsAsAudited.audit_class.as_user('foo') do
         42
       end.should == 42
     end
