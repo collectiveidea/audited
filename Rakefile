@@ -11,10 +11,7 @@ require 'acts_as_audited'
 desc 'Default: run specs and tests'
 task :default => [:spec, :test]
 
-RSpec::Core::RakeTask.new do |t|
-  t.rspec_opts = ["-c", "-f progress", "-r ./spec/spec_helper.rb"]
-  t.pattern = 'spec/*_spec.rb'
-end
+RSpec::Core::RakeTask.new(:spec)
 
 desc 'Test the acts_as_audited generators'
 Rake::TestTask.new(:test) do |t|
