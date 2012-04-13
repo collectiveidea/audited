@@ -1,19 +1,13 @@
 ENV['RAILS_ENV'] = 'test'
 
-$:.unshift File.dirname(__FILE__)
-
-require 'rails_app/config/environment'
-require 'rspec/rails'
+require 'rails/all'
 require 'acts_as_audited'
 require 'audited_spec_helpers'
 
-RSpec.configure do |c|
-  c.include AuditedSpecHelpers
+SPEC_ROOT = Pathname.new(File.expand_path('../', __FILE__))
 
-  c.before(:suite) do
-    ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
-    ActiveRecord::Migration.verbose = false
-    load(File.dirname(__FILE__) + "/db/schema.rb")
-    require 'spec_models'
-  end
+Dir[SPEC_ROOT.join('support/**/*.rb')].each{|f| require f }
+
+RSpec.configure do |config|
+  config.include AuditedSpecHelpers
 end
