@@ -37,6 +37,7 @@ module ActsAsAudited
 end
 
 require 'acts_as_audited/adapters/active_record'
+require 'acts_as_audited/adapters/mongo_mapper'
 
 if defined?(ActionController) and defined?(ActionController::Base)
   require 'acts_as_audited/sweeper'
