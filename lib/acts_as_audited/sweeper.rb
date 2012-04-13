@@ -1,6 +1,6 @@
 module ActsAsAudited
   class Sweeper < ActionController::Caching::Sweeper
-    observe ActsAsAudited.audit_class
+    # observe ActsAsAudited.audit_class
 
     def before_create(audit)
       audit.user ||= current_user
