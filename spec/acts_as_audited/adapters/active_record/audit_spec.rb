@@ -99,9 +99,9 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
   end
 
   describe "audited_classes" do
-    class CustomUser < ::ActiveRecord::Base
+    class Models::ActiveRecord::CustomUser < ::ActiveRecord::Base
     end
-    class CustomUserSubclass < CustomUser
+    class Models::ActiveRecord::CustomUserSubclass < Models::ActiveRecord::CustomUser
       acts_as_audited
     end
 
@@ -110,7 +110,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit do
     end
 
     it "should include subclasses" do
-      ActsAsAudited.audit_class.audited_classes.should include(CustomUserSubclass)
+      ActsAsAudited.audit_class.audited_classes.should include(Models::ActiveRecord::CustomUserSubclass)
     end
   end
 
