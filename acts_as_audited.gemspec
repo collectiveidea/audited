@@ -3,6 +3,8 @@
 Gem::Specification.new do |gem|
   gem.add_runtime_dependency "rails", "~> 3.0", ">= 3.0.3"
 
+  gem.add_development_dependency 'mongo_mapper'
+
   gem.authors = ["Brandon Keepers", "Kenneth Kalmer", "Daniel Morrison", "Brian Ryckbost"]
   gem.email = 'daniel@collectiveidea.com  '
   gem.required_rubygems_version = Gem::Requirement.new('>= 1.3.6')
