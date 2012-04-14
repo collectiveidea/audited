@@ -4,22 +4,23 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
   describe "configuration" do
     it "should include instance methods" do
-      Models::ActiveRecord::User.new.should be_a_kind_of( ActsAsAudited::Adapters::ActiveRecord::Auditor::InstanceMethods )
+      Models::MongoMapper::User.new.should be_a_kind_of(ActsAsAudited::Adapters::MongoMapper::Auditor::AuditedInstanceMethods)
     end
 
     it "should include class methods" do
-      Models::ActiveRecord::User.should be_a_kind_of( ActsAsAudited::Adapters::ActiveRecord::Auditor::SingletonMethods )
+      Models::MongoMapper::User.should be_a_kind_of( ActsAsAudited::Adapters::MongoMapper::Auditor::AuditedClassMethods )
     end
 
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
       it "should not audit #{column}" do
-        Models::ActiveRecord::User.non_audited_columns.should include(column)
+        Models::MongoMapper::User.non_audited_columns.should include(column)
       end
     end
 
     it "should be configurable which attributes are not audited" do
       ActsAsAudited.ignored_attributes = ['delta', 'top_secret', 'created_at']
-      class Secret < ::ActiveRecord::Base
+      class Secret
+        include MongoMapper::Document
         acts_as_audited
       end
 
@@ -27,7 +28,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "should not save non-audited columns" do
-      create_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
+      create_mongo_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
     end
   end
 
@@ -35,7 +36,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     it "should allow mass assignment of all unprotected attributes" do
       yesterday = 1.day.ago
 
-      u = Models::ActiveRecord::NoAttributeProtectionUser.new(:name         => 'name',
+      u = Models::MongoMapper::NoAttributeProtectionUser.new(:name         => 'name',
                                         :username     => 'username',
                                         :password     => 'password',
                                         :activated    => true,
@@ -52,7 +53,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
   end
 
   describe "on create" do
-    let( :user ) { create_user :audit_comment => "Create" }
+    let( :user ) { create_mongo_user :audit_comment => "Create" }
 
     it "should change the audit count" do
       expect {
@@ -81,20 +82,20 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "should not audit an attribute which is excepted if specified on create or destroy" do
-      on_create_destroy_except_name = Models::ActiveRecord::OnCreateDestroyExceptName.create(:name => 'Bart')
+      on_create_destroy_except_name = Models::MongoMapper::OnCreateDestroyExceptName.create(:name => 'Bart')
       on_create_destroy_except_name.audits.first.audited_changes.keys.any?{|col| ['name'].include? col}.should be_false
     end
 
     it "should not save an audit if only specified on update/destroy" do
       expect {
-        Models::ActiveRecord::OnUpdateDestroy.create!( :name => 'Bart' )
+        Models::MongoMapper::OnUpdateDestroy.create!( :name => 'Bart' )
       }.to_not change( ActsAsAudited.audit_class, :count )
     end
   end
 
   describe "on update" do
     before do
-      @user = create_user( :name => 'Brandon', :audit_comment => 'Update' )
+      @user = create_mongo_user( :name => 'Brandon', :audit_comment => 'Update' )
     end
 
     it "should save an audit" do
@@ -114,22 +115,22 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
-      @user.audits.last.action.should == 'update'
-      ActsAsAudited.audit_class.updates.reorder(:id).last.should == @user.audits.last
-      @user.audits.updates.last.should == @user.audits.last
+      @user.audits.all.last.action.should == 'update'
+      ActsAsAudited.audit_class.updates.reorder(:id).last.should == @user.audits.all.last
+      @user.audits.updates.last.should == @user.audits.all.last
     end
 
     it "should store the changed attributes" do
       @user.update_attributes :name => 'Changed'
-      @user.audits.last.audited_changes.should == { 'name' => ['Brandon', 'Changed'] }
+      @user.audits.all.last.audited_changes.should == { 'name' => ['Brandon', 'Changed'] }
     end
 
     it "should store audit comment" do
-      @user.audits.last.comment.should == 'Update'
+      @user.audits.all.last.comment.should == 'Update'
     end
 
     it "should not save an audit if only specified on create/destroy" do
-      on_create_destroy = Models::ActiveRecord::OnCreateDestroy.create( :name => 'Bart' )
+      on_create_destroy = Models::MongoMapper::OnCreateDestroy.create( :name => 'Bart' )
       expect {
         on_create_destroy.update_attributes :name => 'Changed'
       }.to_not change( ActsAsAudited.audit_class, :count )
@@ -145,7 +146,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
   describe "on destroy" do
     before do
-      @user = create_user
+      @user = create_mongo_user
     end
 
     it "should save an audit" do
@@ -159,15 +160,15 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     it "should set the action to 'destroy'" do
       @user.destroy
 
-      @user.audits.last.action.should == 'destroy'
-      ActsAsAudited.audit_class.destroys.reorder(:id).last.should == @user.audits.last
-      @user.audits.destroys.last.should == @user.audits.last
+      @user.audits.all.last.action.should == 'destroy'
+      ActsAsAudited.audit_class.destroys.reorder(:id).last.should == @user.audits.all.last
+      @user.audits.destroys.last.should == @user.audits.all.last
     end
 
     it "should store all of the audited attributes" do
       @user.destroy
 
-      @user.audits.last.audited_changes.should == @user.audited_attributes
+      @user.audits.all.last.audited_changes.should == @user.audited_attributes
     end
 
     it "should be able to reconstruct a destroyed record without history" do
@@ -179,7 +180,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "should not save an audit if only specified on create/update" do
-      on_create_update = Models::ActiveRecord::OnCreateUpdate.create!( :name => 'Bart' )
+      on_create_update = Models::MongoMapper::OnCreateUpdate.create!( :name => 'Bart' )
 
       expect {
         on_create_update.destroy
@@ -188,8 +189,8 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
   end
 
   describe "associated with" do
-    let(:owner) { Models::ActiveRecord::Owner.create(:name => 'Models::ActiveRecord::Owner') }
-    let(:owned_company) { Models::ActiveRecord::OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
+    let(:owner) { Models::MongoMapper::Owner.create(:name => 'Models::MongoMapper::Owner') }
+    let(:owned_company) { Models::MongoMapper::OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
 
     it "should record the associated object on create" do
       owned_company.audits.first.associated.should == owner
@@ -197,18 +198,18 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
     it "should store the associated object on update" do
       owned_company.update_attribute(:name, 'The Auditors')
-      owned_company.audits.last.associated.should == owner
+      owned_company.audits.all.last.associated.should == owner
     end
 
     it "should store the associated object on destroy" do
       owned_company.destroy
-      owned_company.audits.last.associated.should == owner
+      owned_company.audits.all.last.associated.should == owner
     end
   end
 
   describe "has associated audits" do
-    let!(:owner) { Models::ActiveRecord::Owner.create!(:name => 'Models::ActiveRecord::Owner') }
-    let!(:owned_company) { Models::ActiveRecord::OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
+    let!(:owner) { Models::MongoMapper::Owner.create!(:name => 'Models::MongoMapper::Owner') }
+    let!(:owned_company) { Models::MongoMapper::OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
 
     it "should list the associated audits" do
       owner.associated_audits.length.should == 1
@@ -217,15 +218,15 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
   end
 
   describe "revisions" do
-    let( :user ) { create_versions }
+    let( :user ) { create_mongo_versions }
 
     it "should return an Array of Users" do
       user.revisions.should be_a_kind_of( Array )
-      user.revisions.each { |version| version.should be_a_kind_of Models::ActiveRecord::User }
+      user.revisions.each { |version| version.should be_a_kind_of Models::MongoMapper::User }
     end
 
     it "should have one revision for a new record" do
-      create_user.revisions.size.should be(1)
+      create_mongo_user.revisions.size.should be(1)
     end
 
     it "should have one revision for each audit" do
@@ -233,7 +234,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "should set the attributes for each revision" do
-      u = Models::ActiveRecord::User.create(:name => 'Brandon', :username => 'brandon')
+      u = Models::MongoMapper::User.create(:name => 'Brandon', :username => 'brandon')
       u.update_attributes :name => 'Foobar'
       u.update_attributes :name => 'Awesome', :username => 'keepers'
 
@@ -250,7 +251,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "access to only recent revisions" do
-      u = Models::ActiveRecord::User.create(:name => 'Brandon', :username => 'brandon')
+      u = Models::MongoMapper::User.create(:name => 'Brandon', :username => 'brandon')
       u.update_attributes :name => 'Foobar'
       u.update_attributes :name => 'Awesome', :username => 'keepers'
 
@@ -269,13 +270,13 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "should ignore attributes that have been deleted" do
-      user.audits.last.update_attributes :audited_changes => {:old_attribute => 'old value'}
+      user.audits.all.last.update_attributes :audited_changes => {:old_attribute => 'old value'}
       expect { user.revisions }.to_not raise_error
     end
   end
 
   describe "revisions" do
-    let( :user ) { create_versions(5) }
+    let( :user ) { create_mongo_versions(5) }
 
     it "should maintain identity" do
       user.revision(1).should == user
@@ -283,7 +284,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
     it "should find the given revision" do
       revision = user.revision(3)
-      revision.should be_a_kind_of( Models::ActiveRecord::User )
+      revision.should be_a_kind_of( Models::MongoMapper::User )
       revision.version.should be(3)
       revision.name.should == 'Foobar 3'
     end
@@ -302,7 +303,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "should be able to set protected attributes" do
-      u = Models::ActiveRecord::User.create(:name => 'Brandon')
+      u = Models::MongoMapper::User.create(:name => 'Brandon')
       u.update_attribute :logins, 1
       u.update_attribute :logins, 2
 
@@ -312,12 +313,12 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "should set attributes directly" do
-      u = Models::ActiveRecord::User.create(:name => '<Joe>')
+      u = Models::MongoMapper::User.create(:name => '<Joe>')
       u.revision(1).name.should == '&lt;Joe&gt;'
     end
 
     it "should set the attributes for each revision" do
-      u = Models::ActiveRecord::User.create(:name => 'Brandon', :username => 'brandon')
+      u = Models::MongoMapper::User.create(:name => 'Brandon', :username => 'brandon')
       u.update_attributes :name => 'Foobar'
       u.update_attributes :name => 'Awesome', :username => 'keepers'
 
@@ -333,7 +334,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
     it "should be able to get time for first revision" do
       suspended_at = Time.now
-      u = Models::ActiveRecord::User.create(:suspended_at => suspended_at)
+      u = Models::MongoMapper::User.create(:suspended_at => suspended_at)
       u.revision(1).suspended_at.should == suspended_at
     end
 
@@ -356,12 +357,12 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
       user.destroy
       expect {
         user.revision(1).save!
-      }.to change( Models::ActiveRecord::User, :count ).by(1)
+      }.to change( Models::MongoMapper::User, :count ).by(1)
     end
   end
 
   describe "revision_at" do
-    let( :user ) { create_user }
+    let( :user ) { create_mongo_user }
 
     it "should find the latest revision before the given time" do
       ActsAsAudited.audit_class.update( user.audits.first.id, :created_at => 1.hour.ago )
@@ -377,14 +378,14 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
   describe "without auditing" do
     it "should not save an audit when calling #save_without_auditing" do
       expect {
-        u = Models::ActiveRecord::User.new(:name => 'Brandon')
+        u = Models::MongoMapper::User.new(:name => 'Brandon')
         u.save_without_auditing.should be_true
       }.to_not change( ActsAsAudited.audit_class, :count )
     end
 
     it "should not save an audit inside of the #without_auditing block" do
       expect {
-        Models::ActiveRecord::User.without_auditing { Models::ActiveRecord::User.create!( :name => 'Brandon' ) }
+        Models::MongoMapper::User.without_auditing { Models::MongoMapper::User.create!( :name => 'Brandon' ) }
       }.to_not change( ActsAsAudited.audit_class, :count )
     end
   end
@@ -393,22 +394,22 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
     describe "on create" do
       it "should not validate when audit_comment is not supplied" do
-        Models::ActiveRecord::CommentRequiredUser.new.should_not be_valid
+        Models::MongoMapper::CommentRequiredUser.new.should_not be_valid
       end
 
       it "should validate when audit_comment is supplied" do
-        Models::ActiveRecord::CommentRequiredUser.new( :audit_comment => 'Create').should be_valid
+        Models::MongoMapper::CommentRequiredUser.new( :audit_comment => 'Create').should be_valid
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
-        Models::ActiveRecord::CommentRequiredUser.disable_auditing
-        Models::ActiveRecord::CommentRequiredUser.new.should be_valid
-        Models::ActiveRecord::CommentRequiredUser.enable_auditing
+        Models::MongoMapper::CommentRequiredUser.disable_auditing
+        Models::MongoMapper::CommentRequiredUser.new.should be_valid
+        Models::MongoMapper::CommentRequiredUser.enable_auditing
       end
     end
 
     describe "on update" do
-      let( :user ) { Models::ActiveRecord::CommentRequiredUser.create!( :audit_comment => 'Create' ) }
+      let( :user ) { Models::MongoMapper::CommentRequiredUser.create!( :audit_comment => 'Create' ) }
 
       it "should not validate when audit_comment is not supplied" do
         user.update_attributes(:name => 'Test').should be_false
@@ -419,14 +420,14 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
-        Models::ActiveRecord::CommentRequiredUser.disable_auditing
+        Models::MongoMapper::CommentRequiredUser.disable_auditing
         user.update_attributes(:name => 'Test').should be_true
-        Models::ActiveRecord::CommentRequiredUser.enable_auditing
+        Models::MongoMapper::CommentRequiredUser.enable_auditing
       end
     end
 
     describe "on destroy" do
-      let( :user ) { Models::ActiveRecord::CommentRequiredUser.create!( :audit_comment => 'Create' )}
+      let( :user ) { Models::MongoMapper::CommentRequiredUser.create!( :audit_comment => 'Create' )}
 
       it "should not validate when audit_comment is not supplied" do
         user.destroy.should be_false
@@ -434,13 +435,13 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
       it "should validate when audit_comment is supplied" do
         user.audit_comment = "Destroy"
-        user.destroy.should == user
+        user.destroy.should == true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
-        Models::ActiveRecord::CommentRequiredUser.disable_auditing
-        user.destroy.should == user
-        Models::ActiveRecord::CommentRequiredUser.enable_auditing
+        Models::MongoMapper::CommentRequiredUser.disable_auditing
+        user.destroy.should == true
+        Models::MongoMapper::CommentRequiredUser.enable_auditing
       end
     end
 
@@ -450,23 +451,23 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
 
     it "should not raise error when attr_accessible is set and protected is false" do
       expect {
-        Models::ActiveRecord::UnprotectedUser.new(:name => 'No fail!')
+        Models::MongoMapper::UnprotectedUser.new(:name => 'No fail!')
       }.to_not raise_error
     end
 
     it "should not rause an error when attr_accessible is declared before acts_as_audited" do
       expect {
-        Models::ActiveRecord::AccessibleUser.new(:name => 'No fail!')
+        Models::MongoMapper::AccessibleUser.new(:name => 'No fail!')
       }.to_not raise_error
     end
   end
 
   describe "audit_as" do
-    let( :user ) { Models::ActiveRecord::User.create :name => 'Testing' }
+    let( :user ) { Models::MongoMapper::User.create :name => 'Testing' }
 
     it "should record user objects" do
-      Models::ActiveRecord::Company.audit_as( user ) do
-        company = Models::ActiveRecord::Company.create :name => 'The auditors'
+      Models::MongoMapper::Company.audit_as( user ) do
+        company = Models::MongoMapper::Company.create :name => 'The auditors'
         company.update_attributes :name => 'The Auditors'
 
         company.audits.each do |audit|
@@ -476,8 +477,8 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
     end
 
     it "should record usernames" do
-      Models::ActiveRecord::Company.audit_as( user.name ) do
-        company = Models::ActiveRecord::Company.create :name => 'The auditors'
+      Models::MongoMapper::Company.audit_as( user.name ) do
+        company = Models::MongoMapper::Company.create :name => 'The auditors'
         company.update_attributes :name => 'The Auditors'
 
         company.audits.each do |audit|
@@ -488,7 +489,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor do
   end
 
   describe "after_audit" do
-    let( :user ) { user = Models::ActiveRecord::UserWithAfterAudit.new }
+    let( :user ) { user = Models::MongoMapper::UserWithAfterAudit.new }
 
     it "should invoke after_audit callback on create" do
       user.bogus_attr.should == nil
