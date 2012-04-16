@@ -3,7 +3,6 @@ ENV['RAILS_ENV'] = 'test'
 require 'rails/all'
 require 'acts_as_audited'
 require 'audited_spec_helpers'
-require 'pry'
 
 SPEC_ROOT = Pathname.new(File.expand_path('../', __FILE__))
 
