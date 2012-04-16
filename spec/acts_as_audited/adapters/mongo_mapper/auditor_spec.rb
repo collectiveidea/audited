@@ -1,6 +1,6 @@
-require 'spec_helper'
+require File.expand_path('../mongo_mapper_spec_helper', __FILE__)
 
-describe ActsAsAudited::Adapters::MongoMapper::Auditor do
+describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mapper do
 
   describe "configuration" do
     it "should include instance methods" do

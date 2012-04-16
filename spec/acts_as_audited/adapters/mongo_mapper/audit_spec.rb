@@ -1,6 +1,6 @@
-require 'spec_helper'
+require File.expand_path('../mongo_mapper_spec_helper', __FILE__)
 
-describe ActsAsAudited::Adapters::MongoMapper::Audit do
+describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
   let(:user) { Models::MongoMapper::User.new :name => 'Testing' }
 
   describe "user=" do

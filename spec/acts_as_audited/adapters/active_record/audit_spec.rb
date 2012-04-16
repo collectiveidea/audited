@@ -1,6 +1,6 @@
-require 'spec_helper'
+require File.expand_path('../active_record_spec_helper', __FILE__)
 
-describe ActsAsAudited::Adapters::ActiveRecord::Audit do
+describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
   let(:user) { Models::ActiveRecord::User.new :name => 'Testing' }
 
   describe "user=" do

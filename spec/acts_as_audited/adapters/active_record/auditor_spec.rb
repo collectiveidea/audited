@@ -1,6 +1,6 @@
-require 'spec_helper'
+require File.expand_path('../active_record_spec_helper', __FILE__)
 
-describe ActsAsAudited::Adapters::ActiveRecord::Auditor do
+describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_record do
 
   describe "configuration" do
     it "should include instance methods" do

@@ -38,11 +38,11 @@ module ActsAsAudited
         cattr_accessor :audited_class_names
         self.audited_class_names = Set.new
 
-        # scope :ascending,  sort(:version.asc)
-        # scope :descending, sort(:version.desc)
-        # scope :creates,    where(:action => 'create')
-        # scope :updates,    where(:action => 'update')
-        # scope :destroys,   where(:action => 'destroy')
+        scope :ascending,  sort(:version.asc)
+        scope :descending, sort(:version.desc)
+        scope :creates,    where(:action => 'create')
+        scope :updates,    where(:action => 'update')
+        scope :destroys,   where(:action => 'destroy')
 
         class << self
           # Returns the list of classes that are being audited
