@@ -34,20 +34,20 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mappe
 
   describe :new do
     it "should allow mass assignment of all unprotected attributes" do
-      yesterday = 1.day.ago
+      yesterday = 1.day.ago.utc
 
       u = Models::MongoMapper::NoAttributeProtectionUser.new(:name         => 'name',
-                                        :username     => 'username',
-                                        :password     => 'password',
-                                        :activated    => true,
-                                        :suspended_at => yesterday,
-                                        :logins       => 2)
+                                                             :username     => 'username',
+                                                             :password     => 'password',
+                                                             :activated    => true,
+                                                             :suspended_at => yesterday,
+                                                             :logins       => 2)
 
       u.name.should eq('name')
       u.username.should eq('username')
       u.password.should eq('password')
       u.activated.should eq(true)
-      u.suspended_at.should eq(yesterday)
+      u.suspended_at.to_s.should eq(yesterday.to_s)
       u.logins.should eq(2)
     end
   end
@@ -67,7 +67,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mappe
 
     it "should set the action to create" do
       user.audits.first.action.should == 'create'
-      ActsAsAudited.audit_class.creates.reorder(:id).last.should == user.audits.first
+      ActsAsAudited.audit_class.creates.sort(:id.asc).last.should == user.audits.first
       user.audits.creates.count.should == 1
       user.audits.updates.count.should == 0
       user.audits.destroys.count.should == 0
@@ -116,7 +116,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mappe
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
       @user.audits.all.last.action.should == 'update'
-      ActsAsAudited.audit_class.updates.reorder(:id).last.should == @user.audits.all.last
+      ActsAsAudited.audit_class.updates.sort(:id.asc).last.should == @user.audits.all.last
       @user.audits.updates.last.should == @user.audits.all.last
     end
 
@@ -161,7 +161,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mappe
       @user.destroy
 
       @user.audits.all.last.action.should == 'destroy'
-      ActsAsAudited.audit_class.destroys.reorder(:id).last.should == @user.audits.all.last
+      ActsAsAudited.audit_class.destroys.sort(:id.asc).last.should == @user.audits.all.last
       @user.audits.destroys.last.should == @user.audits.all.last
     end
 
@@ -333,9 +333,9 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mappe
     end
 
     it "should be able to get time for first revision" do
-      suspended_at = Time.now
+      suspended_at = Time.now.utc
       u = Models::MongoMapper::User.create(:suspended_at => suspended_at)
-      u.revision(1).suspended_at.should == suspended_at
+      u.revision(1).suspended_at.to_s.should == suspended_at.to_s
     end
 
     it "should not raise an error when no previous audits exist" do

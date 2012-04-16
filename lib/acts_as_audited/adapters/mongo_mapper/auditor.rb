@@ -124,7 +124,7 @@ module ActsAsAudited
           #   end
           #
           def revisions(from_version = 1)
-            audits = self.audits.where(['version >= ?', from_version])
+            audits = self.audits.where(:version.gte => from_version)
             return [] if audits.empty?
             revisions = []
             audits.each do |audit|
@@ -140,7 +140,7 @@ module ActsAsAudited
 
           # Find the oldest revision recorded prior to the date/time provided.
           def revision_at(date_or_time)
-            audits = self.audits.where("created_at <= ?", date_or_time)
+            audits = self.audits.where(:created_at.lte => date_or_time)
             revision_with ActsAsAudited.audit_class.reconstruct_attributes(audits) unless audits.empty?
           end
 
@@ -153,7 +153,7 @@ module ActsAsAudited
 
           def revision_with(attributes)
             self.dup.tap do |revision|
-              revision.send :instance_variable_set, '@attributes', self.attributes_before_type_cast
+              revision.send :instance_variable_set, '@attributes', self.attributes
               revision.send :instance_variable_set, '@new_record', self.destroyed?
               revision.send :instance_variable_set, '@persisted', !self.destroyed?
               revision.send :instance_variable_set, '@readonly', false
@@ -193,7 +193,7 @@ module ActsAsAudited
                 previous ? previous.version : 1
               end
             end
-            audits.where(['version <= ?', version])
+            audits.where(:version.lte => version)
           end
 
           def audit_create
