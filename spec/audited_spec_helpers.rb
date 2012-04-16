@@ -16,6 +16,10 @@ module AuditedSpecHelpers
     end
   end
 
+  def create_active_record_user(attrs = {})
+    create_user(false, attrs)
+  end
+
   def create_mongo_user(attrs = {})
     create_user(true, attrs)
   end

@@ -27,7 +27,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_rec
     end
 
     it "should not save non-audited columns" do
-      create_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
+      create_active_record_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
     end
   end
 
@@ -52,7 +52,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_rec
   end
 
   describe "on create" do
-    let( :user ) { create_user :audit_comment => "Create" }
+    let( :user ) { create_active_record_user :audit_comment => "Create" }
 
     it "should change the audit count" do
       expect {
@@ -94,7 +94,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_rec
 
   describe "on update" do
     before do
-      @user = create_user( :name => 'Brandon', :audit_comment => 'Update' )
+      @user = create_active_record_user( :name => 'Brandon', :audit_comment => 'Update' )
     end
 
     it "should save an audit" do
@@ -145,7 +145,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_rec
 
   describe "on destroy" do
     before do
-      @user = create_user
+      @user = create_active_record_user
     end
 
     it "should save an audit" do
@@ -225,7 +225,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_rec
     end
 
     it "should have one revision for a new record" do
-      create_user.revisions.size.should be(1)
+      create_active_record_user.revisions.size.should be(1)
     end
 
     it "should have one revision for each audit" do
@@ -361,7 +361,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_rec
   end
 
   describe "revision_at" do
-    let( :user ) { create_user }
+    let( :user ) { create_active_record_user }
 
     it "should find the latest revision before the given time" do
       ActsAsAudited.audit_class.update( user.audits.first.id, :created_at => 1.hour.ago )
