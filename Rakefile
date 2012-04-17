@@ -6,19 +6,17 @@ require 'bundler'
 Bundler::GemHelper.install_tasks
 Bundler.setup
 
-$:.unshift File.expand_path('../lib', __FILE__)
+ADAPTERS = %w(active_record mongo_mapper)
 
-require 'acts_as_audited'
-
-desc 'Default: run specs and tests'
-task :default => [:spec, :test]
-
-RSpec::Core::RakeTask.new(:spec)
-
-desc 'Test the acts_as_audited generators'
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.libs << 'test'
-  t.pattern = 'test/*_test.rb'
-  t.verbose = true
+ADAPTERS.each do |adapter|
+  desc "Run RSpec code examples for #{adapter} adapter"
+  RSpec::Core::RakeTask.new(adapter) do |t|
+    t.pattern = "spec/acts_as_audited/adapters/#{adapter}/**/*_spec.rb"
+  end
 end
+
+RSpec::Core::RakeTask.new(:spec => ADAPTERS) do |t|
+  t.pattern = 'spec/acts_as_audited/*_spec.rb'
+end
+
+task :default => :spec
