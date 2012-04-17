@@ -6,5 +6,6 @@
 coverage/
 doc/
 Gemfile.lock
+gemfiles/*.lock
 pkg
 tmp/*
