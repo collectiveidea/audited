@@ -6,3 +6,4 @@ rvm:
 branches:
   only:
     - master
+    - v3
