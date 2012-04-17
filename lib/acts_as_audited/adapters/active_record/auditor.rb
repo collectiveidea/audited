@@ -77,7 +77,7 @@ module ActsAsAudited
               attr_accessible :audit_comment
             end
 
-            has_many :audits, :as => :auditable, :class_name => ActsAsAudited.audit_class
+            has_many :audits, :as => :auditable, :class_name => ActsAsAudited.audit_class.name
             attr_protected :audit_ids if options[:protect]
             ActsAsAudited.audit_class.audited_class_names << self.to_s
 
@@ -99,7 +99,7 @@ module ActsAsAudited
           end
 
           def has_associated_audits
-            has_many :associated_audits, :as => :associated, :class_name => ActsAsAudited.audit_class
+            has_many :associated_audits, :as => :associated, :class_name => ActsAsAudited.audit_class.name
           end
         end
 
