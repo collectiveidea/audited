@@ -1,11 +1,10 @@
-acts_as_audited_plugin.sqlite3.db
 *.log
-doc/
-coverage/
-pkg
 *.swp
 .bundle
-tmp/*
-.yardoc
 .rvmrc
+.yardoc
+coverage/
+doc/
 Gemfile.lock
+pkg
+tmp/*
