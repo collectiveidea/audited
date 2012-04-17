@@ -335,7 +335,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mappe
     it "should be able to get time for first revision" do
       suspended_at = Time.now.utc
       u = Models::MongoMapper::User.create(:suspended_at => suspended_at)
-      u.revision(1).suspended_at.to_s.should == suspended_at.to_s
+      u.revision(1).suspended_at.to_i.should == suspended_at.to_i
     end
 
     it "should not raise an error when no previous audits exist" do
