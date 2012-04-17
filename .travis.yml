@@ -7,3 +7,7 @@ branches:
   only:
     - master
     - v3
+gemfile:
+  - gemfiles/rails30.gemfile
+  - gemfiles/rails31.gemfile
+  - gemfiles/rails32.gemfile
