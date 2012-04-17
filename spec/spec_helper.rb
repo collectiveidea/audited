@@ -1,6 +1,7 @@
 ENV['RAILS_ENV'] = 'test'
 
-require 'rails/all'
+require 'rails_app/config/environment'
+require 'rspec/rails'
 require 'acts_as_audited'
 require 'audited_spec_helpers'
 

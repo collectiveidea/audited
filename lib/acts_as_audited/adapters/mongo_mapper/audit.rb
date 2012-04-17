@@ -14,6 +14,7 @@ module ActsAsAudited
       #
       class Audit
         include ::MongoMapper::Document
+        include ActiveModel::Observing
 
         key :auditable_id, ObjectId
         key :auditable_type, String

@@ -35,11 +35,3 @@ module ActsAsAudited
   # The method to be called to return the current user for logging in the audits.
   @current_user_method = :current_user
 end
-
-if defined?(ActionController) and defined?(ActionController::Base)
-  require 'acts_as_audited/sweeper'
-
-  ActionController::Base.class_eval do
-    cache_sweeper ActsAsAudited::Sweeper
-  end
-end
