@@ -2,7 +2,9 @@ require 'rake'
 require 'rspec/core/rake_task'
 require 'rake/testtask'
 require 'bundler'
+
 Bundler::GemHelper.install_tasks
+Bundler.setup
 
 $:.unshift File.expand_path('../lib', __FILE__)
 
