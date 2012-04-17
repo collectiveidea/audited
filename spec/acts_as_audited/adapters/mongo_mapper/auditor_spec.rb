@@ -47,7 +47,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mappe
       u.username.should eq('username')
       u.password.should eq('password')
       u.activated.should eq(true)
-      u.suspended_at.to_s.should eq(yesterday.to_s)
+      u.suspended_at.to_i.should eq(yesterday.to_i)
       u.logins.should eq(2)
     end
   end
