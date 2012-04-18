@@ -87,6 +87,24 @@ module ActsAsAudited
             end
             record
           end
+
+          # @private
+          def sanitize_for_time_with_zone(value)
+            case value
+            when Hash
+              value.inject({}){|h,(k,v)| h[k] = sanitize_for_time_with_zone(v); h }
+            when Array
+              value.map{|v| sanitize_for_time_with_zone(v) }
+            when ActiveSupport::TimeWithZone
+              value.utc
+            else
+              value
+            end
+          end
+        end
+
+        def audited_changes=(value)
+          self[:audited_changes] = self.class.sanitize_for_time_with_zone(value)
         end
 
         # Allows user to be set to either a string or an ActiveRecord object
