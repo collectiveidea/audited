@@ -34,7 +34,7 @@ module ActsAsAudited
         belongs_to :user,       :polymorphic => true
         belongs_to :associated, :polymorphic => true
 
-        before_create :set_version_number, :set_audit_user
+        before_create :set_version_number, :set_audit_user, :set_created_at
 
         cattr_accessor :audited_class_names
         self.audited_class_names = Set.new
@@ -168,6 +168,10 @@ module ActsAsAudited
         def set_audit_user
           self.user = Thread.current[:acts_as_audited_user] if Thread.current[:acts_as_audited_user]
           nil # prevent stopping callback chains
+        end
+
+        def set_created_at
+          self[:created_at] = Time.now.utc if !persisted? && !created_at?
         end
       end
     end
