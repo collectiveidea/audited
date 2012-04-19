@@ -106,12 +106,6 @@ describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_rec
       }.to change( ActsAsAudited.audit_class, :count ).by(1)
     end
 
-    it "should not save an audit if the record is not changed" do
-      expect {
-        @user.save!
-      }.to_not change( ActsAsAudited.audit_class, :count )
-    end
-
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
       @user.audits.last.action.should == 'update'
@@ -140,6 +134,21 @@ describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_rec
       expect { @user.update_attribute :logins, '0' }.to_not change( ActsAsAudited.audit_class, :count )
       expect { @user.update_attribute :activated, 1 }.to_not change( ActsAsAudited.audit_class, :count )
       expect { @user.update_attribute :activated, '1' }.to_not change( ActsAsAudited.audit_class, :count )
+    end
+
+    describe "with no dirty changes" do
+      it "does not create an audit if the record is not changed" do
+        expect {
+          @user.save!
+        }.to_not change( ActsAsAudited.audit_class, :count )
+      end
+
+      it "creates an audit when an audit comment is present" do
+        expect {
+          @user.audit_comment = "Comment"
+          @user.save!
+        }.to change( ActsAsAudited.audit_class, :count )
+      end
     end
   end
 
