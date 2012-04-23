@@ -29,8 +29,6 @@ module ActsAsAudited
         scope :from_version,  lambda {|version| where(['version >= ?', version]) }
         scope :to_version,    lambda {|version| where(['version <= ?', version]) }
 
-
-
         # Return all audits older than the current one.
         def ancestors
           self.class.where(['auditable_id = ? and auditable_type = ? and version <= ?',
@@ -47,14 +45,15 @@ module ActsAsAudited
             self.username = user
         end
         alias_method :user_as_model=, :user=
-          alias_method :user=, :user_as_string=
+        alias_method :user=, :user_as_string=
 
-          # @private
-          def user_as_string
-            self.user_as_model || self.username
+        # @private
+        def user_as_string
+          self.user_as_model || self.username
         end
         alias_method :user_as_model, :user
         alias_method :user, :user_as_string
+
       private
         def set_version_number
           max = self.class.maximum(:version,

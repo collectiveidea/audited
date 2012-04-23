@@ -76,24 +76,19 @@ module ActsAsAudited
             self.username = user
         end
         alias_method :user_as_model=, :user=
-          alias_method :user=, :user_as_string=
+        alias_method :user=, :user_as_string=
 
-          # @private
-          def user_as_string
-            self.user_as_model || self.username
+        # @private
+        def user_as_string
+          self.user_as_model || self.username
         end
         alias_method :user_as_model, :user
         alias_method :user, :user_as_string
-
-
-
 
         # Return all audits older than the current one.
         def ancestors
           self.class.where(:auditable_id => auditable_id, :auditable_type => auditable_type, :version.lte => version)
         end
-
-
 
         def set_created_at
           self[:created_at] = Time.now.utc if !persisted? && !created_at?
