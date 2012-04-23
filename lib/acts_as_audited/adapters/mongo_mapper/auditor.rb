@@ -19,6 +19,10 @@ module ActsAsAudited
         CALLBACKS = [:audit_create, :audit_update, :audit_destroy]
 
         module ClassMethods
+
+          def default_ignored_attributes
+            ['id']
+          end
           # == Configuration options
           #
           #
@@ -58,7 +62,7 @@ module ActsAsAudited
             if options[:only]
               except = self.column_names - options[:only].flatten.map(&:to_s)
             else
-              except = ['id'] + ActsAsAudited.ignored_attributes
+              except = default_ignored_attributes + ActsAsAudited.ignored_attributes
               except |= Array(options[:except]).collect(&:to_s) if options[:except]
             end
             self.non_audited_columns = except

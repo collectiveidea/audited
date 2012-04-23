@@ -22,6 +22,10 @@ module ActsAsAudited
         end
 
         module ClassMethods
+
+          def default_ignored_attributes
+            [self.primary_key, inheritance_column]
+          end
           # == Configuration options
           #
           #
@@ -52,7 +56,7 @@ module ActsAsAudited
             # don't allow multiple calls
             return if self.included_modules.include?(ActsAsAudited::Adapters::ActiveRecord::Auditor::InstanceMethods)
 
-            options = { :protect => accessible_attributes.empty? }.merge(options)
+            options = { :protect => accessible_attributes.blank? }.merge(options)
 
             class_attribute :non_audited_columns,   :instance_writer => false
             class_attribute :auditing_enabled,      :instance_writer => false
@@ -61,7 +65,7 @@ module ActsAsAudited
             if options[:only]
               except = self.column_names - options[:only].flatten.map(&:to_s)
             else
-              except = [self.primary_key, inheritance_column] + ActsAsAudited.ignored_attributes
+              except = default_ignored_attributes + ActsAsAudited.ignored_attributes
               except |= Array(options[:except]).collect(&:to_s) if options[:except]
             end
             self.non_audited_columns = except
@@ -73,7 +77,7 @@ module ActsAsAudited
             end
 
             attr_accessor :audit_comment
-            unless accessible_attributes.empty? || options[:protect]
+            unless accessible_attributes.blank? || options[:protect]
               attr_accessible :audit_comment
             end
 
