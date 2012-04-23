@@ -131,7 +131,7 @@ module ActsAsAudited
           #   end
           #
           def revisions(from_version = 1)
-            audits = self.audits.where(['version >= ?', from_version])
+            audits = self.audits.from_version(from_version)
             return [] if audits.empty?
             revisions = []
             audits.each do |audit|
@@ -147,7 +147,7 @@ module ActsAsAudited
 
           # Find the oldest revision recorded prior to the date/time provided.
           def revision_at(date_or_time)
-            audits = self.audits.where("created_at <= ?", date_or_time)
+            audits = self.audits.up_until(date_or_time)
             revision_with ActsAsAudited.audit_class.reconstruct_attributes(audits) unless audits.empty?
           end
 
@@ -200,7 +200,7 @@ module ActsAsAudited
                 previous ? previous.version : 1
               end
             end
-            audits.where(['version <= ?', version])
+            audits.to_version(version)
           end
 
           def audit_create
