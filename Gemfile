@@ -1,3 +1,3 @@
 source 'https://rubygems.org'
 
-gemspec
+gemspec :name => 'audited'
