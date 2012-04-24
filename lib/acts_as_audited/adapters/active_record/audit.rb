@@ -1,5 +1,5 @@
 require 'set'
-require 'acts_as_audited/adapters/base/audit'
+require 'audited/adapters/base/audit'
 
 module Audited
   module Adapters

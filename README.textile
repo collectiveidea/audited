@@ -34,7 +34,7 @@ h2. Rails deprecation warning
 
 Currently the gem causes the following deprecation warning to be emitted:
 
-@DEPRECATION WARNING: reorder is deprecated. Please use except(:order).order(...) instead. (called from <class:Audit> at /Users/kenneth/Code/FOSS/acts_as_audited/lib/acts_as_audited/audit.rb:26)@
+@DEPRECATION WARNING: reorder is deprecated. Please use except(:order).order(...) instead. (called from <class:Audit> at /Users/kenneth/Code/FOSS/audited/lib/audited/audit.rb:26)@
 
 I'm well aware of the fact, and working towards a solution. The issue has also been brought up on the Rails lighthouse as "#6011":https://rails.lighthouseapp.com/projects/8994/tickets/6011-exceptorderorder-is-not-working-in-scopes. I'm keeping an eye on the issue and working towards another possible solution.
 

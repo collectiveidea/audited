@@ -2,7 +2,7 @@ ENV['RAILS_ENV'] = 'test'
 
 require 'rails_app/config/environment'
 require 'rspec/rails'
-require 'acts_as_audited'
+require 'audited'
 require 'audited_spec_helpers'
 
 SPEC_ROOT = Pathname.new(File.expand_path('../', __FILE__))

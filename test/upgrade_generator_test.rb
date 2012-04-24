@@ -1,6 +1,6 @@
 require 'test_helper'
 
-require 'generators/acts_as_audited/upgrade_generator'
+require 'generators/audited/upgrade_generator'
 
 class UpgradeGeneratorTest < Rails::Generators::TestCase
   destination File.expand_path('../../tmp', __FILE__)

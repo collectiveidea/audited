@@ -21,7 +21,7 @@ module Audited
       end
 
       def copy_migration
-        migration_template 'install.rb', 'db/migrate/install_acts_as_audited.rb'
+        migration_template 'install.rb', 'db/migrate/install_audited.rb'
       end
     end
   end
