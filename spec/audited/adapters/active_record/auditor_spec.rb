@@ -373,7 +373,9 @@ describe Audited::Auditor, :adapter => :active_record do
     let( :user ) { create_active_record_user }
 
     it "should find the latest revision before the given time" do
-      Audited.audit_class.update( user.audits.first.id, :created_at => 1.hour.ago )
+      audit = user.audits.first
+      audit.created_at = 1.hour.ago
+      audit.save!
       user.update_attributes :name => 'updated'
       user.revision_at( 2.minutes.ago ).version.should be(1)
     end
