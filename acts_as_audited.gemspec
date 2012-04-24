@@ -10,8 +10,12 @@ Gem::Specification.new do |gem|
   gem.summary     = gem.description
   gem.homepage    = 'https://github.com/collectiveidea/acts_as_audited'
 
-  gem.add_development_dependency 'mongo_mapper'
+  gem.add_development_dependency 'appraisal', '~> 0.4'
+  gem.add_development_dependency 'bson_ext', '~> 1.6'
+  gem.add_development_dependency 'mongo_mapper', '~> 0.11'
   gem.add_development_dependency 'rails', '~> 3.0'
+  gem.add_development_dependency 'rspec-rails', '~> 2.0'
+  gem.add_development_dependency 'sqlite3', '~> 1.0'
 
   gem.files         = `git ls-files`.split($\)
   gem.test_files    = gem.files.grep(/^spec\//)
