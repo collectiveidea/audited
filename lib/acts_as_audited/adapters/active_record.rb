@@ -1,8 +1,14 @@
 require 'active_record'
-require 'acts_as_audited/adapters/active_record/auditor'
+require 'acts_as_audited/auditor'
 require 'acts_as_audited/adapters/active_record/audit'
 
-::ActiveRecord::Base.send :include, ActsAsAudited::Adapters::ActiveRecord::Auditor
+module ActsAsAudited::Auditor::ClassMethods
+  def default_ignored_attributes
+    [self.primary_key, inheritance_column]
+  end
+end
+
+::ActiveRecord::Base.send :include, ActsAsAudited::Auditor
 
 ActsAsAudited.audit_class = ActsAsAudited::Adapters::ActiveRecord::Audit
 

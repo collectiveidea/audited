@@ -1,14 +1,14 @@
 require File.expand_path('../mongo_mapper_spec_helper', __FILE__)
 
-describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mapper do
+describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
 
   describe "configuration" do
     it "should include instance methods" do
-      Models::MongoMapper::User.new.should be_a_kind_of(ActsAsAudited::Adapters::MongoMapper::Auditor::AuditedInstanceMethods)
+      Models::MongoMapper::User.new.should be_a_kind_of(ActsAsAudited::Auditor::AuditedInstanceMethods)
     end
 
     it "should include class methods" do
-      Models::MongoMapper::User.should be_a_kind_of( ActsAsAudited::Adapters::MongoMapper::Auditor::AuditedClassMethods )
+      Models::MongoMapper::User.should be_a_kind_of( ActsAsAudited::Auditor::AuditedClassMethods )
     end
 
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|

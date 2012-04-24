@@ -1,14 +1,14 @@
 require File.expand_path('../active_record_spec_helper', __FILE__)
 
-describe ActsAsAudited::Adapters::ActiveRecord::Auditor, :adapter => :active_record do
+describe ActsAsAudited::Auditor, :adapter => :active_record do
 
   describe "configuration" do
     it "should include instance methods" do
-      Models::ActiveRecord::User.new.should be_a_kind_of( ActsAsAudited::Adapters::ActiveRecord::Auditor::InstanceMethods )
+      Models::ActiveRecord::User.new.should be_a_kind_of( ActsAsAudited::Auditor::AuditedInstanceMethods)
     end
 
     it "should include class methods" do
-      Models::ActiveRecord::User.should be_a_kind_of( ActsAsAudited::Adapters::ActiveRecord::Auditor::SingletonMethods )
+      Models::ActiveRecord::User.should be_a_kind_of( ActsAsAudited::Auditor::AuditedClassMethods )
     end
 
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
