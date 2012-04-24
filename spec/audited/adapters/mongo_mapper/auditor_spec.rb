@@ -11,7 +11,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       Models::MongoMapper::User.should be_a_kind_of( Audited::Auditor::AuditedClassMethods )
     end
 
-    ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
+    ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', '_id', 'password'].each do |column|
       it "should not audit #{column}" do
         Models::MongoMapper::User.non_audited_columns.should include(column)
       end

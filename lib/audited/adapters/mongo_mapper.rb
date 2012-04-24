@@ -4,7 +4,7 @@ require 'audited/adapters/mongo_mapper/audit'
 
 module Audited::Auditor::ClassMethods
   def default_ignored_attributes
-    ['id']
+    ['id', '_id']
   end
 end
 
