@@ -115,9 +115,9 @@ describe ActsAsAudited::Adapters::MongoMapper::Auditor, :adapter => :mongo_mappe
     end
 
     it "should store the changed attributes" do
-      now = Time.now.utc
+      now = Time.at(Time.now.to_i).utc
       @user.update_attributes :name => 'Changed', :suspended_at => now
-      @user.audits.all.last.audited_changes.should == { 'name' => ['Brandon', 'Changed'], 'suspended_at' => [nil, now.round(3)] }
+      @user.audits.all.last.audited_changes.should == { 'name' => ['Brandon', 'Changed'], 'suspended_at' => [nil, now] }
     end
 
     it "should store audit comment" do
