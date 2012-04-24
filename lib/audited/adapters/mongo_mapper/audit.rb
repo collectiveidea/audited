@@ -35,15 +35,16 @@ module Audited
 
         before_create :set_created_at
 
-        scope :ascending,  sort(:version.asc)
-        scope :descending, sort(:version.desc)
-        scope :creates,    where(:action => 'create')
-        scope :updates,    where(:action => 'update')
-        scope :destroys,   where(:action => 'destroy')
+        def self.acending;   sort(:version.asc); end
+        def self.ascending;  sort(:version.asc); end
+        def self.descending; sort(:version.desc); end
+        def self.creates;    where(:action => 'create'); end
+        def self.updates;    where(:action => 'update'); end
+        def self.destroys;   where(:action => 'destroy'); end
 
-        scope :up_until,      lambda {|date_or_time| where(:created_at.lte => date_or_time) }
-        scope :from_version,  lambda {|version| where(:version.gte => version) }
-        scope :to_version,    lambda {|version| where(:version.lte => version) }
+        def self.up_until(date_or_time); where(:created_at.lte => date_or_time); end
+        def self.from_version(version);  where(:version.gte => version); end
+        def self.to_version(version);    where(:version.lte => version); end
 
         class << self
 
