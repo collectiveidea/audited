@@ -1,5 +1,5 @@
 require 'set'
-require 'audited/adapters/base/audit'
+require 'audited/audit'
 
 module Audited
   module Adapters
@@ -31,7 +31,7 @@ module Audited
         key :remote_address, String
         key :created_at, Time
 
-        include Audited::Adapters::Base::Audit
+        include Audited::Audit
 
         before_create :set_created_at
 

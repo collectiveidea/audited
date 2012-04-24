@@ -1,5 +1,5 @@
 require 'set'
-require 'audited/adapters/base/audit'
+require 'audited/audit'
 
 module Audited
   module Adapters
@@ -14,7 +14,7 @@ module Audited
       # * <tt>created_at</tt>: Time that the change was performed
       #
       class Audit < ::ActiveRecord::Base
-        include Audited::Adapters::Base::Audit
+        include Audited::Audit
 
 
         serialize :audited_changes
