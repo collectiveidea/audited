@@ -1,14 +1,14 @@
 require File.expand_path('../mongo_mapper_spec_helper', __FILE__)
 
-describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
+describe Audited::Auditor, :adapter => :mongo_mapper do
 
   describe "configuration" do
     it "should include instance methods" do
-      Models::MongoMapper::User.new.should be_a_kind_of(ActsAsAudited::Auditor::AuditedInstanceMethods)
+      Models::MongoMapper::User.new.should be_a_kind_of(Audited::Auditor::AuditedInstanceMethods)
     end
 
     it "should include class methods" do
-      Models::MongoMapper::User.should be_a_kind_of( ActsAsAudited::Auditor::AuditedClassMethods )
+      Models::MongoMapper::User.should be_a_kind_of( Audited::Auditor::AuditedClassMethods )
     end
 
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
@@ -18,7 +18,7 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
     end
 
     it "should be configurable which attributes are not audited" do
-      ActsAsAudited.ignored_attributes = ['delta', 'top_secret', 'created_at']
+      Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
       class Secret
         include MongoMapper::Document
         acts_as_audited
@@ -58,7 +58,7 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
     it "should change the audit count" do
       expect {
         user
-      }.to change( ActsAsAudited.audit_class, :count ).by(1)
+      }.to change( Audited.audit_class, :count ).by(1)
     end
 
     it "should create associated audit" do
@@ -67,7 +67,7 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
 
     it "should set the action to create" do
       user.audits.first.action.should == 'create'
-      ActsAsAudited.audit_class.creates.sort(:id.asc).last.should == user.audits.first
+      Audited.audit_class.creates.sort(:id.asc).last.should == user.audits.first
       user.audits.creates.count.should == 1
       user.audits.updates.count.should == 0
       user.audits.destroys.count.should == 0
@@ -89,7 +89,7 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
     it "should not save an audit if only specified on update/destroy" do
       expect {
         Models::MongoMapper::OnUpdateDestroy.create!( :name => 'Bart' )
-      }.to_not change( ActsAsAudited.audit_class, :count )
+      }.to_not change( Audited.audit_class, :count )
     end
   end
 
@@ -101,16 +101,16 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
     it "should save an audit" do
       expect {
         @user.update_attribute(:name, "Someone")
-      }.to change( ActsAsAudited.audit_class, :count ).by(1)
+      }.to change( Audited.audit_class, :count ).by(1)
       expect {
         @user.update_attribute(:name, "Someone else")
-      }.to change( ActsAsAudited.audit_class, :count ).by(1)
+      }.to change( Audited.audit_class, :count ).by(1)
     end
 
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
       @user.audits.all.last.action.should == 'update'
-      ActsAsAudited.audit_class.updates.sort(:id.asc).last.should == @user.audits.all.last
+      Audited.audit_class.updates.sort(:id.asc).last.should == @user.audits.all.last
       @user.audits.updates.last.should == @user.audits.all.last
     end
 
@@ -128,28 +128,28 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
       on_create_destroy = Models::MongoMapper::OnCreateDestroy.create( :name => 'Bart' )
       expect {
         on_create_destroy.update_attributes :name => 'Changed'
-      }.to_not change( ActsAsAudited.audit_class, :count )
+      }.to_not change( Audited.audit_class, :count )
     end
 
     it "should not save an audit if the value doesn't change after type casting" do
       @user.update_attributes! :logins => 0, :activated => true
-      expect { @user.update_attribute :logins, '0' }.to_not change( ActsAsAudited.audit_class, :count )
-      expect { @user.update_attribute :activated, 1 }.to_not change( ActsAsAudited.audit_class, :count )
-      expect { @user.update_attribute :activated, '1' }.to_not change( ActsAsAudited.audit_class, :count )
+      expect { @user.update_attribute :logins, '0' }.to_not change( Audited.audit_class, :count )
+      expect { @user.update_attribute :activated, 1 }.to_not change( Audited.audit_class, :count )
+      expect { @user.update_attribute :activated, '1' }.to_not change( Audited.audit_class, :count )
     end
 
     describe "with no dirty changes" do
       it "does not create an audit if the record is not changed" do
         expect {
           @user.save!
-        }.to_not change( ActsAsAudited.audit_class, :count )
+        }.to_not change( Audited.audit_class, :count )
       end
 
       it "creates an audit when an audit comment is present" do
         expect {
           @user.audit_comment = "Comment"
           @user.save!
-        }.to change( ActsAsAudited.audit_class, :count )
+        }.to change( Audited.audit_class, :count )
       end
     end
   end
@@ -162,7 +162,7 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
     it "should save an audit" do
       expect {
         @user.destroy
-      }.to change( ActsAsAudited.audit_class, :count )
+      }.to change( Audited.audit_class, :count )
 
       @user.audits.size.should be(2)
     end
@@ -171,7 +171,7 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
       @user.destroy
 
       @user.audits.all.last.action.should == 'destroy'
-      ActsAsAudited.audit_class.destroys.sort(:id.asc).last.should == @user.audits.all.last
+      Audited.audit_class.destroys.sort(:id.asc).last.should == @user.audits.all.last
       @user.audits.destroys.last.should == @user.audits.all.last
     end
 
@@ -194,7 +194,7 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
 
       expect {
         on_create_update.destroy
-      }.to_not change( ActsAsAudited.audit_class, :count )
+      }.to_not change( Audited.audit_class, :count )
     end
   end
 
@@ -375,7 +375,7 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
     let( :user ) { create_mongo_user }
 
     it "should find the latest revision before the given time" do
-      ActsAsAudited.audit_class.update( user.audits.first.id, :created_at => 1.hour.ago )
+      Audited.audit_class.update( user.audits.first.id, :created_at => 1.hour.ago )
       user.update_attributes :name => 'updated'
       user.revision_at( 2.minutes.ago ).version.should be(1)
     end
@@ -390,13 +390,13 @@ describe ActsAsAudited::Auditor, :adapter => :mongo_mapper do
       expect {
         u = Models::MongoMapper::User.new(:name => 'Brandon')
         u.save_without_auditing.should be_true
-      }.to_not change( ActsAsAudited.audit_class, :count )
+      }.to_not change( Audited.audit_class, :count )
     end
 
     it "should not save an audit inside of the #without_auditing block" do
       expect {
         Models::MongoMapper::User.without_auditing { Models::MongoMapper::User.create!( :name => 'Brandon' ) }
-      }.to_not change( ActsAsAudited.audit_class, :count )
+      }.to_not change( Audited.audit_class, :count )
     end
   end
 

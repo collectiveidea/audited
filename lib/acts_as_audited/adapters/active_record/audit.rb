@@ -1,7 +1,7 @@
 require 'set'
 require 'acts_as_audited/adapters/base/audit'
 
-module ActsAsAudited
+module Audited
   module Adapters
     module ActiveRecord
       # Audit saves the changes to ActiveRecord models.  It has the following attributes:
@@ -14,7 +14,7 @@ module ActsAsAudited
       # * <tt>created_at</tt>: Time that the change was performed
       #
       class Audit < ::ActiveRecord::Base
-        include ActsAsAudited::Adapters::Base::Audit
+        include Audited::Adapters::Base::Audit
 
 
         serialize :audited_changes

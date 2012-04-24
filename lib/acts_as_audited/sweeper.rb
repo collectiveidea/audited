@@ -1,6 +1,6 @@
-module ActsAsAudited
+module Audited
   class Sweeper < ActiveModel::Observer
-    observe ActsAsAudited.audit_class
+    observe Audited.audit_class
 
     attr_accessor :controller
 
@@ -19,7 +19,7 @@ module ActsAsAudited
     end
 
     def current_user
-      controller.send(ActsAsAudited.current_user_method) if controller.respond_to?(ActsAsAudited.current_user_method, true)
+      controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true)
     end
 
     def add_observer!(klass)
@@ -40,6 +40,6 @@ end
 
 if defined?(ActionController) and defined?(ActionController::Base)
   ActionController::Base.class_eval do
-    around_filter ActsAsAudited::Sweeper.instance
+    around_filter Audited::Sweeper.instance
   end
 end

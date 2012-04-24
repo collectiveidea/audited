@@ -1,4 +1,4 @@
-module ActsAsAudited
+module Audited
   # Specify this act if you want changes to your model to be saved in an
   # audit table.  This assumes there is an audits table ready.
   #
@@ -9,7 +9,7 @@ module ActsAsAudited
   # To store an audit comment set model.audit_comment to your comment before
   # a create, update or destroy operation.
   #
-  # See <tt>ActsAsAudited::Adapters::ActiveRecord::Auditor::ClassMethods#acts_as_audited</tt>
+  # See <tt>Audited::Adapters::ActiveRecord::Auditor::ClassMethods#acts_as_audited</tt>
   # for configuration options
   module Auditor #:nodoc:
     extend ActiveSupport::Concern
@@ -45,7 +45,7 @@ module ActsAsAudited
       #
       def acts_as_audited(options = {})
         # don't allow multiple calls
-        return if self.included_modules.include?(ActsAsAudited::Auditor::AuditedInstanceMethods)
+        return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
         options = { :protect => accessible_attributes.blank? }.merge(options)
 
@@ -56,7 +56,7 @@ module ActsAsAudited
         if options[:only]
           except = self.column_names - options[:only].flatten.map(&:to_s)
         else
-          except = default_ignored_attributes + ActsAsAudited.ignored_attributes
+          except = default_ignored_attributes + Audited.ignored_attributes
           except |= Array(options[:except]).collect(&:to_s) if options[:except]
         end
         self.non_audited_columns = except
@@ -72,9 +72,9 @@ module ActsAsAudited
           attr_accessible :audit_comment
         end
 
-        has_many :audits, :as => :auditable, :class_name => ActsAsAudited.audit_class.name
+        has_many :audits, :as => :auditable, :class_name => Audited.audit_class.name
         attr_protected :audit_ids if options[:protect]
-        ActsAsAudited.audit_class.audited_class_names << self.to_s
+        Audited.audit_class.audited_class_names << self.to_s
 
         after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
@@ -87,14 +87,14 @@ module ActsAsAudited
 
         attr_accessor :version
 
-        extend ActsAsAudited::Auditor::AuditedClassMethods
-        include ActsAsAudited::Auditor::AuditedInstanceMethods
+        extend Audited::Auditor::AuditedClassMethods
+        include Audited::Auditor::AuditedInstanceMethods
 
         self.auditing_enabled = true
       end
 
       def has_associated_audits
-        has_many :associated_audits, :as => :associated, :class_name => ActsAsAudited.audit_class.name
+        has_many :associated_audits, :as => :associated, :class_name => Audited.audit_class.name
       end
     end
 
@@ -133,13 +133,13 @@ module ActsAsAudited
 
       # Get a specific revision specified by the version number, or +:previous+
       def revision(version)
-        revision_with ActsAsAudited.audit_class.reconstruct_attributes(audits_to(version))
+        revision_with Audited.audit_class.reconstruct_attributes(audits_to(version))
       end
 
       # Find the oldest revision recorded prior to the date/time provided.
       def revision_at(date_or_time)
         audits = self.audits.up_until(date_or_time)
-        revision_with ActsAsAudited.audit_class.reconstruct_attributes(audits) unless audits.empty?
+        revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
       end
 
       # List of attributes that are audited.
@@ -157,7 +157,7 @@ module ActsAsAudited
           revision.send :instance_variable_set, '@readonly', false
           revision.send :instance_variable_set, '@destroyed', false
           revision.send :instance_variable_set, '@marked_for_destruction', false
-          ActsAsAudited.audit_class.assign_revision_attributes(revision, attributes)
+          Audited.audit_class.assign_revision_attributes(revision, attributes)
 
           # Remove any association proxies so that they will be recreated
           # and reference the correct object for this revision. The only way
@@ -264,7 +264,7 @@ module ActsAsAudited
       # convenience wrapper around
       # @see Audit#as_user.
       def audit_as( user, &block )
-        ActsAsAudited.audit_class.as_user( user, &block )
+        Audited.audit_class.as_user( user, &block )
       end
     end
   end

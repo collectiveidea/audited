@@ -1,6 +1,6 @@
 require File.expand_path('../active_record_spec_helper', __FILE__)
 
-describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
+describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
   let(:user) { Models::ActiveRecord::User.new :name => 'Testing' }
 
   describe "user=" do
@@ -86,13 +86,13 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_recor
     user.audits(true).first.version.should be(1)
     user.audits(true).last.version.should be(2)
     user.destroy
-    ActsAsAudited.audit_class.where(:auditable_type => 'Models::ActiveRecord::User', :auditable_id => user.id).last.version.should be(3)
+    Audited.audit_class.where(:auditable_type => 'Models::ActiveRecord::User', :auditable_id => user.id).last.version.should be(3)
   end
 
   describe "reconstruct_attributes" do
 
     it "should work with the old way of storing just the new value" do
-      audits = ActsAsAudited.audit_class.reconstruct_attributes([ActsAsAudited.audit_class.new(:audited_changes => {'attribute' => 'value'})])
+      audits = Audited.audit_class.reconstruct_attributes([Audited.audit_class.new(:audited_changes => {'attribute' => 'value'})])
       audits['attribute'].should == 'value'
     end
 
@@ -106,18 +106,18 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_recor
     end
 
     it "should include audited classes" do
-      ActsAsAudited.audit_class.audited_classes.should include(Models::ActiveRecord::User)
+      Audited.audit_class.audited_classes.should include(Models::ActiveRecord::User)
     end
 
     it "should include subclasses" do
-      ActsAsAudited.audit_class.audited_classes.should include(Models::ActiveRecord::CustomUserSubclass)
+      Audited.audit_class.audited_classes.should include(Models::ActiveRecord::CustomUserSubclass)
     end
   end
 
   describe "new_attributes" do
 
     it "should return a hash of the new values" do
-      ActsAsAudited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
+      Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
     end
 
   end
@@ -125,7 +125,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_recor
   describe "old_attributes" do
 
     it "should return a hash of the old values" do
-      ActsAsAudited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
+      Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
     end
 
   end
@@ -133,7 +133,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_recor
   describe "as_user" do
 
     it "should record user objects" do
-      ActsAsAudited.audit_class.as_user(user) do
+      Audited.audit_class.as_user(user) do
         company = Models::ActiveRecord::Company.create :name => 'The auditors'
         company.name = 'The Auditors, Inc'
         company.save
@@ -145,7 +145,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_recor
     end
 
     it "should record usernames" do
-      ActsAsAudited.audit_class.as_user(user.name) do
+      Audited.audit_class.as_user(user.name) do
         company = Models::ActiveRecord::Company.create :name => 'The auditors'
         company.name = 'The Auditors, Inc'
         company.save
@@ -159,14 +159,14 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_recor
     it "should be thread safe" do
       begin
         t1 = Thread.new do
-          ActsAsAudited.audit_class.as_user(user) do
+          Audited.audit_class.as_user(user) do
             sleep 1
             Models::ActiveRecord::Company.create(:name => 'The Auditors, Inc').audits.first.user.should == user
           end
         end
 
         t2 = Thread.new do
-          ActsAsAudited.audit_class.as_user(user.name) do
+          Audited.audit_class.as_user(user.name) do
             Models::ActiveRecord::Company.create(:name => 'The Competing Auditors, LLC').audits.first.username.should == user.name
             sleep 0.5
           end
@@ -180,7 +180,7 @@ describe ActsAsAudited::Adapters::ActiveRecord::Audit, :adapter => :active_recor
     end
 
     it "should return the value from the yield block" do
-      ActsAsAudited.audit_class.as_user('foo') do
+      Audited.audit_class.as_user('foo') do
         42
       end.should == 42
     end

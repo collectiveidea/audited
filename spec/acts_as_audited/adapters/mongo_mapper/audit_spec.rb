@@ -1,6 +1,6 @@
 require File.expand_path('../mongo_mapper_spec_helper', __FILE__)
 
-describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
+describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
   let(:user) { Models::MongoMapper::User.new :name => 'Testing' }
 
   it "sets created_at timestamp when audit is created" do
@@ -92,13 +92,13 @@ describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper 
     audits.first.version.should be(1)
     audits.last.version.should be(2)
     user.destroy
-    ActsAsAudited.audit_class.where(:auditable_type => 'Models::MongoMapper::User', :auditable_id => user.id).all.last.version.should be(3)
+    Audited.audit_class.where(:auditable_type => 'Models::MongoMapper::User', :auditable_id => user.id).all.last.version.should be(3)
   end
 
   describe "reconstruct_attributes" do
 
     it "should work with the old way of storing just the new value" do
-      audits = ActsAsAudited.audit_class.reconstruct_attributes([ActsAsAudited.audit_class.new(:audited_changes => {'attribute' => 'value'})])
+      audits = Audited.audit_class.reconstruct_attributes([Audited.audit_class.new(:audited_changes => {'attribute' => 'value'})])
       audits['attribute'].should == 'value'
     end
 
@@ -113,18 +113,18 @@ describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper 
     end
 
     it "should include audited classes" do
-      ActsAsAudited.audit_class.audited_classes.should include(Models::MongoMapper::User)
+      Audited.audit_class.audited_classes.should include(Models::MongoMapper::User)
     end
 
     it "should include subclasses" do
-      ActsAsAudited.audit_class.audited_classes.should include(Models::MongoMapper::CustomUserSubclass)
+      Audited.audit_class.audited_classes.should include(Models::MongoMapper::CustomUserSubclass)
     end
   end
 
   describe "new_attributes" do
 
     it "should return a hash of the new values" do
-      ActsAsAudited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
+      Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
     end
 
   end
@@ -132,7 +132,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper 
   describe "old_attributes" do
 
     it "should return a hash of the old values" do
-      ActsAsAudited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
+      Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
     end
 
   end
@@ -140,7 +140,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper 
   describe "as_user" do
 
     it "should record user objects" do
-      ActsAsAudited.audit_class.as_user(user) do
+      Audited.audit_class.as_user(user) do
         company = Models::MongoMapper::Company.create :name => 'The auditors'
         company.name = 'The Auditors, Inc'
         company.save
@@ -152,7 +152,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper 
     end
 
     it "should record usernames" do
-      ActsAsAudited.audit_class.as_user(user.name) do
+      Audited.audit_class.as_user(user.name) do
         company = Models::MongoMapper::Company.create :name => 'The auditors'
         company.name = 'The Auditors, Inc'
         company.save
@@ -165,14 +165,14 @@ describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper 
 
     it "should be thread safe" do
       t1 = Thread.new do
-        ActsAsAudited.audit_class.as_user(user) do
+        Audited.audit_class.as_user(user) do
           sleep 1
           Models::MongoMapper::Company.create(:name => 'The Auditors, Inc').audits.first.user.should == user
         end
       end
 
       t2 = Thread.new do
-        ActsAsAudited.audit_class.as_user(user.name) do
+        Audited.audit_class.as_user(user.name) do
           Models::MongoMapper::Company.create(:name => 'The Competing Auditors, LLC').audits.first.username.should == user.name
           sleep 0.5
         end
@@ -183,7 +183,7 @@ describe ActsAsAudited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper 
     end
 
     it "should return the value from the yield block" do
-      ActsAsAudited.audit_class.as_user('foo') do
+      Audited.audit_class.as_user('foo') do
         42
       end.should == 42
     end

@@ -1,7 +1,7 @@
 require 'set'
 require 'acts_as_audited/adapters/base/audit'
 
-module ActsAsAudited
+module Audited
   module Adapters
     module MongoMapper
       # Audit saves the changes to ActiveRecord models.  It has the following attributes:
@@ -31,7 +31,7 @@ module ActsAsAudited
         key :remote_address, String
         key :created_at, Time
 
-        include ActsAsAudited::Adapters::Base::Audit
+        include Audited::Adapters::Base::Audit
 
         before_create :set_created_at
 

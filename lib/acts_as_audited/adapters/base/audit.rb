@@ -1,4 +1,4 @@
-module ActsAsAudited
+module Audited
   module Adapters
     module Base
       module Audit

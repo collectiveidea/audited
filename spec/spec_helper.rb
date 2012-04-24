@@ -13,10 +13,10 @@ RSpec.configure do |config|
   config.include AuditedSpecHelpers
 
   config.before(:each, :adapter => :active_record) do
-    ActsAsAudited.audit_class = ActsAsAudited::Adapters::ActiveRecord::Audit
+    Audited.audit_class = Audited::Adapters::ActiveRecord::Audit
   end
 
   config.before(:each, :adapter => :mongo_mapper) do
-    ActsAsAudited.audit_class = ActsAsAudited::Adapters::MongoMapper::Audit
+    Audited.audit_class = Audited::Adapters::MongoMapper::Audit
   end
 end

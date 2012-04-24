@@ -5,7 +5,7 @@ require 'generators/acts_as_audited/upgrade_generator'
 class UpgradeGeneratorTest < Rails::Generators::TestCase
   destination File.expand_path('../../tmp', __FILE__)
   setup :prepare_destination
-  tests ActsAsAudited::Generators::UpgradeGenerator
+  tests Audited::Generators::UpgradeGenerator
 
   test "should add 'comment' to audits table" do
     load_schema 1

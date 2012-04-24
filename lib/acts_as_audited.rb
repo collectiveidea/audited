@@ -1,4 +1,4 @@
-module ActsAsAudited
+module Audited
   VERSION = '3.0.0'
 
   class << self

@@ -3,7 +3,7 @@ require 'rails/generators/migration'
 require 'active_record'
 require 'rails/generators/active_record'
 
-module ActsAsAudited
+module Audited
   module Generators
     class UpgradeGenerator < Rails::Generators::Base
       include Rails::Generators::Migration
@@ -29,8 +29,8 @@ module ActsAsAudited
       private
 
       def migrations_to_be_applied
-        ActsAsAudited::Adapters::ActiveRecord::Audit.reset_column_information
-        columns = ActsAsAudited::Adapters::ActiveRecord::Audit.columns.map(&:name)
+        Audited::Adapters::ActiveRecord::Audit.reset_column_information
+        columns = Audited::Adapters::ActiveRecord::Audit.columns.map(&:name)
 
         unless columns.include?( 'comment' )
           yield :add_comment_to_audits

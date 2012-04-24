@@ -21,7 +21,7 @@ describe AuditsController, :adapter => :mongo_mapper do
   include RSpec::Rails::ControllerExampleGroup
 
   before(:each) do
-    ActsAsAudited.current_user_method = :current_user
+    Audited.current_user_method = :current_user
   end
 
   let( :user ) { create_mongo_user }
@@ -33,18 +33,18 @@ describe AuditsController, :adapter => :mongo_mapper do
 
       expect {
         post :audit
-      }.to change( ActsAsAudited.audit_class, :count )
+      }.to change( Audited.audit_class, :count )
 
       assigns(:company).audits.last.user.should == user
     end
 
     it "should support custom users for sweepers" do
       controller.send(:custom_user=, user)
-      ActsAsAudited.current_user_method = :custom_user
+      Audited.current_user_method = :custom_user
 
       expect {
         post :audit
-      }.to change( ActsAsAudited.audit_class, :count )
+      }.to change( Audited.audit_class, :count )
 
       assigns(:company).audits.last.user.should == user
     end
@@ -67,7 +67,7 @@ describe AuditsController, :adapter => :mongo_mapper do
 
       expect {
         post :update_user
-      }.to_not change( ActsAsAudited.audit_class, :count )
+      }.to_not change( Audited.audit_class, :count )
     end
 
   end
