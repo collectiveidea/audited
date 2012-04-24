@@ -1,11 +1,8 @@
-require 'rake'
-require 'rspec/core/rake_task'
-require 'rake/testtask'
-require 'bundler'
-require 'appraisal'
+#!/usr/bin/env rake
 
-Bundler::GemHelper.install_tasks
-Bundler.setup
+require 'rspec/core/rake_task'
+require 'bundler/gem_helper'
+require 'appraisal'
 
 ADAPTERS = %w(active_record mongo_mapper)
 
@@ -21,3 +18,7 @@ RSpec::Core::RakeTask.new(:spec => ADAPTERS) do |t|
 end
 
 task :default => :spec
+
+Bundler::GemHelper.install_tasks(:name => 'audited')
+Bundler::GemHelper.install_tasks(:name => 'audited-activerecord')
+Bundler::GemHelper.install_tasks(:name => 'audited-mongo_mapper')
