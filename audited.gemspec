@@ -10,6 +10,7 @@ Gem::Specification.new do |gem|
   gem.summary     = gem.description
   gem.homepage    = 'https://github.com/collectiveidea/audited'
 
+  gem.add_development_dependency 'activerecord', '~> 3.0'
   gem.add_development_dependency 'appraisal', '~> 0.4'
   gem.add_development_dependency 'bson_ext', '~> 1.6'
   gem.add_development_dependency 'mongo_mapper', '~> 0.11'
