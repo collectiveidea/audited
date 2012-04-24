@@ -109,7 +109,7 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
       include ::MongoMapper::Document
     end
     class Models::MongoMapper::CustomUserSubclass < Models::MongoMapper::CustomUser
-      acts_as_audited
+      audited
     end
 
     it "should include audited classes" do

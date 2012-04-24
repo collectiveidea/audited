@@ -20,7 +20,7 @@ describe Audited::Auditor, :adapter => :active_record do
     it "should be configurable which attributes are not audited" do
       Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
       class Secret < ::ActiveRecord::Base
-        acts_as_audited
+        audited
       end
 
       Secret.non_audited_columns.should include('delta', 'top_secret', 'created_at')
@@ -463,7 +463,7 @@ describe Audited::Auditor, :adapter => :active_record do
       }.to_not raise_error
     end
 
-    it "should not rause an error when attr_accessible is declared before acts_as_audited" do
+    it "should not rause an error when attr_accessible is declared before audited" do
       expect {
         Models::ActiveRecord::AccessibleUser.new(:name => 'No fail!')
       }.to_not raise_error

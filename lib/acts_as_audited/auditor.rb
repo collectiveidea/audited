@@ -3,13 +3,13 @@ module Audited
   # audit table.  This assumes there is an audits table ready.
   #
   #   class User < ActiveRecord::Base
-  #     acts_as_audited
+  #     audited
   #   end
   #
   # To store an audit comment set model.audit_comment to your comment before
   # a create, update or destroy operation.
   #
-  # See <tt>Audited::Adapters::ActiveRecord::Auditor::ClassMethods#acts_as_audited</tt>
+  # See <tt>Audited::Adapters::ActiveRecord::Auditor::ClassMethods#audited</tt>
   # for configuration options
   module Auditor #:nodoc:
     extend ActiveSupport::Concern
@@ -22,16 +22,16 @@ module Audited
       #
       # * +only+ - Only audit the given attributes
       # * +except+ - Excludes fields from being saved in the audit log.
-      #   By default, acts_as_audited will audit all but these fields:
+      #   By default, Audited will audit all but these fields:
       #
       #     [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
       #   You can add to those by passing one or an array of fields to skip.
       #
       #     class User < ActiveRecord::Base
-      #       acts_as_audited :except => :password
+      #       audited :except => :password
       #     end
       # * +protect+ - If your model uses +attr_protected+, set this to false to prevent Rails from
-      #   raising an error.  If you declare +attr_accessible+ before calling +acts_as_audited+, it
+      #   raising an error.  If you declare +attr_accessible+ before calling +audited+, it
       #   will automatically default to false.  You only need to explicitly set this if you are
       #   calling +attr_accessible+ after.
       #
@@ -39,11 +39,11 @@ module Audited
       #   any create, update or destroy operation.
       #
       #     class User < ActiveRecord::Base
-      #       acts_as_audited :protect => false
+      #       audited :protect => false
       #       attr_accessible :name
       #     end
       #
-      def acts_as_audited(options = {})
+      def audited(options = {})
         # don't allow multiple calls
         return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 

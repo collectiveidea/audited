@@ -1,8 +1,8 @@
-h1. acts_as_audited !https://secure.travis-ci.org/collectiveidea/acts_as_audited.png?branch=master(Build Status)!:http://travis-ci.org/collectiveidea/acts_as_audited !https://gemnasium.com/collectiveidea/acts_as_audited.png(Dependency Status)!:https://gemnasium.com/collectiveidea/acts_as_audited
+h1. Audited !https://secure.travis-ci.org/collectiveidea/audited.png?branch=master(Build Status)!:http://travis-ci.org/collectiveidea/audited !https://gemnasium.com/collectiveidea/audited.png(Dependency Status)!:https://gemnasium.com/collectiveidea/audited
 
 
-+acts_as_audited+ is an ActiveRecord extension that logs all changes to your
-models in an audits table, with optional revision comments. +acts_as_audited+
+Audited is an ActiveRecord extension that logs all changes to your
+models in an audits table, with optional revision comments. Audited
 has been updated to work with Rails 3, to use it with older version of Rails,
 please see the <tt>1.1-stable</tt> branch.
 
@@ -10,7 +10,7 @@ h2. Installation
 
 In <tt>Gemfile</tt>:
 
-@gem "acts_as_audited", "2.0.0"@
+@gem "audited-activerecord", "2.0.0"@
 
 In your application root, run:
 
@@ -18,13 +18,13 @@ In your application root, run:
 
 Generate the migration:
 
-* If installing without a previous version of +acts_as_audited+ or you do not mind overwriting your audits table:
+* If installing without a previous version of Audited (or acts_as_audited) or you do not mind overwriting your audits table:
 
-@$ rails g acts_as_audited:install@
+@$ rails g audited:install@
 
-* If upgrading from a previous version of +acts_as_audited+ you might need some alterations to the audits table:
+* If upgrading from a previous version of Audited (or acts_as_audited) you might need some alterations to the audits table:
 
-@$ rails g acts_as_audited:upgrade@
+@$ rails g audited:upgrade@
 
 * After running one of the generators:
 
@@ -40,30 +40,30 @@ I'm well aware of the fact, and working towards a solution. The issue has also b
 
 h2. Upgrading
 
-Upgrading to Rails 3, or even between point releases of +acts_as_audited+, might require alterations to the audits table. After every upgrade please run the following generator:
+Upgrading to Rails 3, or even between point releases of Audited, might require alterations to the audits table. After every upgrade please run the following generator:
 
-@$ rails g acts_as_audited:upgrade@
+@$ rails g audited:upgrade@
 
 The upgrade generator will only generate migrations that are missing, or no migrations at all if you are up to date.
 
 h2. Usage
 
-Declare +acts_as_audited+ on your models:
+Declare +audited+ on your models:
 
 <pre><code>class User < ActiveRecord::Base
-  acts_as_audited :except => [:password, :mistress]
+  audited :except => [:password, :mistress]
 end
 </code></pre>
 
 Within a web request, will automatically record the user that made the change if your controller has a +current_user+ method. Comments can be added to an audit by setting <tt>model.audit_comment</tt>
-before create/update/destroy. If the <tt>:comment_required</tt> option is given to +acts_as_audited+,
+before create/update/destroy. If the <tt>:comment_required</tt> option is given to +audited+,
 the save/update/destroy action will fail with add an error on <tt>model.audit_comment</tt> and triggering a
 transaction rollback if <tt>model.audit_comment</tt> is nil.
 
 To record an audit for an associated model, use the <tt>:associated_with</tt> option.
 
 <pre><code>class User < ActiveRecord::Base
-  acts_as_audited :associated_with => :company
+  audited :associated_with => :company
 end
 </code></pre>
 
@@ -84,23 +84,23 @@ end
 
 h2. Caveats
 
-If your model declares +attr_accessible+ after +acts_as_audited+, you need to set <tt>:protect</tt> to false. acts_as_audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +acts_as_audited+, but needs to be explicitly set if it is called after.
+If your model declares +attr_accessible+ after +audited+, you need to set <tt>:protect</tt> to false. Audited uses +attr_protected+ internally to prevent malicious users from unassociating your audits, and Rails does not allow both +attr_protected+ and +attr_accessible+. It will default to false if +attr_accessible+ is called before +audited+, but needs to be explicitly set if it is called after.
 
 <pre><code>class User < ActiveRecord::Base
-  acts_as_audited :protect => false
+  audited :protect => false
   attr_accessible :name
 end
 </code></pre>
 
-Another caveat is documented in "issue 26":https://github.com/collectiveidea/acts_as_audited/issues#issue/26, where an audit created on the first request to the server does not have a user. Please review the Github issue for more details on how to fix this. It does not appear to affect Rails 3.
+Another caveat is documented in "issue 26":https://github.com/collectiveidea/audited/issues#issue/26, where an audit created on the first request to the server does not have a user. Please review the Github issue for more details on how to fix this. It does not appear to affect Rails 3.
 
 h2. Compatability
 
-+acts_as_audited+ works with Rails 3.0+. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
+Audited works with Rails 3.0+. For older versions of Rails, please see the <tt>1.1-stable</tt> branch.
 
 h2. Getting Help
 
-Review the documentation at "http://rdoc.info/github/collectiveidea/acts_as_audited":http://rdoc.info/github/collectiveidea/acts_as_audited
+Review the documentation at "http://rdoc.info/github/collectiveidea/audited":http://rdoc.info/github/collectiveidea/audited
 
 Join "the mailing list":http://groups.google.com/group/acts_as_audited for getting help or offering suggestions.
 
@@ -121,12 +121,12 @@ Here are some ways *you* can contribute:
 * writing specifications
 * writing code (**no patch is too small**: fix typos, add comments, clean up inconsistent whitespace)
 * refactoring code
-* closing "issues":https://github.com/collectiveidea/acts_as_audited/issues
+* closing "issues":https://github.com/collectiveidea/audited/issues
 * reviewing patches
 
 h2. Submitting an Issue
 
-We use the "GitHub issue tracker":https://github.com/collectiveidea/acts_as_audited/issues to track bugs
+We use the "GitHub issue tracker":https://github.com/collectiveidea/audited/issues to track bugs
 and features. Before submitting a bug report or feature request, check to make sure it hasn't already
 been submitted. You can indicate support for an existing issuse by voting it up. When submitting a
 bug report, please include a "Gist":https://gist.github.com/ that includes a stack trace and any

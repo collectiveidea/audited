@@ -21,7 +21,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
       class Secret
         include MongoMapper::Document
-        acts_as_audited
+        audited
       end
 
       Secret.non_audited_columns.should include('delta', 'top_secret', 'created_at')
@@ -465,7 +465,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       }.to_not raise_error
     end
 
-    it "should not rause an error when attr_accessible is declared before acts_as_audited" do
+    it "should not rause an error when attr_accessible is declared before audited" do
       expect {
         Models::MongoMapper::AccessibleUser.new(:name => 'No fail!')
       }.to_not raise_error

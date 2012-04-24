@@ -29,7 +29,7 @@ module Audited
 
     def define_callback(klass)
       observer = self
-      callback_meth = :"_notify_acts_as_audited_sweeper"
+      callback_meth = :"_notify_audited_sweeper"
       klass.send(:define_method, callback_meth) do
         observer.update(:before_create, self)
       end

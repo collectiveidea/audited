@@ -15,7 +15,7 @@ module Models
       key :logins, Integer, :default => 0
       timestamps!
 
-      acts_as_audited :except => :password
+      audited :except => :password
 
       attr_protected :logins
 
@@ -35,7 +35,7 @@ module Models
       key :logins, Integer, :default => 0
       timestamps!
 
-      acts_as_audited :comment_required => true
+      audited :comment_required => true
     end
 
     class UnprotectedUser
@@ -49,7 +49,7 @@ module Models
       key :logins, Integer, :default => 0
       timestamps!
 
-      acts_as_audited :protect => false
+      audited :protect => false
       attr_accessible :name, :username, :password
     end
 
@@ -65,7 +65,7 @@ module Models
       timestamps!
 
       attr_accessible :name, :username, :password # declare attr_accessible before calling aaa
-      acts_as_audited
+      audited
     end
 
     class NoAttributeProtectionUser
@@ -79,7 +79,7 @@ module Models
       key :logins, Integer, :default => 0
       timestamps!
 
-      acts_as_audited
+      audited
     end
 
     class UserWithAfterAudit
@@ -93,7 +93,7 @@ module Models
       key :logins, Integer, :default => 0
       timestamps!
 
-      acts_as_audited
+      audited
       attr_accessor :bogus_attr
 
       def after_audit
@@ -107,7 +107,7 @@ module Models
       key :name, String
       key :owner_id, ObjectId
 
-      acts_as_audited
+      audited
     end
 
     class Owner
@@ -132,7 +132,7 @@ module Models
 
       belongs_to :owner, :class_name => "Owner"
       attr_accessible :name, :owner # declare attr_accessible before calling aaa
-      acts_as_audited :associated_with => :owner
+      audited :associated_with => :owner
     end
 
     class OnUpdateDestroy
@@ -141,7 +141,7 @@ module Models
       key :name, String
       key :owner_id, ObjectId
 
-      acts_as_audited :on => [:update, :destroy]
+      audited :on => [:update, :destroy]
     end
 
     class OnCreateDestroy
@@ -150,7 +150,7 @@ module Models
       key :name, String
       key :owner_id, ObjectId
 
-      acts_as_audited :on => [:create, :destroy]
+      audited :on => [:create, :destroy]
     end
 
     class OnCreateDestroyExceptName
@@ -159,7 +159,7 @@ module Models
       key :name, String
       key :owner_id, ObjectId
 
-      acts_as_audited :except => :name, :on => [:create, :destroy]
+      audited :except => :name, :on => [:create, :destroy]
     end
 
     class OnCreateUpdate
@@ -168,7 +168,7 @@ module Models
       key :name, String
       key :owner_id, ObjectId
 
-      acts_as_audited :on => [:create, :update]
+      audited :on => [:create, :update]
     end
   end
 end

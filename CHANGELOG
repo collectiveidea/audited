@@ -1,4 +1,4 @@
-acts_as_audited ChangeLog
+Audited ChangeLog
 -------------------------------------------------------------------------------
 * 2012-04-10 - Add Audit scopes for creates, updates and destroys [chriswfx]
 * 2011-10-25 - Made ignored_attributes configurable [senny]

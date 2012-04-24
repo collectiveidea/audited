@@ -102,7 +102,7 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
     class Models::ActiveRecord::CustomUser < ::ActiveRecord::Base
     end
     class Models::ActiveRecord::CustomUserSubclass < Models::ActiveRecord::CustomUser
-      acts_as_audited
+      audited
     end
 
     it "should include audited classes" do

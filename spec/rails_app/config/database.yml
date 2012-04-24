@@ -4,13 +4,13 @@ sqlite3mem: &SQLITE3MEM
 
 sqlite3: &SQLITE
   adapter: sqlite3
-  database: acts_as_audited_plugin.sqlite3.db
+  database: audited_test.sqlite3.db
 
 postgresql: &POSTGRES
   adapter: postgresql
   username: postgres
   password: postgres
-  database: acts_as_audited_plugin_test
+  database: audited_test
   min_messages: ERROR
 
 mysql: &MYSQL
@@ -18,7 +18,7 @@ mysql: &MYSQL
   host: localhost
   username: root
   password:
-  database: acts_as_audited_plugin_test
+  database: audited_test
 
 test:
   <<: *<%= ENV['DB'] || 'SQLITE3MEM' %>
