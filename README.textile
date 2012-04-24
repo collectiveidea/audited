@@ -102,7 +102,7 @@ h2. Getting Help
 
 Review the documentation at "http://rdoc.info/github/collectiveidea/audited":http://rdoc.info/github/collectiveidea/audited
 
-Join "the mailing list":http://groups.google.com/group/acts_as_audited for getting help or offering suggestions.
+Join "the mailing list":http://groups.google.com/group/audited for getting help or offering suggestions.
 
 h2. Branches
 
