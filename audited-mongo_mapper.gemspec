@@ -10,6 +10,7 @@ Gem::Specification.new do |gem|
   gem.summary     = gem.description
   gem.homepage    = 'https://github.com/collectiveidea/audited'
 
+  gem.add_dependency 'audited', gem.version
   gem.add_dependency 'mongo_mapper', '~> 0.11'
 
   gem.files         = `git ls-files lib`.split($\).grep(/mongo_mapper/)
