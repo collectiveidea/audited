@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name    = 'audited'
-  gem.version = '3.0.0'
+  gem.version = '3.0.0.rc1'
 
   gem.authors     = ['Brandon Keepers', 'Kenneth Kalmer', 'Daniel Morrison', 'Brian Ryckbost', 'Steve Richert', 'Ryan Glover']
   gem.email       = 'info@collectiveidea.com'
