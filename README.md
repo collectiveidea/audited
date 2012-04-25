@@ -40,21 +40,22 @@ $ rails generate audited:install
 $ rake db:migrate
 ```
 
-### MongoMapper
-
-```ruby
-gem "audited-mongo_mapper", "~> 3.0"
-```
-
-## Upgrading
+#### Upgrading
 
 If you're already using Audited (or acts_as_audited), your `audits` table may require additional columns. After every upgrade, please run:
 
 ```bash
 $ rails generate audited:upgrade
+$ rake db:migrate
 ```
 
-This will only make changes if changes are needed.
+Upgrading will only make changes if changes are needed.
+
+### MongoMapper
+
+```ruby
+gem "audited-mongo_mapper", "~> 3.0"
+```
 
 ## Usage
 
@@ -66,10 +67,140 @@ class User < ActiveRecord::Base
 end
 ```
 
-## TODO: Moar Usage
+By default, whenever a user is created, updated or destroyed, a new audit is created.
 
-## TODO: Caveats?
+```ruby
+user = User.create!(:name => "Steve")
+user.audits.count # => 1
+user.update_attributes!(:name => "Ryan")
+user.audits.count # => 2
+user.destroy
+user.audits.count # => 3
+```
 
-## TODO: Support (documentation and Google group)
+Audits contain information regarding what action was taken on the model and what changes were made.
 
-## TODO: Contributing
+```ruby
+user.update_attributes!(:name => "Ryan")
+audit = user.audits.last
+audit.action # => "update"
+audit.audited_changes # => {"name"=>["Steve", "Ryan"]}
+```
+
+### Comments
+
+You can attach comments to each audit using an `audit_comment` attribute on your model.
+
+```ruby
+user.update_attributes!(:name => "Ryan", :audit_comment => "Changing name, just because")
+user.audits.last.comment # => "Changing name, just because"
+```
+
+You can optionally add the `:comment_required` option to your `audited` call to require comments for all audits.
+
+```ruby
+class User < ActiveRecord::Base
+  audited :comment_required => true
+end
+```
+
+### Current User Tracking
+
+If you're using Audited in a Rails application, all audited changes made within a request will automatically be attributed to the current user. By default, Audited uses the `current_user` method in your controller.
+
+```
+class PostsController < ApplicationController
+  def create
+    current_user # => #<User name: "Steve">
+    @post = Post.create(params[:post])
+    @post.audits.last.user # => #<User name: "Steve">
+  end
+end
+```
+
+To use a method other than `current_user`, put the following in an intializer:
+
+```ruby
+Audited.current_user_method = :authenticated_user
+```
+
+Outside of a request, Audited can still record the user with the `as_user` method:
+
+```ruby
+Audit.as_user(User.find(1)) do
+  post.update_attribute!(:title => "Hello, world!")
+end
+post.audits.last.user # => #<User id: 1>
+```
+
+### Associated Audits
+
+Sometimes it's useful to associate an audit with a model other than the one being changed. For instance, given the following models:
+
+```ruby
+class User < ActiveRecord::Base
+  belongs_to :company
+  audited
+end
+
+class Company < ActiveRecord::Base
+  has_many :users
+end
+```
+
+Every change to a user is audited, but what if you want to grab all of the audits of users belonging to a particular company? You can add the `:associated_with` option to your `audited` call:
+
+```ruby
+class User < ActiveRecord::Base
+  belongs_to :company
+  audited :associated_with => :company
+end
+
+class Company < ActiveRecord::Base
+  has_many :users
+  has_associated_audits
+end
+```
+
+Now, when a audit is created for a user, that user's company is also saved alongside the audit. This makes it much easier (and faster) to access audits indirectly related to a company.
+
+```ruby
+company = Company.create!(:name => "Collective Idea")
+user = company.users.create!(:name => "Steve")
+user.update_attribute!(:name => "Steve Richert")
+user.audits.last.associated # => #<Company name: "Collective Idea">
+company.associated_audits.last.auditable # => #<User name: "Steve Richert">
+```
+
+## Gotchas
+
+### ActiveRecord Accessible Attributes
+
+If your model calls `attr_accessible` after `audited`, you'll need to set the `:protect => false` option. By default, Audited uses `attr_protected` to prevent malicious users from dissociating your audits, but Rails doesn't allow both `attr_protected` and `attr_accessible`.
+
+```ruby
+class User < ActiveRecord::Base
+  audited :protect => false
+  attr_accessible :name
+end
+```
+
+### MongoMapper Embedded Documents
+
+Currently, Audited does not track changes on embedded documents. Audited works by tracking a model's [dirty changes](http://api.rubyonrails.org/classes/ActiveModel/Dirty.html) but changes to embedded documents don't appear in dirty tracking.
+
+## Support
+
+You can find documentation at: http://rdoc.info/github/collectiveidea/audited
+
+Or join the [mailing list](http://groups.google.com/group/audited) to get help or offer suggestions.
+
+## Contributing
+
+In the spirit of [free software](http://www.fsf.org/licensing/essays/free-sw.html), **everyone** is encouraged to help improve this project. Here are a few ways _you_ can pitch in:
+
+* Use prerelease versions of Audited.
+* [Report bugs](https://github.com/collectiveidea/audited/issues).
+* Fix bugs and submit [pull requests](http://github.com/collectiveidea/audited/pulls).
+* Write, clarify or fix documentation.
+* Refactor code.
