@@ -29,6 +29,22 @@ describe Audited::Auditor, :adapter => :active_record do
     it "should not save non-audited columns" do
       create_active_record_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
     end
+
+    it "should not call column_names on initialization" do
+      model = Class.new(Models::ActiveRecord::BlankUser)
+      model.should_not_receive(:column_names)
+      model.audited :only => [:name]
+      Audited::Adapters::ActiveRecord::Audit.audited_class_names.delete(model.to_s)
+    end
+
+    it "should access column names one time" do
+      model = Class.new(Models::ActiveRecord::BlankUser)
+      model.audited :only => [:name]
+      model.should_receive(:column_names).once
+        .and_return(Models::ActiveRecord::BlankUser.column_names)
+      2.times { model.non_audited_columns }
+      Audited::Adapters::ActiveRecord::Audit.audited_class_names.delete(model.to_s)
+    end
   end
 
   describe :new do
