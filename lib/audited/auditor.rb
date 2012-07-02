@@ -157,6 +157,7 @@ module Audited
           revision.send :instance_variable_set, '@persisted', !self.destroyed?
           revision.send :instance_variable_set, '@readonly', false
           revision.send :instance_variable_set, '@destroyed', false
+          revision.send :instance_variable_set, '@_destroyed', false
           revision.send :instance_variable_set, '@marked_for_destruction', false
           Audited.audit_class.assign_revision_attributes(revision, attributes)
 
