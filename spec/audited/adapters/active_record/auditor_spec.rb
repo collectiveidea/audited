@@ -461,13 +461,13 @@ describe Audited::Auditor, :adapter => :active_record do
 
     it "should not raise error when attr_accessible is set and protected is false" do
       expect {
-        Models::ActiveRecord::UnprotectedUser.new(:name => 'No fail!')
+        Models::ActiveRecord::AccessibleAfterDeclarationUser.new(:name => 'No fail!')
       }.to_not raise_error
     end
 
     it "should not rause an error when attr_accessible is declared before audited" do
       expect {
-        Models::ActiveRecord::AccessibleUser.new(:name => 'No fail!')
+        Models::ActiveRecord::AccessibleAfterDeclarationUser.new(:name => 'No fail!')
       }.to_not raise_error
     end
   end

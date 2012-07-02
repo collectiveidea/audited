@@ -4,7 +4,7 @@ require File.expand_path('../schema', __FILE__)
 module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
-      audited :except => :password
+      audited :allow_mass_assignment => true, :except => :password
 
       attr_protected :logins
 
@@ -18,13 +18,13 @@ module Models
       audited :comment_required => true
     end
 
-    class UnprotectedUser < ::ActiveRecord::Base
+    class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
-      audited :protect => false
+      audited
       attr_accessible :name, :username, :password
     end
 
-    class AccessibleUser < ::ActiveRecord::Base
+    class AccessibleBeforeDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
       attr_accessible :name, :username, :password # declare attr_accessible before calling aaa
       audited
@@ -32,7 +32,7 @@ module Models
 
     class NoAttributeProtectionUser < ::ActiveRecord::Base
       self.table_name = :users
-      audited
+      audited :allow_mass_assignment => true
     end
 
     class UserWithAfterAudit < ::ActiveRecord::Base

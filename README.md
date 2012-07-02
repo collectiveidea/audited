@@ -174,14 +174,22 @@ company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 
 ## Gotchas
 
-### ActiveRecord Accessible Attributes
+### Accessible Attributes
 
-If your model calls `attr_accessible` after `audited`, you'll need to set the `:protect => false` option. By default, Audited uses `attr_protected` to prevent malicious users from dissociating your audits, but Rails doesn't allow both `attr_protected` and `attr_accessible`.
+Audited assumes you are using `attr_accessible`, however, if you are using `attr_protected` or just going at it unprotected you will have to set the `:allow_mass_assignment => true` option.
+
+If using `attr_protected` be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
 
 ```ruby
 class User < ActiveRecord::Base
-  audited :protect => false
-  attr_accessible :name
+  audited :allow_mass_assignment => true
+end
+```
+
+```ruby
+class User < ActiveRecord::Base
+  audited :allow_mass_assignment => true
+  attr_protected :logins, :audit_ids
 end
 ```
 

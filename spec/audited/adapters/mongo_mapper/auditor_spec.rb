@@ -463,13 +463,13 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
 
     it "should not raise error when attr_accessible is set and protected is false" do
       expect {
-        Models::MongoMapper::UnprotectedUser.new(:name => 'No fail!')
+        Models::MongoMapper::AccessibleAfterDeclarationUser.new(:name => 'No fail!')
       }.to_not raise_error
     end
 
     it "should not rause an error when attr_accessible is declared before audited" do
       expect {
-        Models::MongoMapper::AccessibleUser.new(:name => 'No fail!')
+        Models::MongoMapper::AccessibleAfterDeclarationUser.new(:name => 'No fail!')
       }.to_not raise_error
     end
   end

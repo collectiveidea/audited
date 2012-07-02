@@ -15,7 +15,7 @@ module Models
       key :logins, Integer, :default => 0
       timestamps!
 
-      audited :except => :password
+      audited :allow_mass_assignment => true, :except => :password
 
       attr_protected :logins
 
@@ -38,7 +38,7 @@ module Models
       audited :comment_required => true
     end
 
-    class UnprotectedUser
+    class AccessibleAfterDeclarationUser
       include ::MongoMapper::Document
 
       key :name, String
@@ -49,11 +49,11 @@ module Models
       key :logins, Integer, :default => 0
       timestamps!
 
-      audited :protect => false
+      audited
       attr_accessible :name, :username, :password
     end
 
-    class AccessibleUser
+    class AccessibleBeforeDeclarationUser
       include ::MongoMapper::Document
 
       key :name, String
@@ -79,7 +79,7 @@ module Models
       key :logins, Integer, :default => 0
       timestamps!
 
-      audited
+      audited :allow_mass_assignment => true
     end
 
     class UserWithAfterAudit
