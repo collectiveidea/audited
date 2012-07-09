@@ -138,6 +138,19 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       expect { @user.update_attribute :activated, '1' }.to_not change( Audited.audit_class, :count )
     end
 
+    it "saves audits of rich objects" do
+      user = Models::MongoMapper::RichObjectUser.create!(:name => 'Bart Simpson')
+
+      expect {
+        user.update_attribute(:name, 'O.J.   Simpson')
+      }.to_not raise_error(BSON::InvalidDocument)
+
+      change = user.audits.all.last.audited_changes['name']
+      change.should be_all{|c| c.is_a?(String) }
+      change[0].should == 'Bart Simpson'
+      change[1].should == 'O.J. Simpson'
+    end
+
     describe "with no dirty changes" do
       it "does not create an audit if the record is not changed" do
         expect {

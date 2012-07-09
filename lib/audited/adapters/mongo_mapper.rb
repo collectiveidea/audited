@@ -1,5 +1,6 @@
 require 'mongo_mapper'
 require 'audited/auditor'
+require 'audited/adapters/mongo_mapper/audited_changes'
 require 'audited/adapters/mongo_mapper/audit'
 
 module Audited::Auditor::ClassMethods

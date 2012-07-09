@@ -25,7 +25,7 @@ module Audited
         key :user_type, String
         key :username, String
         key :action, String
-        key :audited_changes, Hash
+        key :audited_changes, AuditedChanges
         key :version, Integer, :default => 0
         key :comment, String
         key :remote_address, String

@@ -170,5 +170,41 @@ module Models
 
       audited :on => [:create, :update]
     end
+
+    class RichObjectUser
+      include ::MongoMapper::Document
+
+      class Name
+        attr_accessor :first_name, :last_name
+
+        def self.from_mongo(value)
+          case value
+          when String then new(*value.split)
+          when self then value
+          end
+        end
+
+        def self.to_mongo(value)
+          case value
+          when String then value
+          when self then value.to_s
+          end
+        end
+
+        def initialize(first_name, last_name)
+          self.first_name, self.last_name = first_name, last_name
+        end
+
+        def to_s
+          [first_name, last_name].compact.join(' ')
+        end
+      end
+
+      key :name, Name
+
+      attr_accessible :name
+
+      audited
+    end
   end
 end
