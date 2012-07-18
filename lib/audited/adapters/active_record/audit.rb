@@ -21,6 +21,8 @@ module Audited
 
         default_scope         order(:version)
         scope :descending,    reorder("version DESC")
+        scope :descending_age,reorder("created_at DESC")
+        scope :ascending_age, reorder("created_at ASC")
         scope :creates,       :conditions => {:action => 'create'}
         scope :updates,       :conditions => {:action => 'update'}
         scope :destroys,      :conditions => {:action => 'destroy'}
