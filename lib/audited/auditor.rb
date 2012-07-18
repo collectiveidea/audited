@@ -176,7 +176,7 @@ module Audited
 
       def audited_changes
         changed_attributes.except(*non_audited_columns).inject({}) do |changes,(attr, old_value)|
-          changes[attr] = [old_value, self[attr]]
+          changes[attr] = [old_value, self[attr]] if self[attr] != old_value
           changes
         end
       end
