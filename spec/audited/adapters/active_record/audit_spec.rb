@@ -35,10 +35,10 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
       subject.user_type.should be_nil
     end
 
-    it "should clear the username when setting to a model" do
+    it "should update the username when setting to a model" do
       subject.username = 'test'
       subject.user = user
-      subject.username.should be_nil
+      subject.username.should == user.name
     end
 
   end
