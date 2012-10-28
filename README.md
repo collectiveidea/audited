@@ -87,6 +87,26 @@ audit.action # => "update"
 audit.audited_changes # => {"name"=>["Steve", "Ryan"]}
 ```
 
+### Specifying columns
+
+By default, a new audit is created for any attribute changes. You can, however, limit the columns to be considered.
+
+```ruby
+class User < ActiveRecord::Base
+  # All fields
+  # audited
+
+  # Single field
+  # audited only: :name
+
+  # Multiple fields
+  # audited only: [:name, :address]
+
+  # All except certain fields
+  # audited except: :password
+end
+```
+
 ### Comments
 
 You can attach comments to each audit using an `audit_comment` attribute on your model.
