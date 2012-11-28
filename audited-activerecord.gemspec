@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
 
   gem.files         = `git ls-files lib`.split($\).grep(/(active_?record|generators)/)
   gem.files         += `git ls-files spec`.split($\).grep(/(active_?record|generators|rails_app)/)
-  gem.files         += `git ls-files spec\*.rb`.split($\)
+  gem.files         += `git ls-files spec\/*.rb`.split($\)
   gem.files         += `git ls-files test`.split($\)
   gem.require_paths = ['lib']
 end
