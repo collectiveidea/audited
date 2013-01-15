@@ -132,6 +132,16 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
 
   describe "as_user" do
 
+    it "should guarantee the audited_user is nil " do
+      begin
+        Audited.audit_class.as_user("someone") do
+          raise "broken as_user"
+        end
+      rescue
+        Thread.current[:audited_user].should == nil
+      end
+    end
+
     it "should record user objects" do
       Audited.audit_class.as_user(user) do
         company = Models::ActiveRecord::Company.create :name => 'The auditors'
