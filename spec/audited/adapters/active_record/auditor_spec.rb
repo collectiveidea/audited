@@ -26,6 +26,14 @@ describe Audited::Auditor, :adapter => :active_record do
       expect(Secret.non_audited_columns).to include('delta', 'top_secret', 'created_at')
     end
 
+    it "should be configurable which attributes are not audited when uses only" do
+      class AdminUser < ::ActiveRecord::Base
+        audited :only => ['email', 'name']
+      end
+
+      AdminUser.non_audited_columns.should include('email', 'name')
+    end
+
     it "should not save non-audited columns" do
       expect(create_active_record_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }).to eq(false)
     end

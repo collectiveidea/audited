@@ -43,7 +43,13 @@ module Audited
         class_attribute :audit_associated_with, :instance_writer => false
 
         if options[:only]
-          except = self.column_names - options[:only].flatten.map(&:to_s)
+          only_columns = options[:only].flatten.map(&:to_s)
+
+          except = if self.table_exists?
+            self.column_names - only_columns
+          else
+            only_columns
+          end
         else
           except = default_ignored_attributes + Audited.ignored_attributes
           except |= Array(options[:except]).collect(&:to_s) if options[:except]
