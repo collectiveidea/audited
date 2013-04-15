@@ -18,6 +18,29 @@ module Models
       audited :comment_required => true
     end
 
+    def self.return_combinations_of_actions
+      actions = [:create, :destroy, :update]
+      combinations = []
+      for i in (1..actions.length)
+        actions.combination(i).to_a.each do |action|
+          combinations << action
+        end 
+      end
+      combinations
+    end
+
+    instance_eval do 
+      prefix = "CommentRequiredUserWithOn"
+      suffix = "Option"
+      return_combinations_of_actions.each do |action|
+        class_name = "#{prefix}#{action.map { |i| i.to_s.capitalize }.join("And")}#{suffix}"
+        const_set(class_name, Class.new(::ActiveRecord::Base) do  
+          self.table_name = :users
+          audited :comment_required => true, :on => action
+        end)
+      end
+    end
+
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
       audited

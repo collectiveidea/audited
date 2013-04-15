@@ -61,8 +61,16 @@ module Audited
         self.audit_associated_with = options[:associated_with]
 
         if options[:comment_required]
-          validates_presence_of :audit_comment, :if => :auditing_enabled
-          before_destroy :require_comment
+          if !options[:on]
+            # Adding presence validation + destroy callback when there is no :on parameter is passed in options
+            validates :audit_comment, :presence => true, :if => :auditing_enabled
+            before_destroy :require_comment
+          else
+            unless options[:on] == [:destroy]
+              add_validations_based_on_passed_actions(options[:on])
+            end
+            before_destroy :require_comment if options[:on].include?(:destroy)
+          end
         end
 
         attr_accessor :audit_comment
@@ -92,6 +100,18 @@ module Audited
 
       def has_associated_audits
         has_many :associated_audits, :as => :associated, :class_name => Audited.audit_class.name
+      end
+
+      private
+
+      def add_validations_based_on_passed_actions(options)
+        actions = [:create, :update]
+        derived_actions = actions & options.to_a
+        if derived_actions == actions
+          validates :audit_comment, :presence => true, :if => :auditing_enabled
+        else
+          validates :audit_comment, :presence => true, :if => :auditing_enabled, :on => derived_actions.first
+        end
       end
     end
 
