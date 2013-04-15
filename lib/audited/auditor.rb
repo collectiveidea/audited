@@ -79,7 +79,7 @@ module Audited
         end
 
         has_many :audits, :as => :auditable, :class_name => Audited.audit_class.name
-        Audited.audit_class.audited_class_names << self.to_s
+        Audited.audit_class.audited_class_names << self.name.to_s
 
         after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
