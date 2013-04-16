@@ -447,12 +447,12 @@ describe Audited::Auditor, :adapter => :active_record do
 
       it "should validate when audit_comment is supplied" do
         user.audit_comment = "Destroy"
-        user.destroy.should == user
+        user.destroy.should be_true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
         Models::ActiveRecord::CommentRequiredUserWithOnDestroyOption.disable_auditing
-        user.destroy.should == user
+        user.destroy.should be_true
         Models::ActiveRecord::CommentRequiredUserWithOnDestroyOption.enable_auditing
       end
     end

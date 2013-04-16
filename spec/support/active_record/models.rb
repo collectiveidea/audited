@@ -3,6 +3,7 @@ require File.expand_path('../schema', __FILE__)
 
 module Models
   module ActiveRecord
+    extend CommonMethods
     class User < ::ActiveRecord::Base
       audited :allow_mass_assignment => true, :except => :password
 
@@ -16,17 +17,6 @@ module Models
     class CommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
       audited :comment_required => true
-    end
-
-    def self.return_combinations_of_actions
-      actions = [:create, :destroy, :update]
-      combinations = []
-      for i in (1..actions.length)
-        actions.combination(i).to_a.each do |action|
-          combinations << action
-        end 
-      end
-      combinations
     end
 
     instance_eval do 
