@@ -473,35 +473,35 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
     end
 
     describe "on create and destroy" do 
-      let( :user ) { Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOption.create!( :name => 'Test', :audit_comment => "testing comment" ) }
+      let( :user ) { Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOptions.create!( :name => 'Test', :audit_comment => "testing comment" ) }
 
       it "should not validate when audit_comment is not supplied" do 
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOption.new.should_not be_valid
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOptions.new.should_not be_valid
         user.destroy.should be_false
         user.update_attributes(:name => "Update Testing").should be_true
       end
 
       it "should validate when audit_comment is supplied" do 
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOption.new(:audit_comment => "Create").should be_valid
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOptions.new(:audit_comment => "Create").should be_valid
         user.audit_comment = "testing comment"
         user.destroy.should be_true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do 
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOption.disable_auditing
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOption.new.should be_valid
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOptions.disable_auditing
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOptions.new.should be_valid
         user.destroy.should be_true
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOption.enable_auditing
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyOptions.enable_auditing
       end
     end
 
     describe "on destroy and update" do 
-      let( :user ) { Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOption.create!( :name => 'Test') }
+      let( :user ) { Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOptions.create!( :name => 'Test') }
 
       it "should not validate when audit_comment is not supplied" do 
         user.destroy.should be_false
         user.update_attributes(:name => "Update Testing").should be_false
-        Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOption.new.should be_valid
+        Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOptions.new.should be_valid
       end
 
       it "should validate when audit_comment is supplied" do 
@@ -511,60 +511,60 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do 
-        Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOption.disable_auditing
-        Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOption.new.should be_valid
+        Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOptions.disable_auditing
+        Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOptions.new.should be_valid
         user.update_attributes(:name => "Updated Name").should be_true
         user.destroy.should be_true
-        Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOption.enable_auditing
+        Models::MongoMapper::CommentRequiredUserWithOnDestroyAndUpdateOptions.enable_auditing
       end
     end
 
     describe "on update and create" do 
-      let( :user ) { Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOption.create!( :name => 'Test', :audit_comment => "Testing Comment") }
+      let( :user ) { Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOptions.create!( :name => 'Test', :audit_comment => "Testing Comment") }
 
       it "should not validate when audit_comment is not supplied" do
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOption.new.should_not be_valid
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOptions.new.should_not be_valid
         user.update_attributes(:name => "Update Testing").should be_false
         user.destroy.should be_true
       end
 
       it "should validate when audit_comment is supplied" do 
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOption.new(:name => "Test", :audit_comment => "Testing Comment").should be_valid
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOptions.new(:name => "Test", :audit_comment => "Testing Comment").should be_valid
         user.update_attributes(:name => "Updated Name", :audit_comment => "Comment").should be_true
         user.destroy.should be_true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do 
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOption.disable_auditing
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOption.new.should be_valid
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOptions.disable_auditing
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOptions.new.should be_valid
         user.update_attributes(:name => "Updated Name").should be_true
         user.destroy.should be_true
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOption.enable_auditing
+        Models::MongoMapper::CommentRequiredUserWithOnCreateAndUpdateOptions.enable_auditing
       end
     end
 
     describe "on create, destroy and update" do 
-      let( :user ) { Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.create!( :name => 'Test', :audit_comment => "Testing Comment") }
+      let( :user ) { Models::MongoMapper::CommentRequiredUserOnAllOptions.create!( :name => 'Test', :audit_comment => "Testing Comment") }
 
       it "should not validate when audit_comment is not supplied" do
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.new.should_not be_valid
+        Models::MongoMapper::CommentRequiredUserOnAllOptions.new.should_not be_valid
         user.update_attributes(:name => "Update Testing").should be_false
         user.destroy.should be_false
       end
 
       it "should validate when audit_comment is supplied" do 
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.new(:name => "Test", :audit_comment => "Testing Comment").should be_valid
+        Models::MongoMapper::CommentRequiredUserOnAllOptions.new(:name => "Test", :audit_comment => "Testing Comment").should be_valid
         user.update_attributes(:name => "Updated Name", :audit_comment => "Comment").should be_true
         user.audit_comment = "Testing Comment"
         user.destroy.should be_true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do 
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.disable_auditing
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.new.should be_valid
+        Models::MongoMapper::CommentRequiredUserOnAllOptions.disable_auditing
+        Models::MongoMapper::CommentRequiredUserOnAllOptions.new.should be_valid
         user.update_attributes(:name => "Updated Name").should be_true
         user.destroy.should be_true
-        Models::MongoMapper::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.enable_auditing
+        Models::MongoMapper::CommentRequiredUserOnAllOptions.enable_auditing
       end
     end
 

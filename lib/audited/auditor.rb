@@ -59,17 +59,17 @@ module Audited
         end
         self.non_audited_columns = except
         self.audit_associated_with = options[:associated_with]
-
         if options[:comment_required]
-          if !options[:on]
-            # Adding presence validation + destroy callback when there is no :on parameter is passed in options
-            validates :audit_comment, :presence => true, :if => :auditing_enabled
-            before_destroy :require_comment
-          else
+          if options[:on]
             unless options[:on] == [:destroy]
               add_validations_based_on_passed_actions(options[:on])
             end
             before_destroy :require_comment if options[:on].include?(:destroy)
+          else
+            # Adding presence validation + destroy callback when there is no :on parameter 
+            # is passed in options
+            validates :audit_comment, :presence => true, :if => :auditing_enabled
+            before_destroy :require_comment
           end
         end
 
@@ -79,7 +79,7 @@ module Audited
         end
 
         has_many :audits, :as => :auditable, :class_name => Audited.audit_class.name
-        Audited.audit_class.audited_class_names << self.name.to_s
+        Audited.audit_class.audited_class_names << self.to_s
 
         after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
@@ -104,10 +104,11 @@ module Audited
 
       private
 
-      def add_validations_based_on_passed_actions(options)
-        actions = [:create, :update]
-        derived_actions = actions & options.to_a
-        if derived_actions == actions
+      def add_validations_based_on_passed_actions(actions)
+        # This function is written with the purpose of adding the presence validation for audit_comment
+        predefined_actions = [:create, :update]
+        derived_actions = predefined_actions & actions.to_a
+        if derived_actions == predefined_actions
           validates :audit_comment, :presence => true, :if => :auditing_enabled
         else
           validates :audit_comment, :presence => true, :if => :auditing_enabled, :on => derived_actions.first

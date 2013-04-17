@@ -458,35 +458,35 @@ describe Audited::Auditor, :adapter => :active_record do
     end
 
     describe "on create and destroy" do 
-      let( :user ) { Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOption.create!( :name => 'Test', :audit_comment => "testing comment" ) }
+      let( :user ) { Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOptions.create!( :name => 'Test', :audit_comment => "testing comment" ) }
 
       it "should not validate when audit_comment is not supplied" do 
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOption.new.should_not be_valid
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOptions.new.should_not be_valid
         user.destroy.should be_false
         user.update_attributes(:name => "Update Testing").should be_true
       end
 
       it "should validate when audit_comment is supplied" do 
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOption.new(:audit_comment => "Create").should be_valid
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOptions.new(:audit_comment => "Create").should be_valid
         user.audit_comment = "testing comment"
         user.destroy.should be_true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do 
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOption.disable_auditing
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOption.new.should be_valid
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOptions.disable_auditing
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOptions.new.should be_valid
         user.destroy.should be_true
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOption.enable_auditing
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyOptions.enable_auditing
       end
     end
 
     describe "on destroy and update" do 
-      let( :user ) { Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOption.create!( :name => 'Test') }
+      let( :user ) { Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOptions.create!( :name => 'Test') }
 
       it "should not validate when audit_comment is not supplied" do 
         user.destroy.should be_false
         user.update_attributes(:name => "Update Testing").should be_false
-        Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOption.new.should be_valid
+        Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOptions.new.should be_valid
       end
 
       it "should validate when audit_comment is supplied" do 
@@ -496,60 +496,60 @@ describe Audited::Auditor, :adapter => :active_record do
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do 
-        Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOption.disable_auditing
-        Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOption.new.should be_valid
+        Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOptions.disable_auditing
+        Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOptions.new.should be_valid
         user.update_attributes(:name => "Updated Name").should be_true
         user.destroy.should be_true
-        Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOption.enable_auditing
+        Models::ActiveRecord::CommentRequiredUserWithOnDestroyAndUpdateOptions.enable_auditing
       end
     end
 
     describe "on update and create" do 
-      let( :user ) { Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOption.create!( :name => 'Test', :audit_comment => "Testing Comment") }
+      let( :user ) { Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOptions.create!( :name => 'Test', :audit_comment => "Testing Comment") }
 
       it "should not validate when audit_comment is not supplied" do
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOption.new.should_not be_valid
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOptions.new.should_not be_valid
         user.update_attributes(:name => "Update Testing").should be_false
         user.destroy.should be_true
       end
 
       it "should validate when audit_comment is supplied" do 
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOption.new(:name => "Test", :audit_comment => "Testing Comment").should be_valid
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOptions.new(:name => "Test", :audit_comment => "Testing Comment").should be_valid
         user.update_attributes(:name => "Updated Name", :audit_comment => "Comment").should be_true
         user.destroy.should be_true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do 
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOption.disable_auditing
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOption.new.should be_valid
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOptions.disable_auditing
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOptions.new.should be_valid
         user.update_attributes(:name => "Updated Name").should be_true
         user.destroy.should be_true
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOption.enable_auditing
+        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndUpdateOptions.enable_auditing
       end
     end
 
     describe "on create, destroy and update" do 
-      let( :user ) { Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.create!( :name => 'Test', :audit_comment => "Testing Comment") }
+      let( :user ) { Models::ActiveRecord::CommentRequiredUserWithAllOptions.create!( :name => 'Test', :audit_comment => "Testing Comment") }
 
       it "should not validate when audit_comment is not supplied" do
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.new.should_not be_valid
+        Models::ActiveRecord::CommentRequiredUserWithAllOptions.new.should_not be_valid
         user.update_attributes(:name => "Update Testing").should be_false
         user.destroy.should be_false
       end
 
       it "should validate when audit_comment is supplied" do 
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.new(:name => "Test", :audit_comment => "Testing Comment").should be_valid
+        Models::ActiveRecord::CommentRequiredUserWithAllOptions.new(:name => "Test", :audit_comment => "Testing Comment").should be_valid
         user.update_attributes(:name => "Updated Name", :audit_comment => "Comment").should be_true
         user.audit_comment = "Testing Comment"
         user.destroy.should be_true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do 
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.disable_auditing
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.new.should be_valid
+        Models::ActiveRecord::CommentRequiredUserWithAllOptions.disable_auditing
+        Models::ActiveRecord::CommentRequiredUserWithAllOptions.new.should be_valid
         user.update_attributes(:name => "Updated Name").should be_true
         user.destroy.should be_true
-        Models::ActiveRecord::CommentRequiredUserWithOnCreateAndDestroyAndUpdateOption.enable_auditing
+        Models::ActiveRecord::CommentRequiredUserWithAllOptions.enable_auditing
       end
     end
 

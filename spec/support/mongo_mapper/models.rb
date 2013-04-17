@@ -4,7 +4,6 @@ require File.expand_path('../connection', __FILE__)
 
 module Models
   module MongoMapper
-    extend CommonMethods
     class User
       include ::MongoMapper::Document
 
@@ -38,25 +37,103 @@ module Models
 
       audited :comment_required => true
     end
+
+    class CommentRequiredUserWithOnCreateOption
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:create]
+    end
     
-    instance_eval do 
-      prefix = "CommentRequiredUserWithOn"
-      suffix = "Option"
-      return_combinations_of_actions.each do |action|
-        class_name = "#{prefix}#{action.map { |i| i.to_s.capitalize }.join("And")}#{suffix}"
-        const_set(class_name, Class.new do 
-          include ::MongoMapper::Document
-          key :name, String
-          key :username, String
-          key :password, String
-          key :activated, Boolean
-          key :suspended_at, Time
-          key :logins, Integer, :default => 0
-          timestamps!
-                   
-          audited :comment_required => true, :on => action
-        end)
-      end
+    class CommentRequiredUserWithOnDestroyOption
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:destroy]
+    end
+
+    class CommentRequiredUserWithOnUpdateOption
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:update]
+    end
+
+    class CommentRequiredUserWithOnCreateAndDestroyOptions
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:create, :destroy]
+    end
+
+    class CommentRequiredUserWithOnCreateAndUpdateOptions
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:create, :update]
+    end
+
+    class CommentRequiredUserWithOnDestroyAndUpdateOptions
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:destroy, :update]
+    end
+
+    class CommentRequiredUserOnAllOptions
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:create, :update, :destroy]
     end
 
     class AccessibleAfterDeclarationUser

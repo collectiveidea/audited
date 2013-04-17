@@ -3,7 +3,6 @@ require File.expand_path('../schema', __FILE__)
 
 module Models
   module ActiveRecord
-    extend CommonMethods
     class User < ::ActiveRecord::Base
       audited :allow_mass_assignment => true, :except => :password
 
@@ -19,16 +18,39 @@ module Models
       audited :comment_required => true
     end
 
-    instance_eval do 
-      prefix = "CommentRequiredUserWithOn"
-      suffix = "Option"
-      return_combinations_of_actions.each do |action|
-        class_name = "#{prefix}#{action.map { |i| i.to_s.capitalize }.join("And")}#{suffix}"
-        const_set(class_name, Class.new(::ActiveRecord::Base) do  
-          self.table_name = :users
-          audited :comment_required => true, :on => action
-        end)
-      end
+    class CommentRequiredUserWithOnCreateOption < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:create]
+    end
+
+    class CommentRequiredUserWithOnDestroyOption < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:destroy]
+    end
+
+    class CommentRequiredUserWithOnUpdateOption < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:update]
+    end
+
+    class CommentRequiredUserWithOnCreateAndDestroyOptions < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:create, :destroy]
+    end
+
+    class CommentRequiredUserWithOnCreateAndUpdateOptions < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:create, :update]
+    end    
+
+    class CommentRequiredUserWithOnDestroyAndUpdateOptions < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:destroy, :update]
+    end
+
+    class CommentRequiredUserWithAllOptions < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:create, :destroy, :update]
     end
 
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
