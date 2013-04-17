@@ -38,6 +38,104 @@ module Models
       audited :comment_required => true
     end
 
+    class CommentRequiredUserWithOnCreateOption
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:create]
+    end
+    
+    class CommentRequiredUserWithOnDestroyOption
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:destroy]
+    end
+
+    class CommentRequiredUserWithOnUpdateOption
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:update]
+    end
+
+    class CommentRequiredUserWithOnCreateAndDestroyOptions
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:create, :destroy]
+    end
+
+    class CommentRequiredUserWithOnCreateAndUpdateOptions
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:create, :update]
+    end
+
+    class CommentRequiredUserWithOnDestroyAndUpdateOptions
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:destroy, :update]
+    end
+
+    class CommentRequiredUserOnAllOptions
+      include ::MongoMapper::Document
+
+      key :name, String
+      key :username, String
+      key :password, String
+      key :activated, Boolean
+      key :suspended_at, Time
+      key :logins, Integer, :default => 0
+      timestamps!
+
+      audited :comment_required => true, :on => [:create, :update, :destroy]
+    end
+
     class AccessibleAfterDeclarationUser
       include ::MongoMapper::Document
 

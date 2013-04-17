@@ -18,6 +18,41 @@ module Models
       audited :comment_required => true
     end
 
+    class CommentRequiredUserWithOnCreateOption < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:create]
+    end
+
+    class CommentRequiredUserWithOnDestroyOption < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:destroy]
+    end
+
+    class CommentRequiredUserWithOnUpdateOption < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:update]
+    end
+
+    class CommentRequiredUserWithOnCreateAndDestroyOptions < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:create, :destroy]
+    end
+
+    class CommentRequiredUserWithOnCreateAndUpdateOptions < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:create, :update]
+    end    
+
+    class CommentRequiredUserWithOnDestroyAndUpdateOptions < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:destroy, :update]
+    end
+
+    class CommentRequiredUserWithAllOptions < ::ActiveRecord::Base
+      self.table_name = :users
+      audited :comment_required => true, :on => [:create, :destroy, :update]
+    end
+
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
       audited
