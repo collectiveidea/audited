@@ -9,6 +9,7 @@ Gem::Specification.new do |gem|
   gem.description = 'Log all changes to your models'
   gem.summary     = gem.description
   gem.homepage    = 'https://github.com/collectiveidea/audited'
+  gem.license     = 'MIT'
 
   gem.add_development_dependency 'activerecord', '~> 3.0'
   gem.add_development_dependency 'appraisal', '~> 0.4'
