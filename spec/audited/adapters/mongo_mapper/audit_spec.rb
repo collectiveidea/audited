@@ -188,6 +188,15 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
       end.should == 42
     end
 
+    it "should reset audited_user when the yield block raises an exception" do
+      expect {
+        Audited.audit_class.as_user('foo') do
+          raise StandardError
+        end
+      }.to raise_exception
+      Thread.current[:audited_user].should be_nil
+    end
+
   end
 
 end

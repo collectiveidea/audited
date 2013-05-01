@@ -29,12 +29,9 @@ module Audited
       # for background operations that require audit information.
       def as_user(user, &block)
         Thread.current[:audited_user] = user
-
-        yieldval = yield
-
+        yield
+      ensure
         Thread.current[:audited_user] = nil
-
-        yieldval
       end
 
       # @private
