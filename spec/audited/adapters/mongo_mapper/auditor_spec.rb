@@ -460,12 +460,12 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
 
       it "should validate when audit_comment is supplied" do
         user.audit_comment = "Destroy"
-        user.destroy.should == true
+        user.destroy.should be_true
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
         Models::MongoMapper::CommentRequiredUser.disable_auditing
-        user.destroy.should == true
+        user.destroy.should be_true
         Models::MongoMapper::CommentRequiredUser.enable_auditing
       end
     end
