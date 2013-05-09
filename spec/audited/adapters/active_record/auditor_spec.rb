@@ -194,6 +194,16 @@ describe Audited::Auditor, :adapter => :active_record do
         on_create_update.destroy
       }.to_not change( Audited.audit_class, :count )
     end
+    
+    it "should not throw an error when record is destroyed twice" do
+      expect {
+        @user.destroy
+        @user.destroy
+      }.to change( Audited.audit_class, :count )
+
+      @user.audits.size.should be(2)
+    end
+
   end
 
   describe "associated with" do
