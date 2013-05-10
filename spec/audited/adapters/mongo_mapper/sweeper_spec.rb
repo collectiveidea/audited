@@ -72,3 +72,26 @@ describe AuditsController, :adapter => :mongo_mapper do
 
   end
 end
+
+
+describe Audited::Sweeper, :adapter => :mongo_mapper do
+
+  it "should be thread-safe" do
+    t1 = Thread.new do
+      sleep 0.5
+      Audited::Sweeper.instance.controller = 'thread1 controller instance'
+      Audited::Sweeper.instance.controller.should eq('thread1 controller instance')
+    end
+
+    t2 = Thread.new do
+      Audited::Sweeper.instance.controller = 'thread2 controller instance'
+      sleep 1
+      Audited::Sweeper.instance.controller.should eq('thread2 controller instance')
+    end
+
+    t1.join; t2.join
+
+    Audited::Sweeper.instance.controller.should be_nil
+  end
+
+end
