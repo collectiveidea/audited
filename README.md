@@ -107,6 +107,20 @@ class User < ActiveRecord::Base
 end
 ```
 
+### Specifying callbacks
+
+By default, a new audit is created for any Create, Update or Destroy action. You can, however, limit the actions audited.
+
+```ruby
+class User < ActiveRecord::Base
+  # All fields and actions
+  # audited
+
+  # Single field, only audit Update and Destroy (not Create)
+  # audited only: :name, on: [:update, :destroy]
+end
+```
+
 ### Comments
 
 You can attach comments to each audit using an `audit_comment` attribute on your model.
