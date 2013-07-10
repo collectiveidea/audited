@@ -17,7 +17,7 @@ module Audited
 
     def before_create(audit)
       audit.user ||= current_user
-      audit.remote_address = controller.try(:request).try(:ip)
+      audit.remote_address = controller.try(:request).try(:remote_ip)
       audit.request_uuid = controller.try(:request).try(:uuid)
     end
 
