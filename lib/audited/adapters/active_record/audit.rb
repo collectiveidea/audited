@@ -56,11 +56,7 @@ module Audited
 
       private
         def set_version_number
-          max = self.class.maximum(:version,
-            :conditions => {
-              :auditable_id => auditable_id,
-              :auditable_type => auditable_type
-            }) || 0
+          max = self.class.where(:auditable_id => auditable_id, :auditable_type => auditable_type).maximum(:version) || 0
           self.version = max + 1
         end
       end
