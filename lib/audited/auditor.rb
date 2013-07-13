@@ -47,17 +47,14 @@ module Audited
         # don't allow multiple calls
         return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
+        class_attribute :audited_columns,       :instance_writer => false
         class_attribute :non_audited_columns,   :instance_writer => false
         class_attribute :auditing_enabled,      :instance_writer => false
         class_attribute :audit_associated_with, :instance_writer => false
 
-        if options[:only]
-          except = self.column_names - options[:only].flatten.map(&:to_s)
-        else
-          except = default_ignored_attributes + Audited.ignored_attributes
-          except |= Array(options[:except]).collect(&:to_s) if options[:except]
-        end
-        self.non_audited_columns = except
+        self.audited_columns = Array(options[:only]).map(&:to_s) if options[:only]
+        self.non_audited_columns = default_ignored_attributes + Audited.ignored_attributes
+        self.non_audited_columns |= Array(options[:except]).map(&:to_s) if options[:except]
         self.audit_associated_with = options[:associated_with]
 
         if options[:comment_required]
@@ -141,7 +138,7 @@ module Audited
 
       # List of attributes that are audited.
       def audited_attributes
-        attributes.except(*non_audited_columns)
+        self.audited_columns ? attributes.slice(*self.audited_columns) : attributes.except(*self.non_audited_columns)
       end
 
       protected
@@ -175,7 +172,7 @@ module Audited
       private
 
       def audited_changes
-        changed_attributes.except(*non_audited_columns).inject({}) do |changes,(attr, old_value)|
+        changed_attributes.slice(*audited_attributes.keys).inject({}) do |changes,(attr, old_value)|
           changes[attr] = [old_value, self[attr]]
           changes
         end
@@ -233,11 +230,6 @@ module Audited
     end # InstanceMethods
 
     module AuditedClassMethods
-      # Returns an array of columns that are audited. See non_audited_columns
-      def audited_columns
-        self.columns.select { |c| !non_audited_columns.include?(c.name) }
-      end
-
       # Executes the block with auditing disabled.
       #
       #   Foo.without_auditing do

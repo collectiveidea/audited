@@ -29,6 +29,14 @@ describe Audited::Auditor, :adapter => :active_record do
     it "should not save non-audited columns" do
       create_active_record_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
     end
+
+    it "should not require the audited table be defined to set :only option" do
+      expect {
+        class TableNotDefined < ActiveRecord::Base
+          audited :only => :column_not_defined
+        end
+      }.not_to raise_error
+    end
   end
 
   describe :new do
