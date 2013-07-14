@@ -27,7 +27,7 @@ describe Audited::Auditor, :adapter => :active_record do
     end
 
     it "should not save non-audited columns" do
-      create_active_record_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
+      create_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
     end
 
     it "should not require the audited table be defined to set :only option" do
@@ -60,7 +60,7 @@ describe Audited::Auditor, :adapter => :active_record do
   end
 
   describe "on create" do
-    let( :user ) { create_active_record_user :audit_comment => "Create" }
+    let( :user ) { create_user :audit_comment => "Create" }
 
     it "should change the audit count" do
       expect {
@@ -102,7 +102,7 @@ describe Audited::Auditor, :adapter => :active_record do
 
   describe "on update" do
     before do
-      @user = create_active_record_user( :name => 'Brandon', :audit_comment => 'Update' )
+      @user = create_user( :name => 'Brandon', :audit_comment => 'Update' )
     end
 
     it "should save an audit" do
@@ -162,7 +162,7 @@ describe Audited::Auditor, :adapter => :active_record do
 
   describe "on destroy" do
     before do
-      @user = create_active_record_user
+      @user = create_user
     end
 
     it "should save an audit" do
@@ -242,7 +242,7 @@ describe Audited::Auditor, :adapter => :active_record do
     end
 
     it "should have one revision for a new record" do
-      create_active_record_user.revisions.size.should be(1)
+      create_user.revisions.size.should be(1)
     end
 
     it "should have one revision for each audit" do
@@ -378,7 +378,7 @@ describe Audited::Auditor, :adapter => :active_record do
   end
 
   describe "revision_at" do
-    let( :user ) { create_active_record_user }
+    let( :user ) { create_user }
 
     it "should find the latest revision before the given time" do
       audit = user.audits.first
@@ -463,21 +463,6 @@ describe Audited::Auditor, :adapter => :active_record do
       end
     end
 
-  end
-
-  describe "attr_protected and attr_accessible" do
-
-    it "should not raise error when attr_accessible is set and protected is false" do
-      expect {
-        Models::ActiveRecord::AccessibleAfterDeclarationUser.new(:name => 'No fail!')
-      }.to_not raise_error
-    end
-
-    it "should not rause an error when attr_accessible is declared before audited" do
-      expect {
-        Models::ActiveRecord::AccessibleAfterDeclarationUser.new(:name => 'No fail!')
-      }.to_not raise_error
-    end
   end
 
   describe "audit_as" do

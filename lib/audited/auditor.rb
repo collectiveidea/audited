@@ -30,17 +30,12 @@ module Audited
       #     class User < ActiveRecord::Base
       #       audited :except => :password
       #     end
-      # * +protect+ - If your model uses +attr_protected+, set this to false to prevent Rails from
-      #   raising an error.  If you declare +attr_accessible+ before calling +audited+, it
-      #   will automatically default to false.  You only need to explicitly set this if you are
-      #   calling +attr_accessible+ after.
       #
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
       #
       #     class User < ActiveRecord::Base
       #       audited :protect => false
-      #       attr_accessible :name
       #     end
       #
       def audited(options = {})
@@ -63,9 +58,6 @@ module Audited
         end
 
         attr_accessor :audit_comment
-        unless options[:allow_mass_assignment]
-          attr_accessible :audit_comment
-        end
 
         has_many :audits, :as => :auditable, :class_name => Audited.audit_class.name
         Audited.audit_class.audited_class_names << self.to_s

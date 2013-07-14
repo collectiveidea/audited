@@ -16,15 +16,14 @@ module Audited
       class Audit < ::ActiveRecord::Base
         include Audited::Audit
 
-
         serialize :audited_changes
 
-        default_scope         order(:version)
-        scope :descending,    reorder("version DESC")
-        scope :creates,       :conditions => {:action => 'create'}
-        scope :updates,       :conditions => {:action => 'update'}
-        scope :destroys,      :conditions => {:action => 'destroy'}
+        default_scope { order(:version) }
 
+        scope :descending,    lambda { order("version DESC") }
+        scope :creates,       lambda { where(:action => :create) }
+        scope :updates,       lambda { where(:action => :update) }
+        scope :destroys,      lambda { where(:action => :destroy) }
         scope :up_until,      lambda {|date_or_time| where("created_at <= ?", date_or_time) }
         scope :from_version,  lambda {|version| where(['version >= ?', version]) }
         scope :to_version,    lambda {|version| where(['version <= ?', version]) }
@@ -56,11 +55,10 @@ module Audited
 
       private
         def set_version_number
-          max = self.class.maximum(:version,
-            :conditions => {
-              :auditable_id => auditable_id,
-              :auditable_type => auditable_type
-            }) || 0
+          max = self.class.where(
+            :auditable_id => auditable_id,
+            :auditable_type => auditable_type
+          ).maximum(:version) || 0
           self.version = max + 1
         end
       end
