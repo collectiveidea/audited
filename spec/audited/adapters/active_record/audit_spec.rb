@@ -196,10 +196,4 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
 
   end
 
-  describe "mass assignment" do
-    it "should accept :action, :audited_changes and :comment attributes as well as the :associated association" do
-      Audited.audit_class.accessible_attributes.should include(:action, :audited_changes, :comment, :associated)
-    end
-  end
-
 end

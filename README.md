@@ -16,10 +16,9 @@ Audited may work just fine with a Ruby version not listed above, but we can't gu
 
 ## Supported ORMs
 
-In a previous life, Audited was ActiveRecord-only. Audited will now audit models for the following backends:
-
 * ActiveRecord
-* MongoMapper
+
+MongoMapper support has been removed from this version as MongoMapper does not currently support ActiveModel 4.0.
 
 ## Installation
 
@@ -50,12 +49,6 @@ $ rake db:migrate
 ```
 
 Upgrading will only make changes if changes are needed.
-
-### MongoMapper
-
-```ruby
-gem "audited-mongo_mapper", "~> 3.0"
-```
 
 ## Usage
 
@@ -191,31 +184,6 @@ user.update_attribute!(:name => "Steve Richert")
 user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
-
-## Gotchas
-
-### Accessible Attributes
-
-Audited assumes you are using `attr_accessible`, however, if you are using `attr_protected` or just going at it unprotected you will have to set the `:allow_mass_assignment => true` option.
-
-If using `attr_protected` be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
-
-```ruby
-class User < ActiveRecord::Base
-  audited :allow_mass_assignment => true
-end
-```
-
-```ruby
-class User < ActiveRecord::Base
-  audited :allow_mass_assignment => true
-  attr_protected :logins, :audit_ids
-end
-```
-
-### MongoMapper Embedded Documents
-
-Currently, Audited does not track changes on embedded documents. Audited works by tracking a model's [dirty changes](http://api.rubyonrails.org/classes/ActiveModel/Dirty.html) but changes to embedded documents don't appear in dirty tracking.
 
 ## Support
 
