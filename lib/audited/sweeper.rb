@@ -2,8 +2,6 @@ module Audited
   class Sweeper < ActiveModel::Observer
     observe Audited.audit_class
 
-    attr_accessor :controller
-
     def before(controller)
       self.controller = controller
       true
@@ -34,6 +32,14 @@ module Audited
         observer.update(:before_create, self)
       end
       klass.send(:before_create, callback_meth)
+    end
+
+    def controller
+      ::Audited.store[:current_controller]
+    end
+
+    def controller=(value)
+      ::Audited.store[:current_controller] = value
     end
   end
 end
