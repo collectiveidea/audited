@@ -1,6 +1,12 @@
+*.iml
+*.ipr
+*.iws
 *.log
 *.swp
 .bundle
+.rakeTasks
+.ruby-gemset
+.ruby-version
 .rvmrc
 .yardoc
 coverage/
