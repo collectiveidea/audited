@@ -17,8 +17,10 @@ ADAPTERS.each do |adapter|
   end
 end
 
-RSpec::Core::RakeTask.new(:spec => ADAPTERS) do |t|
-  t.pattern = 'spec/audited/*_spec.rb'
+task :spec do
+  ADAPTERS.each do |adapter|
+    Rake::Task[adapter].invoke
+  end
 end
 
 task :default => :spec
