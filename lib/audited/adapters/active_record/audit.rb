@@ -16,8 +16,8 @@ module Audited
       class Audit < ::ActiveRecord::Base
         include Audited::Audit
 
-
         serialize :audited_changes
+        serialize :given_params
 
         default_scope         order(:version)
         scope :descending,    reorder("version DESC")

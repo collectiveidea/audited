@@ -65,9 +65,9 @@ module Audited
           before_destroy :require_comment
         end
 
-        attr_accessor :audit_comment
+        attr_accessor :audit_comment, :audit_params, :audit_referer
         unless options[:allow_mass_assignment]
-          attr_accessible :audit_comment
+          attr_accessible :audit_comment, :audit_params, :audit_referer
         end
 
         has_many :audits, :as => :auditable, :class_name => Audited.audit_class.name
@@ -195,24 +195,26 @@ module Audited
 
       def audit_create
         write_audit(:action => 'create', :audited_changes => audited_attributes,
-                    :comment => audit_comment)
+                    :comment => audit_comment, :given_params => audit_params, :referer => audit_referer)
       end
 
       def audit_update
         unless (changes = audited_changes).empty? && audit_comment.blank?
           write_audit(:action => 'update', :audited_changes => changes,
-                      :comment => audit_comment)
+                      :comment => audit_comment, :given_params => audit_params, :referer => audit_referer)
         end
       end
 
       def audit_destroy
         write_audit(:action => 'destroy', :audited_changes => audited_attributes,
-                    :comment => audit_comment)
+                    :comment => audit_comment, :given_params => audit_params, :referer => audit_referer)
       end
 
       def write_audit(attrs)
         attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
+        self.audit_params = nil
+        self.audit_referer = nil
         run_callbacks(:audit)  { self.audits.create(attrs) } if auditing_enabled
       end
 
