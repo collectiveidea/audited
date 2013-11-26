@@ -14,6 +14,8 @@ class <%= migration_class_name %> < ActiveRecord::Migration
       t.column :comment, :string
       t.column :remote_address, :string
       t.column :created_at, :datetime
+      t.column :referer, :text
+      t.column :given_params, :text
     end
 
     add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
