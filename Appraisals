@@ -9,3 +9,8 @@ end
 appraise 'rails32' do
   gem 'rails', '~> 3.2.0'
 end
+
+appraise 'rails40' do
+  gem 'rails', '~> 4.0.0'
+  gem 'rails-observers'
+end

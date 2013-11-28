@@ -1,10 +1,11 @@
-require 'rails/observers/active_model/active_model' 
+require "rails/observers/activerecord/active_record"
+require "rails/observers/action_controller/caching"
 
 module Audited
-  class Sweeper < ActiveModel::Observer
+  class Sweeper < ActionController::Caching::Sweeper
+    observe Audited.audit_class
 
-    include ActiveModel::Observing
-
+    attr_accessor :controller
     def before(controller)
       self.controller = controller
       true
@@ -48,7 +49,16 @@ module Audited
 end
 
 if defined?(ActionController) and defined?(ActionController::Base)
+  # Create dynamic subclass of Audited::Sweeper otherwise rspec will
+  # fail with both ActiveRecord and MongoMapper tests as there will be
+  # around_filter collision
+  sweeper_class = Class.new(Audited::Sweeper) do
+    def self.name
+      "#{Audited.audit_class}::Sweeper"
+    end
+  end
+
   ActionController::Base.class_eval do
-    around_filter Audited::Sweeper.instance
+    around_filter sweeper_class.instance
   end
 end

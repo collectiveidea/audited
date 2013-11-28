@@ -11,8 +11,8 @@ Gem::Specification.new do |gem|
   gem.homepage    = 'https://github.com/collectiveidea/audited'
   gem.license     = 'MIT'
 
+  gem.add_dependency 'rails-observers', '~> 0.1.2'
   gem.add_development_dependency 'activerecord', '~> 4.0.0'
-  gem.add_development_dependency 'rails-observers'
   gem.add_development_dependency "protected_attributes"
   gem.add_development_dependency 'appraisal', '~> 0.4'
   gem.add_development_dependency 'bson_ext', '~> 1.6'
