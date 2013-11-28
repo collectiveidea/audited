@@ -30,4 +30,6 @@ RailsApp::Application.configure do
   config.action_dispatch.show_exceptions = false
 
   config.active_support.deprecation = :stderr
+
+  config.eager_load = false
 end
