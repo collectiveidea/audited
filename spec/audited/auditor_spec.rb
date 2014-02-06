@@ -17,6 +17,54 @@ describe Audited::Auditor do
       end
     end
 
+    context "should be configurable which conditions are audited" do
+      before do
+        class ConditionalCompany < ::ActiveRecord::Base
+          self.table_name = 'companies'
+
+          audited :if => :public?
+
+          def public?; end
+        end
+      end
+
+      subject { ConditionalCompany.new.send(:auditing_enabled) }
+
+      context "when conditions are true" do
+        before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(true) }
+        it     { is_expected.to be_truthy }
+      end
+
+      context "when conditions are false" do
+        before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(false) }
+        it     { is_expected.to be_falsey }
+      end
+    end
+
+    context "should be configurable which conditions aren't audited" do
+      before do
+        class ExclusionaryCompany < ::ActiveRecord::Base
+          self.table_name = 'companies'
+
+          audited :unless => :non_profit?
+
+          def non_profit?; end
+        end
+      end
+
+      subject { ExclusionaryCompany.new.send(:auditing_enabled) }
+
+      context "when conditions are true" do
+        before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(true) }
+        it     { is_expected.to be_falsey }
+      end
+
+      context "when conditions are false" do
+        before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(false) }
+        it     { is_expected.to be_truthy }
+      end
+    end
+
     it "should be configurable which attributes are not audited via ignored_attributes" do
       Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
       class Secret < ::ActiveRecord::Base

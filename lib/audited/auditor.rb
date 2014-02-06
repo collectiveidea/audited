@@ -34,6 +34,17 @@ module Audited
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
       #
+      # * +if+ - Only audit the model when the given function returns true
+      # * +unless+ - Only audit the model when the given function returns false
+      #
+      #     class User < ActiveRecord::Base
+      #       audited :if => :active?
+      #
+      #       def active?
+      #         self.status == 'active'
+      #       end
+      #     end
+      #
       def audited(options = {})
         # don't allow multiple calls
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
@@ -41,8 +52,10 @@ module Audited
         extend Audited::Auditor::AuditedClassMethods
         include Audited::Auditor::AuditedInstanceMethods
 
-        class_attribute :audit_associated_with,   instance_writer: false
-        class_attribute :audited_options,       instance_writer: false
+        class_attribute :audit_associated_with,      instance_writer: false
+        class_attribute :audited_options,            instance_writer: false
+        class_attribute :conditional_auditing_with,  :instance_writer => false
+        class_attribute :exclusionary_auditing_with, :instance_writer => false
         attr_accessor :version, :audit_comment
 
         self.audited_options = options
@@ -68,6 +81,12 @@ module Audited
         define_callbacks :audit
         set_callback :audit, :after, :after_audit, if: lambda { respond_to?(:after_audit, true) }
         set_callback :audit, :around, :around_audit, if: lambda { respond_to?(:around_audit, true) }
+
+        if audited_options[:if]
+          self.conditional_auditing_with = audited_options[:if]
+        elsif audited_options[:unless]
+          self.exclusionary_auditing_with = audited_options[:unless]
+        end
 
         enable_auditing
       end
@@ -232,7 +251,13 @@ module Audited
       end
 
       def auditing_enabled
-        self.class.auditing_enabled
+        if conditional_auditing_with and self.respond_to?(conditional_auditing_with)
+          send(conditional_auditing_with)
+        elsif exclusionary_auditing_with and self.respond_to?(exclusionary_auditing_with)
+          !send(exclusionary_auditing_with)
+        else
+          self.class.auditing_enabled
+        end
       end
 
       def auditing_enabled=(val)
