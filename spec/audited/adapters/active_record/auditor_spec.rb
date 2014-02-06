@@ -17,6 +17,54 @@ describe Audited::Auditor, :adapter => :active_record do
       end
     end
 
+    context "should be configurable which conditions are audited" do
+      before do
+        class ConditionalCompany < ::ActiveRecord::Base
+          self.table_name = 'companies'
+
+          audited :if => :public?
+          
+          def public?; end
+        end
+      end
+
+      subject { ConditionalCompany.new.auditing_enabled }
+
+      context "when conditions are true" do
+        before { ConditionalCompany.any_instance.stub(:public?).and_return(true) }
+        it     { should be_true }
+      end
+
+      context "when conditions are false" do
+        before { ConditionalCompany.any_instance.stub(:public?).and_return(false) }
+        it     { should be_false }
+      end
+    end
+
+    context "should be configurable which conditions aren't audited" do
+      before do
+        class ExclusionaryCompany < ::ActiveRecord::Base
+          self.table_name = 'companies'
+
+          audited :unless => :non_profit?
+
+          def non_profit?; end
+        end
+      end
+
+      subject { ExclusionaryCompany.new.auditing_enabled }
+
+      context "when conditions are true" do
+        before { ExclusionaryCompany.any_instance.stub(:non_profit?).and_return(true) }
+        it     { should be_false }
+      end
+
+      context "when conditions are false" do
+        before { ExclusionaryCompany.any_instance.stub(:non_profit?).and_return(false) }
+        it     { should be_true }
+      end
+    end
+
     it "should be configurable which attributes are not audited" do
       Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
       class Secret < ::ActiveRecord::Base

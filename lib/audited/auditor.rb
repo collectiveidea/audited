@@ -47,9 +47,11 @@ module Audited
         # don't allow multiple calls
         return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
-        class_attribute :non_audited_columns,   :instance_writer => false
-        class_attribute :auditing_enabled,      :instance_writer => false
-        class_attribute :audit_associated_with, :instance_writer => false
+        class_attribute :non_audited_columns,        :instance_writer => false
+        class_attribute :auditing_enabled,           :instance_writer => false, :instance_reader => false
+        class_attribute :audit_associated_with,      :instance_writer => false
+        class_attribute :conditional_auditing_with,  :instance_writer => false
+        class_attribute :exclusionary_auditing_with, :instance_writer => false
 
         if options[:only]
           except = self.column_names - options[:only].flatten.map(&:to_s)
@@ -87,6 +89,12 @@ module Audited
         extend Audited::Auditor::AuditedClassMethods
         include Audited::Auditor::AuditedInstanceMethods
 
+        if options[:if]
+          self.conditional_auditing_with = options[:if]
+        elsif options[:unless]
+          self.exclusionary_auditing_with = options[:unless]
+        end
+
         self.auditing_enabled = true
       end
 
@@ -96,6 +104,16 @@ module Audited
     end
 
     module AuditedInstanceMethods
+      def auditing_enabled
+        if conditional_auditing_with and self.respond_to?(conditional_auditing_with)
+          send(conditional_auditing_with)
+        elsif exclusionary_auditing_with and self.respond_to?(exclusionary_auditing_with)
+          !send(exclusionary_auditing_with)
+        else
+          self.class.auditing_enabled
+        end
+      end
+
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
@@ -229,7 +247,6 @@ module Audited
 
       def empty_callback #:nodoc:
       end
-
     end # InstanceMethods
 
     module AuditedClassMethods
