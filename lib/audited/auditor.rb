@@ -43,6 +43,17 @@ module Audited
       #       attr_accessible :name
       #     end
       #
+      # * +if+ - Only audit the model when the given function returns true
+      # * +unless+ - Only audit the model when the given function returns false
+      #
+      #     class User < ActiveRecord::Base
+      #       audited :if => :active?
+      #
+      #       def active?
+      #         self.status == 'active'
+      #       end
+      #     end
+      #
       def audited(options = {})
         # don't allow multiple calls
         return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)

@@ -27,6 +27,53 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       Secret.non_audited_columns.should include('delta', 'top_secret', 'created_at')
     end
 
+    context "should be configurable which conditions are audited" do
+      before do
+        class ConditionalCompany
+          include MongoMapper::Document
+          audited :if => :public?
+          
+          def public?; end
+        end
+      end
+
+      subject { ConditionalCompany.new.auditing_enabled }
+
+      context "when conditions are true" do
+        before { ConditionalCompany.any_instance.stub(:public?).and_return(true) }
+        it     { should be_true }
+      end
+
+      context "when conditions are false" do
+        before { ConditionalCompany.any_instance.stub(:public?).and_return(false) }
+        it     { should be_false }
+      end
+    end
+
+    context "should be configurable which conditions aren't audited" do
+      before do
+        class ExclusionaryCompany
+          include MongoMapper::Document
+
+          audited :unless => :non_profit?
+
+          def non_profit?; end
+        end
+      end
+
+      subject { ExclusionaryCompany.new.auditing_enabled }
+
+      context "when conditions are true" do
+        before { ExclusionaryCompany.any_instance.stub(:non_profit?).and_return(true) }
+        it     { should be_false }
+      end
+
+      context "when conditions are false" do
+        before { ExclusionaryCompany.any_instance.stub(:non_profit?).and_return(false) }
+        it     { should be_true }
+      end
+    end
+
     it "should not save non-audited columns" do
       create_mongo_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
     end
