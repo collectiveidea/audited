@@ -10,6 +10,8 @@ Added
 
 - Add `inverse_of: auditable` definition to audit relation
   [#413](https://github.com/collectiveidea/audited/pull/413)
+- Add functionality to conditionally audit models
+  [#414](https://github.com/collectiveidea/audited/pull/414)
 
 Changed
 
