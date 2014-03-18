@@ -5,6 +5,10 @@ module AuditedSpecHelpers
     klass.create({:name => 'Brandon', :username => 'brandon', :password => 'password'}.merge(attrs))
   end
 
+  def build_user(attrs = {})
+    User.new({:name => 'darth', :username => 'darth', :password => 'noooooooo'}.merge(attrs))
+  end
+
   def create_versions(n = 2, use_mongo = false)
     klass = use_mongo ? Models::MongoMapper::User : Models::ActiveRecord::User
 

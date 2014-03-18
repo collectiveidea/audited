@@ -196,6 +196,21 @@ describe Audited::Auditor, :adapter => :active_record do
     end
   end
 
+  describe "on destroy with unsaved object" do
+    before do
+      @user = build_user
+      @user.new_record?.should be_true
+    end
+
+    it "should not audit on 'destroy'" do
+      expect {
+        @user.destroy
+      }.to_not raise_error
+
+      @user.audits.should be_empty
+    end
+  end
+
   describe "associated with" do
     let(:owner) { Models::ActiveRecord::Owner.create(:name => 'Models::ActiveRecord::Owner') }
     let(:owned_company) { Models::ActiveRecord::OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
