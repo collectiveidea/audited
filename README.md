@@ -254,6 +254,12 @@ You can find documentation at: http://rdoc.info/github/collectiveidea/audited
 
 Or join the [mailing list](http://groups.google.com/group/audited) to get help or offer suggestions.
 
+## Running Tests
+
+We use [appraisal](https://github.com/thoughtbot/appraisal) to run test against multiple versions of Rails.
+
+To get started, run `appraisal install` and run tests with `appraisal rake` or run against a specific version of rails with `appraisal rails30 rake`.
+
 ## Contributing
 
 In the spirit of [free software](http://www.fsf.org/licensing/essays/free-sw.html), **everyone** is encouraged to help improve this project. Here are a few ways _you_ can pitch in:
