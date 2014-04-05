@@ -192,6 +192,37 @@ user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
 
+### Disabling auditing
+
+If you want to disable auditing temporarily doing certain tasks, there are a few
+methods available.
+
+To disable auditing on a save:
+
+```ruby
+@user.save_wihtout_auditing
+```
+
+or:
+
+```ruby
+@user.without_auditing do
+  @user.save
+end
+```
+
+To disable auditing on a column:
+
+```ruby
+User.non_audited_columns = [:first_name, :last_name]
+```
+
+To disable auditing on an entire model:
+
+```ruby
+User.auditing_enabled = false
+```
+
 ## Gotchas
 
 ### Accessible Attributes
