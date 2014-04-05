@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rspec-rails', '~> 2.0'
   gem.add_development_dependency 'sqlite3', '~> 1.0'
 
-  gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(lib\/audited\-|adapters|generators)/ }
+  gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(\.gemspec|lib\/audited\-|adapters|generators)/ }
   gem.test_files    = gem.files.grep(/^spec\//)
   gem.require_paths = ['lib']
 end
