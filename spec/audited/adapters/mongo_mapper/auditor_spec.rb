@@ -414,6 +414,11 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
         Models::MongoMapper::User.without_auditing { Models::MongoMapper::User.create!( :name => 'Brandon' ) }
       }.to_not change( Audited.audit_class, :count )
     end
+
+    it "should reset auditing status even it raises an exception" do
+      Models::MongoMapper::User.without_auditing { raise } rescue nil
+      expect(Models::MongoMapper::User.auditing_enabled).to eq(true)
+    end
   end
 
   describe "comment required" do

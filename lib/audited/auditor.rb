@@ -237,7 +237,9 @@ module Audited
       def without_auditing(&block)
         auditing_was_enabled = auditing_enabled
         disable_auditing
-        block.call.tap { enable_auditing if auditing_was_enabled }
+        block.call
+      ensure
+        enable_auditing if auditing_was_enabled
       end
 
       def disable_auditing
