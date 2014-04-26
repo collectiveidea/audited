@@ -371,6 +371,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
     end
 
     it "should record new audit when saving revision" do
+      user.destroy
       expect {
         user.revision(1).save!
       }.to change( user.audits, :count ).by(1)
