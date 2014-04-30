@@ -341,9 +341,9 @@ describe Audited::Auditor, :adapter => :active_record do
     end
 
     it "should be able to get time for first revision" do
-      suspended_at = Time.now
+      suspended_at = Time.zone.now
       u = Models::ActiveRecord::User.create(:suspended_at => suspended_at)
-      u.revision(1).suspended_at.should == suspended_at
+      u.revision(1).suspended_at.to_s.should == suspended_at.to_s
     end
 
     it "should not raise an error when no previous audits exist" do

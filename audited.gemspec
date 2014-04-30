@@ -11,11 +11,13 @@ Gem::Specification.new do |gem|
   gem.homepage    = 'https://github.com/collectiveidea/audited'
   gem.license     = 'MIT'
 
-  gem.add_development_dependency 'activerecord', '~> 3.0'
+  gem.add_dependency 'rails-observers', '~> 0.1.2'
+  gem.add_development_dependency 'activerecord', '~> 4.0'
+  gem.add_development_dependency "protected_attributes"
   gem.add_development_dependency 'appraisal', '~> 0.4'
   gem.add_development_dependency 'bson_ext', '~> 1.6'
-  gem.add_development_dependency 'mongo_mapper', '~> 0.11'
-  gem.add_development_dependency 'rails', '~> 3.0'
+  gem.add_development_dependency 'mongo_mapper', '~> 0.13.0.beta2'
+  gem.add_development_dependency 'rails', '~> 4.0.0'
   gem.add_development_dependency 'rspec-rails', '~> 2.0'
   gem.add_development_dependency 'sqlite3', '~> 1.0'
 
