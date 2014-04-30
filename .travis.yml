@@ -6,3 +6,4 @@ rvm:
   - 2.1.2
 gemfile:
   - gemfiles/rails40.gemfile
+  - gemfiles/rails41.gemfile
