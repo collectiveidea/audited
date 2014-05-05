@@ -46,6 +46,8 @@ module Audited
       def audited(options = {})
         # don't allow multiple calls
         return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
+        #don't break if instantiated before the table exists (during rake db tasks)
+        return if !self.table_exists?
 
         class_attribute :non_audited_columns,   :instance_writer => false
         class_attribute :auditing_enabled,      :instance_writer => false
