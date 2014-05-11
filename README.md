@@ -200,7 +200,7 @@ methods available.
 To disable auditing on a save:
 
 ```ruby
-@user.save_wihtout_auditing
+@user.save_without_auditing
 ```
 
 or:
