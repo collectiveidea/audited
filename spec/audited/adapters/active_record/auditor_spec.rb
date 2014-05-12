@@ -194,6 +194,17 @@ describe Audited::Auditor, :adapter => :active_record do
         on_create_update.destroy
       }.to_not change( Audited.audit_class, :count )
     end
+
+    it "should audit dependent destructions" do
+      owner = Models::ActiveRecord::Owner.create!
+      company = owner.companies.create!
+
+      expect {
+        owner.destroy
+      }.to change( Audited.audit_class, :count )
+
+      company.audits.map { |a| a.action }.should == ['create', 'destroy']
+    end
   end
 
   describe "associated with" do
