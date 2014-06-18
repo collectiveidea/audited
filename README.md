@@ -239,17 +239,23 @@ User.auditing_enabled = false
 
 ## Gotchas
 
-### Accessible Attributes
+### Using attr_protected or strong_parameters
 
-Audited assumes you are using `attr_accessible`, however, if you are using `attr_protected` or just going at it unprotected you will have to set the `:allow_mass_assignment => true` option.
+Audited assumes you are using `attr_accessible`. If you're using
+`attr_protected` or `strong_parameters`, you'll have to take an extra step or
+two.
 
-If using `attr_protected` be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
+
+If you're using `strong_parameters` with Rails 3.x, be sure to add `:allow_mass_assignment => true` to your `audited` call; otherwise Audited will 
+interfere with `strong_parameters` and none of your `save` calls will work.
 
 ```ruby
 class User < ActiveRecord::Base
   audited :allow_mass_assignment => true
 end
 ```
+
+If using `attr_protected`, add `:allow_mass_assignment => true`, and also be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
 
 ```ruby
 class User < ActiveRecord::Base
