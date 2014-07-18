@@ -1,5 +1,8 @@
+require 'rails/observers/active_model/active_model' 
+
+
 module Audited
-  VERSION = '3.0.0'
+  VERSION = '4.0.0'
 
   class << self
     attr_accessor :ignored_attributes, :current_user_method, :audit_class

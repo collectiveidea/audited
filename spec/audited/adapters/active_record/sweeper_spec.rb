@@ -30,7 +30,6 @@ describe AuditsController, :adapter => :active_record do
 
     it "should audit user" do
       controller.send(:current_user=, user)
-
       expect {
         post :audit
       }.to change( Audited.audit_class, :count )

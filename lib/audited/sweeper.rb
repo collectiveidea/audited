@@ -1,6 +1,9 @@
+require 'rails/observers/active_model/active_model' 
+
 module Audited
   class Sweeper < ActiveModel::Observer
-    observe Audited.audit_class
+
+    include ActiveModel::Observing
 
     def before(controller)
       self.controller = controller
