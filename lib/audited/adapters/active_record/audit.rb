@@ -12,7 +12,9 @@ module Audited
       # * <tt>audited_changes</tt>: a serialized hash of all the changes
       # * <tt>comment</tt>: a comment set with the audit
       # * <tt>created_at</tt>: Time that the change was performed
-      #
+      #        # Allows user to be set to either a string or an ActiveRecord object
+        # @private
+
       class Audit < ::ActiveRecord::Base
         include Audited::Audit
 
@@ -21,6 +23,8 @@ module Audited
 
         default_scope         order(:version)
         scope :descending,    reorder("version DESC")
+        scope :descending_age,reorder("created_at DESC")
+        scope :ascending_age, reorder("created_at ASC")
         scope :creates,       :conditions => {:action => 'create'}
         scope :updates,       :conditions => {:action => 'update'}
         scope :destroys,      :conditions => {:action => 'destroy'}
@@ -40,9 +44,12 @@ module Audited
         def user_as_string=(user)
           # reset both either way
           self.user_as_model = self.username = nil
-          user.is_a?(::ActiveRecord::Base) ?
-            self.user_as_model = user :
+          if user.is_a?(::ActiveRecord::Base)
+            self.user_as_model = user
+            self.username = user.name if user.name
+          else
             self.username = user
+          end
         end
         alias_method :user_as_model=, :user=
         alias_method :user=, :user_as_string=
