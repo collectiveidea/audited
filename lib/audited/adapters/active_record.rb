@@ -10,6 +10,8 @@ end
 
 ::ActiveRecord::Base.send :include, Audited::Auditor
 
+::Audit = Audited::Adapters::ActiveRecord::Audit
+
 Audited.audit_class = Audited::Adapters::ActiveRecord::Audit
 
 require 'audited/sweeper'

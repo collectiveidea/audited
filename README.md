@@ -30,7 +30,7 @@ The installation process depends on what ORM your app is using.
 Add the appropriate gem to your Gemfile:
 
 ```ruby
-gem "audited-activerecord", "~> 3.0"
+gem "audited-activerecord", "~> 3.0.0.rc1"
 ```
 
 Then, from your Rails app directory, create the `audits` table:
@@ -54,7 +54,7 @@ Upgrading will only make changes if changes are needed.
 ### MongoMapper
 
 ```ruby
-gem "audited-mongo_mapper", "~> 3.0"
+gem "audited-mongo_mapper", "~> 3.0.0.rc1"
 ```
 
 ## Usage
