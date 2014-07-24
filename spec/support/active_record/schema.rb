@@ -1,7 +1,9 @@
 require 'active_record'
 require 'logger'
 
-ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ':memory:')
+ActiveRecord::Base.establish_connection(:adapter => 'postgresql', encoding: 'unicode',
+  database: 'audited_test',
+  min_messages: 'ERROR', pool: 5)
 ActiveRecord::Base.logger = Logger.new(SPEC_ROOT.join('debug.log'))
 ActiveRecord::Migration.verbose = false
 

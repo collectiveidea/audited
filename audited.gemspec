@@ -16,7 +16,10 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'mongo_mapper'
   gem.add_development_dependency 'rails'
   gem.add_development_dependency 'rspec-rails', '~> 2.0'
+  gem.add_development_dependency 'database_cleaner'
   gem.add_development_dependency 'sqlite3'
+  gem.add_development_dependency 'pg'
+  gem.add_development_dependency 'pry'
 
   gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(\.gemspec|lib\/audited\-|adapters|generators)/ }
   gem.test_files    = gem.files.grep(/^spec\//)
