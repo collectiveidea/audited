@@ -1,4 +1,5 @@
 Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.png)](http://travis-ci.org/collectiveidea/audited) [![Dependency Status](https://gemnasium.com/collectiveidea/audited.png)](https://gemnasium.com/collectiveidea/audited)
+[![Code Climate](https://codeclimate.com/github/collectiveidea/audited.png)](https://codeclimate.com/github/collectiveidea/audited)
 =======
 
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited also allows you to record who made those changes, save comments and associate models related to the changes. Audited works with Rails 3.
@@ -246,7 +247,7 @@ Audited assumes you are using `attr_accessible`. If you're using
 two.
 
 
-If you're using `strong_parameters` with Rails 3.x, be sure to add `:allow_mass_assignment => true` to your `audited` call; otherwise Audited will 
+If you're using `strong_parameters` with Rails 3.x, be sure to add `:allow_mass_assignment => true` to your `audited` call; otherwise Audited will
 interfere with `strong_parameters` and none of your `save` calls will work.
 
 ```ruby
