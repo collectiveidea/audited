@@ -28,7 +28,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
     end
 
     it "should not save non-audited columns" do
-      create_mongo_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should be_false
+      create_mongo_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }.should eq(false)
     end
   end
 
@@ -83,7 +83,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
 
     it "should not audit an attribute which is excepted if specified on create or destroy" do
       on_create_destroy_except_name = Models::MongoMapper::OnCreateDestroyExceptName.create(:name => 'Bart')
-      on_create_destroy_except_name.audits.first.audited_changes.keys.any?{|col| ['name'].include? col}.should be_false
+      on_create_destroy_except_name.audits.first.audited_changes.keys.any?{|col| ['name'].include? col}.should eq(false)
     end
 
     it "should not save an audit if only specified on update/destroy" do
@@ -367,7 +367,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
     end
 
     it "should mark revision's attributes as changed" do
-      user.revision(1).name_changed?.should be_true
+      user.revision(1).name_changed?.should eq(true)
     end
 
     it "should record new audit when saving revision" do
@@ -405,7 +405,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
     it "should not save an audit when calling #save_without_auditing" do
       expect {
         u = Models::MongoMapper::User.new(:name => 'Brandon')
-        u.save_without_auditing.should be_true
+        u.save_without_auditing.should eq(true)
       }.to_not change( Audited.audit_class, :count )
     end
 
@@ -438,16 +438,16 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       let( :user ) { Models::MongoMapper::CommentRequiredUser.create!( :audit_comment => 'Create' ) }
 
       it "should not validate when audit_comment is not supplied" do
-        user.update_attributes(:name => 'Test').should be_false
+        user.update_attributes(:name => 'Test').should eq(false)
       end
 
       it "should validate when audit_comment is supplied" do
-        user.update_attributes(:name => 'Test', :audit_comment => 'Update').should be_true
+        user.update_attributes(:name => 'Test', :audit_comment => 'Update').should eq(true)
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
         Models::MongoMapper::CommentRequiredUser.disable_auditing
-        user.update_attributes(:name => 'Test').should be_true
+        user.update_attributes(:name => 'Test').should eq(true)
         Models::MongoMapper::CommentRequiredUser.enable_auditing
       end
     end
@@ -456,17 +456,17 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       let( :user ) { Models::MongoMapper::CommentRequiredUser.create!( :audit_comment => 'Create' )}
 
       it "should not validate when audit_comment is not supplied" do
-        user.destroy.should be_false
+        user.destroy.should eq(false)
       end
 
       it "should validate when audit_comment is supplied" do
         user.audit_comment = "Destroy"
-        user.destroy.should be_true
+        user.destroy.should eq(true)
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
         Models::MongoMapper::CommentRequiredUser.disable_auditing
-        user.destroy.should be_true
+        user.destroy.should eq(true)
         Models::MongoMapper::CommentRequiredUser.enable_auditing
       end
     end
