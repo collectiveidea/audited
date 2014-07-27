@@ -19,6 +19,7 @@ end
 
 describe AuditsController, :adapter => :active_record do
   include RSpec::Rails::ControllerExampleGroup
+  render_views
 
   before(:each) do
     Audited.current_user_method = :current_user
