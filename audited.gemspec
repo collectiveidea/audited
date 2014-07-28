@@ -1,8 +1,10 @@
 # encoding: utf-8
+$:.push File.expand_path("../lib", __FILE__)
+require "audited/version"
 
 Gem::Specification.new do |gem|
   gem.name    = 'audited'
-  gem.version = '3.0.0'
+  gem.version = Audited::VERSION
 
   gem.authors     = ['Brandon Keepers', 'Kenneth Kalmer', 'Daniel Morrison', 'Brian Ryckbost', 'Steve Richert', 'Ryan Glover']
   gem.email       = 'info@collectiveidea.com'
