@@ -1,5 +1,6 @@
 require 'test_helper'
 
+require 'audited/adapters/active_record'
 require 'generators/audited/upgrade_generator'
 
 class UpgradeGeneratorTest < Rails::Generators::TestCase
@@ -60,6 +61,17 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
     assert_migration "db/migrate/rename_association_to_associated.rb" do |content|
       assert_match /rename_column :audits, :association_id, :associated_id/, content
       assert_match /rename_column :audits, :association_type, :associated_type/, content
+    end
+  end
+
+  test "should add 'request_uuid' to audits table" do
+    load_schema 6
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/add_request_uuid_to_audits.rb" do |content|
+      assert_match /add_column :audits, :request_uuid, :string/, content
+      assert_match /add_index :audits, :request_uuid/, content
     end
   end
 end

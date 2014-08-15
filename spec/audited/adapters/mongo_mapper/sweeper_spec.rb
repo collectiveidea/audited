@@ -58,6 +58,15 @@ describe MongoAuditsController, :adapter => :mongo_mapper do
       expect(assigns(:company).audits.last.remote_address).to eq('1.2.3.4')
     end
 
+    it "should record a UUID for the web request responsible for the change" do
+      allow_any_instance_of(ActionDispatch::Request).to receive(:uuid).and_return("abc123")
+      controller.send(:current_user=, user)
+
+      post :audit
+
+      expect(assigns(:company).audits.last.request_uuid).to eq("abc123")
+    end
+
   end
 
   describe "POST update_user" do
