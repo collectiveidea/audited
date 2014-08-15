@@ -65,10 +65,12 @@ module Audited
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
         before_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
 
-        # Define and set an after_audit callback. This might be useful if you want
-        # to notify a party after the audit has been created.
+        # Define and set after_audit and around_audit callbacks. This might be useful if you want
+        # to notify a party after the audit has been created or if you want to access the newly-created
+        # audit.
         define_callbacks :audit
         set_callback :audit, :after, :after_audit, :if => lambda { self.respond_to?(:after_audit) }
+        set_callback :audit, :around, :around_audit, :if => lambda { self.respond_to?(:around_audit) }
 
         attr_accessor :version
 

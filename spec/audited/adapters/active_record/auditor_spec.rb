@@ -519,4 +519,13 @@ describe Audited::Auditor, :adapter => :active_record do
     end
   end
 
+  describe "around_audit" do
+    let( :user ) { user = Models::ActiveRecord::UserWithAfterAudit.new }
+
+    it "should invoke around_audit callback on create" do
+      expect(user.around_attr).to be_nil
+      expect(user.save).to eq(true)
+      expect(user.around_attr).to eq(user.audits.last)
+    end
+  end
 end
