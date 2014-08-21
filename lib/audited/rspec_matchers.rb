@@ -72,7 +72,7 @@ module Audited
         "Expected #{@expectation}"
       end
 
-      def negative_failure_message
+      def failure_message_when_negated
         "Did not expect #{@expectation}"
       end
 
@@ -145,7 +145,7 @@ module Audited
         "Expected #{model_class} to have associated audits"
       end
 
-      def negative_failure_message
+      def failure_message_when_negated
         "Expected #{model_class} to not have associated audits"
       end
 
