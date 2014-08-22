@@ -89,6 +89,11 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
     expect(Audited.audit_class.where(:auditable_type => 'Models::ActiveRecord::User', :auditable_id => user.id).last.version).to eq(3)
   end
 
+  it "should set the request uuid on create" do
+    user = Models::ActiveRecord::User.create! :name => 'Set Request UUID'
+    expect(user.audits(true).first.request_uuid).not_to be_blank
+  end
+
   describe "reconstruct_attributes" do
 
     it "should work with the old way of storing just the new value" do

@@ -95,6 +95,12 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
     expect(Audited.audit_class.where(:auditable_type => 'Models::MongoMapper::User', :auditable_id => user.id).all.last.version).to eq(3)
   end
 
+  it "should set the request uuid on create" do
+    user = Models::MongoMapper::User.create! :name => 'Set Request UUID'
+    audits = user.audits.reload.all
+    expect(audits.first.request_uuid).not_to be_blank
+  end
+
   describe "reconstruct_attributes" do
 
     it "should work with the old way of storing just the new value" do
