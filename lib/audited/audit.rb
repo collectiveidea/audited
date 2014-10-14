@@ -78,7 +78,6 @@ module Audited
     def old_attributes
       (audited_changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
         attrs[attr] = (action == 'update') ? values.first : values
-
         attrs
       end
     end
