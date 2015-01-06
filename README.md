@@ -153,7 +153,7 @@ class PostsController < ApplicationController
 end
 ```
 
-To use a method other than `current_user`, put the following in an intializer:
+To use a method other than `current_user`, put the following in an initializer:
 
 ```ruby
 Audited.current_user_method = :authenticated_user
