@@ -11,12 +11,10 @@ module Audited
         belongs_to :user,       :polymorphic => true
         belongs_to :associated, :polymorphic => true
 
-        before_create :set_version_number, :set_audit_user
+        before_create :set_version_number, :set_audit_user, :set_request_uuid
 
         cattr_accessor :audited_class_names
         self.audited_class_names = Set.new
-
-        attr_accessible :action, :audited_changes, :comment, :associated
       end
 
       # Returns the list of classes that are being audited
@@ -29,12 +27,9 @@ module Audited
       # for background operations that require audit information.
       def as_user(user, &block)
         Thread.current[:audited_user] = user
-
-        yieldval = yield
-
+        yield
+      ensure
         Thread.current[:audited_user] = nil
-
-        yieldval
       end
 
       # @private
@@ -100,6 +95,10 @@ module Audited
     def set_audit_user
       self.user = Thread.current[:audited_user] if Thread.current[:audited_user]
       nil # prevent stopping callback chains
+    end
+
+    def set_request_uuid
+      self.request_uuid ||= SecureRandom.uuid
     end
   end
 end

@@ -2,6 +2,7 @@
 
 require 'bundler/gem_helper'
 require 'rspec/core/rake_task'
+require 'rake/testtask'
 require 'appraisal'
 
 Bundler::GemHelper.install_tasks(:name => 'audited')
@@ -17,8 +18,16 @@ ADAPTERS.each do |adapter|
   end
 end
 
-RSpec::Core::RakeTask.new(:spec => ADAPTERS) do |t|
-  t.pattern = 'spec/audited/*_spec.rb'
+task :spec do
+  ADAPTERS.each do |adapter|
+    Rake::Task[adapter].invoke
+  end
 end
 
-task :default => :spec
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = FileList['test/**/*_test.rb']
+  t.verbose = true
+end
+
+task :default => [:spec, :test]
