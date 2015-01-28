@@ -1,16 +1,17 @@
-Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.png)](http://travis-ci.org/collectiveidea/audited) [![Dependency Status](https://gemnasium.com/collectiveidea/audited.png)](https://gemnasium.com/collectiveidea/audited)
+Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.png)](http://travis-ci.org/collectiveidea/audited) [![Dependency Status](https://gemnasium.com/collectiveidea/audited.png)](https://gemnasium.com/collectiveidea/audited)[![Code Climate](https://codeclimate.com/github/collectiveidea/audited.png)](https://codeclimate.com/github/collectiveidea/audited)
 =======
 
-**Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited also allows you to record who made those changes, save comments and associate models related to the changes. Audited works with Rails 3.
+**Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited also allows you to record who made those changes, save comments and associate models related to the changes.
+
+Audited currently (4.x) works with Rails 4. For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
 
 ## Supported Rubies
 
 Audited supports and is [tested against](http://travis-ci.org/collectiveidea/audited) the following Ruby versions:
 
-* 1.8.7
-* 1.9.2
 * 1.9.3
-* Head
+* 2.0.0
+* 2.1.2
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
@@ -30,7 +31,7 @@ The installation process depends on what ORM your app is using.
 Add the appropriate gem to your Gemfile:
 
 ```ruby
-gem "audited-activerecord", "~> 3.0"
+gem "audited-activerecord", "~> 4.0"
 ```
 
 Then, from your Rails app directory, create the `audits` table:
@@ -54,7 +55,7 @@ Upgrading will only make changes if changes are needed.
 ### MongoMapper
 
 ```ruby
-gem "audited-mongo_mapper", "~> 3.0"
+gem "audited-mongo_mapper", "~> 4.0"
 ```
 
 ## Usage
@@ -107,6 +108,20 @@ class User < ActiveRecord::Base
 end
 ```
 
+### Specifying callbacks
+
+By default, a new audit is created for any Create, Update or Destroy action. You can, however, limit the actions audited.
+
+```ruby
+class User < ActiveRecord::Base
+  # All fields and actions
+  # audited
+
+  # Single field, only audit Update and Destroy (not Create)
+  # audited only: :name, on: [:update, :destroy]
+end
+```
+
 ### Comments
 
 You can attach comments to each audit using an `audit_comment` attribute on your model.
@@ -138,7 +153,7 @@ class PostsController < ApplicationController
 end
 ```
 
-To use a method other than `current_user`, put the following in an intializer:
+To use a method other than `current_user`, put the following in an initializer:
 
 ```ruby
 Audited.current_user_method = :authenticated_user
@@ -147,7 +162,7 @@ Audited.current_user_method = :authenticated_user
 Outside of a request, Audited can still record the user with the `as_user` method:
 
 ```ruby
-Audit.as_user(User.find(1)) do
+Audited.audit_class.as_user(User.find(1)) do
   post.update_attribute!(:title => "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
@@ -192,19 +207,56 @@ user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
 
+### Disabling auditing
+
+If you want to disable auditing temporarily doing certain tasks, there are a few
+methods available.
+
+To disable auditing on a save:
+
+```ruby
+@user.save_without_auditing
+```
+
+or:
+
+```ruby
+@user.without_auditing do
+  @user.save
+end
+```
+
+To disable auditing on a column:
+
+```ruby
+User.non_audited_columns = [:first_name, :last_name]
+```
+
+To disable auditing on an entire model:
+
+```ruby
+User.auditing_enabled = false
+```
+
 ## Gotchas
 
-### Accessible Attributes
+### Using attr_protected or strong_parameters
 
-Audited assumes you are using `attr_accessible`, however, if you are using `attr_protected` or just going at it unprotected you will have to set the `:allow_mass_assignment => true` option.
+Audited assumes you are using `attr_accessible`. If you're using
+`attr_protected` or `strong_parameters`, you'll have to take an extra step or
+two.
 
-If using `attr_protected` be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
+
+If you're using `strong_parameters` with Rails 3.x, be sure to add `:allow_mass_assignment => true` to your `audited` call; otherwise Audited will
+interfere with `strong_parameters` and none of your `save` calls will work.
 
 ```ruby
 class User < ActiveRecord::Base
   audited :allow_mass_assignment => true
 end
 ```
+
+If using `attr_protected`, add `:allow_mass_assignment => true`, and also be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
 
 ```ruby
 class User < ActiveRecord::Base

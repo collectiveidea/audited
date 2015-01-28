@@ -5,14 +5,14 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
 
   it "sets created_at timestamp when audit is created" do
     subject.save!
-    subject.created_at.should be_a Time
+    expect(subject.created_at).to be_a Time
   end
 
   describe "user=" do
 
     it "should be able to set the user to a model object" do
       subject.user = user
-      subject.user.should == user
+      expect(subject.user).to eq(user)
     end
 
     it "should be able to set the user to nil" do
@@ -22,28 +22,28 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
 
       subject.user = nil
 
-      subject.user.should be_nil
-      subject.user_id.should be_nil
-      subject.user_type.should be_nil
-      subject.username.should be_nil
+      expect(subject.user).to be_nil
+      expect(subject.user_id).to be_nil
+      expect(subject.user_type).to be_nil
+      expect(subject.username).to be_nil
     end
 
     it "should be able to set the user to a string" do
       subject.user = 'test'
-      subject.user.should == 'test'
+      expect(subject.user).to eq('test')
     end
 
     it "should clear model when setting to a string" do
       subject.user = user
       subject.user = 'testing'
-      subject.user_id.should be_nil
-      subject.user_type.should be_nil
+      expect(subject.user_id).to be_nil
+      expect(subject.user_type).to be_nil
     end
 
     it "should clear the username when setting to a model" do
       subject.username = 'test'
       subject.user = user
-      subject.username.should be_nil
+      expect(subject.username).to be_nil
     end
 
   end
@@ -55,7 +55,7 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
       5.times { |i| user.update_attribute :name, (i + 2).to_s }
 
       user.audits.each do |audit|
-        audit.revision.name.should == audit.version.to_s
+        expect(audit.revision.name).to eq(audit.version.to_s)
       end
     end
 
@@ -64,42 +64,48 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
       u.update_attribute :logins, 1
       u.update_attribute :logins, 2
 
-      u.audits[2].revision.logins.should be(2)
-      u.audits[1].revision.logins.should be(1)
-      u.audits[0].revision.logins.should be(0)
+      expect(u.audits[2].revision.logins).to eq(2)
+      expect(u.audits[1].revision.logins).to eq(1)
+      expect(u.audits[0].revision.logins).to eq(0)
     end
 
     it "should bypass attribute assignment wrappers" do
       u = Models::MongoMapper::User.create(:name => '<Joe>')
-      u.audits.first.revision.name.should == '&lt;Joe&gt;'
+      expect(u.audits.first.revision.name).to eq('&lt;Joe&gt;')
     end
 
     it "should work for deleted records" do
       user = Models::MongoMapper::User.create :name => "1"
       user.destroy
       revision = user.audits.last.revision
-      revision.name.should == user.name
-      revision.should be_a_new_record
+      expect(revision.name).to eq(user.name)
+      expect(revision).to be_a_new_record
     end
 
   end
 
   it "should set the version number on create" do
     user = Models::MongoMapper::User.create! :name => 'Set Version Number'
-    user.audits.first.version.should be(1)
+    expect(user.audits.first.version).to eq(1)
     user.update_attribute :name, "Set to 2"
     audits = user.audits.reload.all
-    audits.first.version.should be(1)
-    audits.last.version.should be(2)
+    expect(audits.first.version).to eq(1)
+    expect(audits.last.version).to eq(2)
     user.destroy
-    Audited.audit_class.where(:auditable_type => 'Models::MongoMapper::User', :auditable_id => user.id).all.last.version.should be(3)
+    expect(Audited.audit_class.where(:auditable_type => 'Models::MongoMapper::User', :auditable_id => user.id).all.last.version).to eq(3)
+  end
+
+  it "should set the request uuid on create" do
+    user = Models::MongoMapper::User.create! :name => 'Set Request UUID'
+    audits = user.audits.reload.all
+    expect(audits.first.request_uuid).not_to be_blank
   end
 
   describe "reconstruct_attributes" do
 
     it "should work with the old way of storing just the new value" do
       audits = Audited.audit_class.reconstruct_attributes([Audited.audit_class.new(:audited_changes => {'attribute' => 'value'})])
-      audits['attribute'].should == 'value'
+      expect(audits['attribute']).to eq('value')
     end
 
   end
@@ -113,18 +119,19 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
     end
 
     it "should include audited classes" do
-      Audited.audit_class.audited_classes.should include(Models::MongoMapper::User)
+      expect(Audited.audit_class.audited_classes).to include(Models::MongoMapper::User)
     end
 
     it "should include subclasses" do
-      Audited.audit_class.audited_classes.should include(Models::MongoMapper::CustomUserSubclass)
+      expect(Audited.audit_class.audited_classes).to include(Models::MongoMapper::CustomUserSubclass)
     end
   end
 
   describe "new_attributes" do
 
     it "should return a hash of the new values" do
-      Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes.should == {'a' => 2, 'b' => 4}
+      new_attributes = Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes
+      expect(new_attributes).to eq({'a' => 2, 'b' => 4})
     end
 
   end
@@ -132,7 +139,8 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
   describe "old_attributes" do
 
     it "should return a hash of the old values" do
-      Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes.should == {'a' => 1, 'b' => 3}
+      old_attributes = Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes
+      expect(old_attributes).to eq({'a' => 1, 'b' => 3})
     end
 
   end
@@ -146,7 +154,7 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
         company.save
 
         company.audits.each do |audit|
-          audit.user.should == user
+          expect(audit.user).to eq(user)
         end
       end
     end
@@ -158,7 +166,7 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
         company.save
 
         company.audits.each do |audit|
-          audit.username.should == user.name
+          expect(audit.username).to eq(user.name)
         end
       end
     end
@@ -167,13 +175,13 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
       t1 = Thread.new do
         Audited.audit_class.as_user(user) do
           sleep 1
-          Models::MongoMapper::Company.create(:name => 'The Auditors, Inc').audits.first.user.should == user
+          expect(Models::MongoMapper::Company.create(:name => 'The Auditors, Inc').audits.first.user).to eq(user)
         end
       end
 
       t2 = Thread.new do
         Audited.audit_class.as_user(user.name) do
-          Models::MongoMapper::Company.create(:name => 'The Competing Auditors, LLC').audits.first.username.should == user.name
+          expect(Models::MongoMapper::Company.create(:name => 'The Competing Auditors, LLC').audits.first.username).to eq(user.name)
           sleep 0.5
         end
       end
@@ -183,9 +191,10 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
     end
 
     it "should return the value from the yield block" do
-      Audited.audit_class.as_user('foo') do
+      result = Audited.audit_class.as_user('foo') do
         42
-      end.should == 42
+      end
+      expect(result).to eq(42)
     end
 
     it "should reset audited_user when the yield block raises an exception" do
@@ -194,7 +203,7 @@ describe Audited::Adapters::MongoMapper::Audit, :adapter => :mongo_mapper do
           raise StandardError
         end
       }.to raise_exception
-      Thread.current[:audited_user].should be_nil
+      expect(Thread.current[:audited_user]).to be_nil
     end
 
   end

@@ -38,10 +38,14 @@ module Models
     class UserWithAfterAudit < ::ActiveRecord::Base
       self.table_name = :users
       audited
-      attr_accessor :bogus_attr
+      attr_accessor :bogus_attr, :around_attr
 
       def after_audit
         self.bogus_attr = "do something"
+      end
+
+      def around_audit
+        self.around_attr = yield
       end
     end
 
@@ -52,6 +56,7 @@ module Models
     class Owner < ::ActiveRecord::Base
       self.table_name = 'users'
       has_associated_audits
+      has_many :companies, class_name: "OwnedCompany", dependent: :destroy
     end
 
     class OwnedCompany < ::ActiveRecord::Base

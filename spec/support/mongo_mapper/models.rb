@@ -94,10 +94,14 @@ module Models
       timestamps!
 
       audited
-      attr_accessor :bogus_attr
+      attr_accessor :bogus_attr, :around_attr
 
       def after_audit
         self.bogus_attr = "do something"
+      end
+
+      def around_audit
+        self.around_attr = yield
       end
     end
 

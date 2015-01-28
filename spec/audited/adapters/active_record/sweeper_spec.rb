@@ -19,6 +19,7 @@ end
 
 describe AuditsController, :adapter => :active_record do
   include RSpec::Rails::ControllerExampleGroup
+  render_views
 
   before(:each) do
     Audited.current_user_method = :current_user
@@ -30,12 +31,11 @@ describe AuditsController, :adapter => :active_record do
 
     it "should audit user" do
       controller.send(:current_user=, user)
-
       expect {
         post :audit
       }.to change( Audited.audit_class, :count )
 
-      assigns(:company).audits.last.user.should == user
+      expect(assigns(:company).audits.last.user).to eq(user)
     end
 
     it "should support custom users for sweepers" do
@@ -46,7 +46,7 @@ describe AuditsController, :adapter => :active_record do
         post :audit
       }.to change( Audited.audit_class, :count )
 
-      assigns(:company).audits.last.user.should == user
+      expect(assigns(:company).audits.last.user).to eq(user)
     end
 
     it "should record the remote address responsible for the change" do
@@ -55,7 +55,16 @@ describe AuditsController, :adapter => :active_record do
 
       post :audit
 
-      assigns(:company).audits.last.remote_address.should == '1.2.3.4'
+      expect(assigns(:company).audits.last.remote_address).to eq('1.2.3.4')
+    end
+
+    it "should record a UUID for the web request responsible for the change" do
+      allow_any_instance_of(ActionDispatch::Request).to receive(:uuid).and_return("abc123")
+      controller.send(:current_user=, user)
+
+      post :audit
+
+      expect(assigns(:company).audits.last.request_uuid).to eq("abc123")
     end
 
   end
@@ -80,18 +89,18 @@ describe Audited::Sweeper, :adapter => :active_record do
     t1 = Thread.new do
       sleep 0.5
       Audited::Sweeper.instance.controller = 'thread1 controller instance'
-      Audited::Sweeper.instance.controller.should eq('thread1 controller instance')
+      expect(Audited::Sweeper.instance.controller).to eq('thread1 controller instance')
     end
 
     t2 = Thread.new do
       Audited::Sweeper.instance.controller = 'thread2 controller instance'
       sleep 1
-      Audited::Sweeper.instance.controller.should eq('thread2 controller instance')
+      expect(Audited::Sweeper.instance.controller).to eq('thread2 controller instance')
     end
 
     t1.join; t2.join
 
-    Audited::Sweeper.instance.controller.should be_nil
+    expect(Audited::Sweeper.instance.controller).to be_nil
   end
 
 end
