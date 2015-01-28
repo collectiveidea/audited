@@ -197,7 +197,7 @@ module Audited
 
       def audit_destroy
         write_audit(:action => 'destroy', :audited_changes => audited_attributes,
-                    :comment => audit_comment)
+                    :comment => audit_comment) unless self.new_record?
       end
 
       def write_audit(attrs)
