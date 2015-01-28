@@ -208,17 +208,14 @@ describe Audited::Auditor, :adapter => :active_record do
   end
 
   describe "on destroy with unsaved object" do
-    before do
-      @user = build_user
-      @user.new_record?.should be_true
-    end
+    let(:user) { Models::ActiveRecord::User.new }
 
     it "should not audit on 'destroy'" do
       expect {
-        @user.destroy
+        user.destroy
       }.to_not raise_error
 
-      @user.audits.should be_empty
+      expect( user.audits ).to be_empty
     end
   end
 
