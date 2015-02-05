@@ -139,7 +139,6 @@ module Audited
       def revision_with(attributes)
         self.dup.tap do |revision|
           revision.id = id
-          revision.send :instance_variable_set, '@attributes', self.attributes
           revision.send :instance_variable_set, '@new_record', self.destroyed?
           revision.send :instance_variable_set, '@persisted', !self.destroyed?
           revision.send :instance_variable_set, '@readonly', false
