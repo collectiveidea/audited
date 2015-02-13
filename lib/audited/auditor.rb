@@ -234,10 +234,12 @@ module Audited
       #     @foo.save
       #   end
       #
-      def without_auditing(&block)
+      def without_auditing
         auditing_was_enabled = auditing_enabled
         disable_auditing
-        block.call.tap { enable_auditing if auditing_was_enabled }
+        yield
+      ensure
+        enable_auditing if auditing_was_enabled
       end
 
       def disable_auditing
