@@ -2,6 +2,8 @@
 
 source "https://rubygems.org"
 
+gem "mysql2", "~> 0.3.12"
+gem "pg", "~> 0.17"
 gem "rails", "~> 4.1.0"
 gem "rails-observers"
 

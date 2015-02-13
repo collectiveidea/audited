@@ -6,6 +6,13 @@ rvm:
   - 2.1
   - 2.2
   - jruby-head
+env:
+  - DB=SQLITE
+  - DB=POSTGRES
+  - DB=MYSQL
+before_script:
+  - mysql -e 'create database audited_test;'
+  - psql -c 'create database audited_test;' -U postgres
 gemfile:
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile
