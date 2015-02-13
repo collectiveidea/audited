@@ -11,7 +11,8 @@ Audited supports and is [tested against](http://travis-ci.org/collectiveidea/aud
 
 * 1.9.3
 * 2.0.0
-* 2.1.2
+* 2.1.5
+* 2.2.0
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
@@ -153,7 +154,7 @@ class PostsController < ApplicationController
 end
 ```
 
-To use a method other than `current_user`, put the following in an intializer:
+To use a method other than `current_user`, put the following in an initializer:
 
 ```ruby
 Audited.current_user_method = :authenticated_user

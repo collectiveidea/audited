@@ -197,7 +197,7 @@ module Audited
 
       def audit_destroy
         write_audit(:action => 'destroy', :audited_changes => audited_attributes,
-                    :comment => audit_comment)
+                    :comment => audit_comment) unless self.new_record?
       end
 
       def write_audit(attrs)
@@ -234,10 +234,10 @@ module Audited
       #     @foo.save
       #   end
       #
-      def without_auditing(&block)
+      def without_auditing
         auditing_was_enabled = auditing_enabled
         disable_auditing
-        block.call
+        yield
       ensure
         enable_auditing if auditing_was_enabled
       end
