@@ -9,3 +9,6 @@ gemfile:
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile
   - gemfiles/rails42.gemfile
+matrix:
+  allow_failures:
+    - gemfile: gemfiles/rails42.gemfile
