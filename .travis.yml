@@ -14,3 +14,4 @@ matrix:
   allow_failures:
     - gemfile: gemfiles/rails42.gemfile
     - rvm: jruby-head
+sudo: false
