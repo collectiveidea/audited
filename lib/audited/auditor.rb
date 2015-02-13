@@ -163,7 +163,7 @@ module Audited
       end
 
       def rails_below?(rails_version)
-        Rails.gem_version < Gem::Version.new(rails_version)
+        Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
       end
 
       private
