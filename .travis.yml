@@ -23,3 +23,8 @@ branches:
   only:
   - master
 sudo: false
+notifications:
+  webhooks:
+    urls:
+    - http://buildlight.collectiveidea.com/
+    on_start: true
