@@ -165,6 +165,8 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
 
     it "should be thread safe" do
       begin
+        expect(user.save).to eq(true)
+
         t1 = Thread.new do
           Audited.audit_class.as_user(user) do
             sleep 1

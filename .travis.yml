@@ -2,9 +2,23 @@ language: ruby
 services: mongodb
 rvm:
   - 1.9.3
-  - 2.0.0
-  - 2.1.5
-  - 2.2.0
+  - 2.0
+  - 2.1
+  - 2.2
+  - jruby-head
+env:
+  - DB=SQLITE
+  - DB=POSTGRES
+  - DB=MYSQL
+before_script:
+  - mysql -e 'create database audited_test;'
+  - psql -c 'create database audited_test;' -U postgres
 gemfile:
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile
+  - gemfiles/rails42.gemfile
+matrix:
+  allow_failures:
+    - gemfile: gemfiles/rails42.gemfile
+    - rvm: jruby-head
+sudo: false
