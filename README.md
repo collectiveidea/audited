@@ -9,7 +9,6 @@ Audited currently (4.x) works with Rails 4.2. For Rails 3, use gem version 3.0 o
 
 Audited supports and is [tested against](http://travis-ci.org/collectiveidea/audited) the following Ruby versions:
 
-* 1.9.3
 * 2.0.0
 * 2.1.5
 * 2.2.0

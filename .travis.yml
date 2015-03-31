@@ -1,7 +1,6 @@
 language: ruby
 services: mongodb
 rvm:
-  - 1.9.3
   - 2.0
   - 2.1
   - 2.2
@@ -19,6 +18,13 @@ gemfile:
   - gemfiles/rails42.gemfile
 matrix:
   allow_failures:
-    - gemfile: gemfiles/rails42.gemfile
     - rvm: jruby-head
+branches:
+  only:
+  - master
 sudo: false
+notifications:
+  webhooks:
+    urls:
+    - http://buildlight.collectiveidea.com/
+    on_start: true
