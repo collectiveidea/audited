@@ -139,7 +139,7 @@ module Audited
       def revision_with(attributes)
         self.dup.tap do |revision|
           revision.id = id
-          revision.send :instance_variable_set, '@attributes', self.attributes
+          revision.send :instance_variable_set, '@attributes', self.attributes if rails_below?('4.2.0')
           revision.send :instance_variable_set, '@new_record', self.destroyed?
           revision.send :instance_variable_set, '@persisted', !self.destroyed?
           revision.send :instance_variable_set, '@readonly', false
@@ -160,6 +160,10 @@ module Audited
             end
           end
         end
+      end
+
+      def rails_below?(rails_version)
+        Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
       end
 
       private
@@ -197,7 +201,7 @@ module Audited
 
       def audit_destroy
         write_audit(:action => 'destroy', :audited_changes => audited_attributes,
-                    :comment => audit_comment)
+                    :comment => audit_comment) unless self.new_record?
       end
 
       def write_audit(attrs)
@@ -234,10 +238,12 @@ module Audited
       #     @foo.save
       #   end
       #
-      def without_auditing(&block)
+      def without_auditing
         auditing_was_enabled = auditing_enabled
         disable_auditing
-        block.call.tap { enable_auditing if auditing_was_enabled }
+        yield
+      ensure
+        enable_auditing if auditing_was_enabled
       end
 
       def disable_auditing

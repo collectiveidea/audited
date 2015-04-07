@@ -9,12 +9,12 @@ sqlite3: &SQLITE
 postgresql: &POSTGRES
   adapter: postgresql
   username: postgres
-  password: postgres
+  password:
   database: audited_test
   min_messages: ERROR
 
 mysql: &MYSQL
-  adapter: mysql
+  adapter: mysql2
   host: localhost
   username: root
   password:

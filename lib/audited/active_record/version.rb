@@ -1,5 +1,5 @@
 module Audited
   module ActiveRecord
-    VERSION = "4.0.0"
+    VERSION = "4.2.0"
   end
 end

@@ -211,6 +211,18 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
     end
   end
 
+  describe "on destroy with unsaved object" do
+    let(:user) { Models::MongoMapper::User.new }
+
+    it "should not audit on 'destroy'" do
+      expect {
+        user.destroy
+      }.to_not raise_error
+
+      expect( user.audits ).to be_empty
+    end
+  end
+
   describe "associated with" do
     let(:owner) { Models::MongoMapper::Owner.create(:name => 'Models::MongoMapper::Owner') }
     let(:owned_company) { Models::MongoMapper::OwnedCompany.create!(:name => 'The auditors', :owner => owner) }
@@ -413,6 +425,11 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       expect {
         Models::MongoMapper::User.without_auditing { Models::MongoMapper::User.create!( :name => 'Brandon' ) }
       }.to_not change( Audited.audit_class, :count )
+    end
+
+    it "should reset auditing status even it raises an exception" do
+      Models::MongoMapper::User.without_auditing { raise } rescue nil
+      expect(Models::MongoMapper::User.auditing_enabled).to eq(true)
     end
   end
 
