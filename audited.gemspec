@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.homepage    = 'https://github.com/collectiveidea/audited'
   gem.license     = 'MIT'
 
-  gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(\.gemspec|lib\/audited\-|adapters|generators)/ }
+  gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(\.gemspec|lib\/audited\-(mongo_mapper|activerecord)|adapters|generators)/ }
   gem.test_files    = gem.files.grep(/^spec\//)
   gem.require_paths = ['lib']
 
