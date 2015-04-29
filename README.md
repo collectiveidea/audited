@@ -168,7 +168,7 @@ end
 post.audits.last.user # => #<User id: 1>
 ```
 
-## Custom Auditor
+#### Custom Auditor
 
 You might need to use a custom auditor from time to time. It can be done by simply passing in a string:
 
