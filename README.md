@@ -172,7 +172,7 @@ post.audits.last.user # => #<User id: 1>
 
 You might need to use a custom auditor from time to time. It can be done by simply passing in a string:
 
-```
+```ruby
 class ApplicationController < ActionController::Base
   def authenticated_user
     if current_user
