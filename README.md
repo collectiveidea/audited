@@ -168,6 +168,22 @@ end
 post.audits.last.user # => #<User id: 1>
 ```
 
+## Custom Auditor
+
+You might need to use a custom auditor from time to time. It can be done by simply passing in a string:
+
+```
+class ApplicationController < ActionController::Base
+  def authenticated_user
+    if current_user
+      current_user
+    else
+      'Elon Musk'
+    end
+  end
+end
+```
+
 ### Associated Audits
 
 Sometimes it's useful to associate an audit with a model other than the one being changed. For instance, given the following models:
