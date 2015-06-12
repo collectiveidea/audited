@@ -71,9 +71,9 @@ end
 By default, whenever a user is created, updated or destroyed, a new audit is created.
 
 ```ruby
-user = User.create!(:name => "Steve")
+user = User.create!(name: "Steve")
 user.audits.count # => 1
-user.update_attributes!(:name => "Ryan")
+user.update_attributes!(name: "Ryan")
 user.audits.count # => 2
 user.destroy
 user.audits.count # => 3
@@ -82,7 +82,7 @@ user.audits.count # => 3
 Audits contain information regarding what action was taken on the model and what changes were made.
 
 ```ruby
-user.update_attributes!(:name => "Ryan")
+user.update_attributes!(name: "Ryan")
 audit = user.audits.last
 audit.action # => "update"
 audit.audited_changes # => {"name"=>["Steve", "Ryan"]}
@@ -127,7 +127,7 @@ end
 You can attach comments to each audit using an `audit_comment` attribute on your model.
 
 ```ruby
-user.update_attributes!(:name => "Ryan", :audit_comment => "Changing name, just because")
+user.update_attributes!(name: "Ryan", audit_comment: "Changing name, just because")
 user.audits.last.comment # => "Changing name, just because"
 ```
 
@@ -163,7 +163,7 @@ Outside of a request, Audited can still record the user with the `as_user` metho
 
 ```ruby
 Audited.audit_class.as_user(User.find(1)) do
-  post.update_attribute!(:title => "Hello, world!")
+  post.update_attribute!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
 ```
@@ -188,7 +188,7 @@ Every change to a user is audited, but what if you want to grab all of the audit
 ```ruby
 class User < ActiveRecord::Base
   belongs_to :company
-  audited :associated_with => :company
+  audited associated_with: :company
 end
 
 class Company < ActiveRecord::Base
@@ -200,9 +200,9 @@ end
 Now, when a audit is created for a user, that user's company is also saved alongside the audit. This makes it much easier (and faster) to access audits indirectly related to a company.
 
 ```ruby
-company = Company.create!(:name => "Collective Idea")
-user = company.users.create!(:name => "Steve")
-user.update_attribute!(:name => "Steve Richert")
+company = Company.create!(name: "Collective Idea")
+user = company.users.create!(name: "Steve")
+user.update_attribute!(name: "Steve Richert")
 user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
@@ -247,20 +247,20 @@ Audited assumes you are using `attr_accessible`. If you're using
 two.
 
 
-If you're using `strong_parameters` with Rails 3.x, be sure to add `:allow_mass_assignment => true` to your `audited` call; otherwise Audited will
+If you're using `strong_parameters` with Rails 3.x, be sure to add `allow_mass_assignment: true` to your `audited` call; otherwise Audited will
 interfere with `strong_parameters` and none of your `save` calls will work.
 
 ```ruby
 class User < ActiveRecord::Base
-  audited :allow_mass_assignment => true
+  audited allow_mass_assignment: true
 end
 ```
 
-If using `attr_protected`, add `:allow_mass_assignment => true`, and also be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
+If using `attr_protected`, add `allow_mass_assignment: true`, and also be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
 
 ```ruby
 class User < ActiveRecord::Base
-  audited :allow_mass_assignment => true
+  audited allow_mass_assignment: true
   attr_protected :logins, :audit_ids
 end
 ```
