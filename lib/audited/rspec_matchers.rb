@@ -10,12 +10,12 @@ module Audited
     # * <tt>on</tt> - tests that the audit makes use of the on option with specified parameters
     #
     # Example:
-    #   it { should be_audited }
-    #   it { should be_audited.associated_with(:user) }
-    #   it { should be_audited.only(:field_name) }
-    #   it { should be_audited.except(:password) }
-    #   it { should be_audited.requires_comment }
-    #   it { should be_audited.on(:create).associated_with(:user).except(:password) }
+    #   it { is_expected.to be_audited }
+    #   it { is_expected.to be_audited.associated_with(:user) }
+    #   it { is_expected.to be_audited.only(:field_name) }
+    #   it { is_expected.to be_audited.except(:password) }
+    #   it { is_expected.to be_audited.requires_comment }
+    #   it { is_expected.to be_audited.on(:create).associated_with(:user).except(:password) }
     #
     def be_audited
       AuditMatcher.new
@@ -24,7 +24,7 @@ module Audited
     # Ensure that the model has associated audits
     #
     # Example:
-    #   it { should have_associated_audits }
+    #   it { is_expected.to have_associated_audits }
     #
     def have_associated_audits
       AssociatedAuditMatcher.new
@@ -72,7 +72,7 @@ module Audited
         "Expected #{@expectation}"
       end
 
-      def negative_failure_message
+      def failure_message_when_negated
         "Did not expect #{@expectation}"
       end
 
@@ -145,7 +145,7 @@ module Audited
         "Expected #{model_class} to have associated audits"
       end
 
-      def negative_failure_message
+      def failure_message_when_negated
         "Expected #{model_class} to not have associated audits"
       end
 
