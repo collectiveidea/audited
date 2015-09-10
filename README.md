@@ -1,6 +1,10 @@
 Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.png)](http://travis-ci.org/collectiveidea/audited) [![Dependency Status](https://gemnasium.com/collectiveidea/audited.png)](https://gemnasium.com/collectiveidea/audited)[![Code Climate](https://codeclimate.com/github/collectiveidea/audited.png)](https://codeclimate.com/github/collectiveidea/audited)
 =======
 
+> ## Important version disclaimer
+> ***This README is for a branch which is still in development.
+> Please switch to the [4.2-stable branch](https://github.com/collectiveidea/audited/tree/4.2-stable) for a stable version.***
+
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited also allows you to record who made those changes, save comments and associate models related to the changes.
 
 Audited currently (4.x) works with Rails 4.2. For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
@@ -21,14 +25,10 @@ Audited is currently ActiveRecord-only. In a previous life, Audited worked with 
 
 ## Installation
 
-The installation process depends on what ORM your app is using.
-
-### ActiveRecord
-
-Add the appropriate gem to your Gemfile:
+Add the gem to your Gemfile:
 
 ```ruby
-gem "audited-activerecord", "~> 4.0"
+gem "audited", "~> 4.0"
 ```
 
 Then, from your Rails app directory, create the `audits` table:
