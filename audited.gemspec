@@ -27,14 +27,14 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rspec-rails', '~> 3.0'
 
   # JRuby support for the test ENV
-  unless defined?(JRUBY_VERSION)
-    gem.add_development_dependency 'sqlite3', '~> 1.3'
-    gem.add_development_dependency 'mysql2', '~> 0.4'
-    gem.add_development_dependency 'pg', '~> 0.18'
-  else
+  if defined?(JRUBY_VERSION)
     gem.add_development_dependency 'activerecord-jdbcsqlite3-adapter', '~> 1.3'
     gem.add_development_dependency 'activerecord-jdbcpostgresql-adapter', '~> 1.3'
     gem.add_development_dependency 'activerecord-jdbcmysql-adapter', '~> 1.3'
+  else
+    gem.add_development_dependency 'sqlite3', '~> 1.3'
+    gem.add_development_dependency 'mysql2', '~> 0.4'
+    gem.add_development_dependency 'pg', '~> 0.18'
   end
 end
 
