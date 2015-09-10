@@ -6,7 +6,6 @@ require 'rake/testtask'
 require 'appraisal'
 
 Bundler::GemHelper.install_tasks(:name => 'audited')
-Bundler::GemHelper.install_tasks(:name => 'audited-activerecord')
 
 ADAPTERS = %w(active_record)
 

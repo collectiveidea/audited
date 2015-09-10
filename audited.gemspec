@@ -14,10 +14,11 @@ Gem::Specification.new do |gem|
   gem.homepage    = 'https://github.com/collectiveidea/audited'
   gem.license     = 'MIT'
 
-  gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(\.gemspec|lib\/audited\-|adapters|generators)/ }
+  gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(\.gemspec)/ }
   gem.test_files    = gem.files.grep(/^spec\//)
   gem.require_paths = ['lib']
 
+  gem.add_dependency 'activerecord', '~> 4.0'
   gem.add_dependency 'rails-observers', '~> 0.1.2'
 
   gem.add_development_dependency "protected_attributes"
