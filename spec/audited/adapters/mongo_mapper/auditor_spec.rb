@@ -257,7 +257,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
 
     it "should return an Array of Users" do
       expect(user.revisions).to be_a_kind_of( Array )
-      user.revisions.each { |version| expect(version).to be_a_kind_of(Models::MongoMapper::User) }
+      user.revisions.each { |revision| expect(revision).to be_a_kind_of(Models::MongoMapper::User) }
     end
 
     it "should have one revision for a new record" do
@@ -320,21 +320,21 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
     it "should find the given revision" do
       revision = user.revision(3)
       expect(revision).to be_a_kind_of( Models::MongoMapper::User )
-      expect(revision.version).to eq(3)
+      expect(revision.audit_version).to eq(3)
       expect(revision.name).to eq('Foobar 3')
     end
 
     it "should find the previous revision with :previous" do
       revision = user.revision(:previous)
-      expect(revision.version).to eq(4)
+      expect(revision.audit_version).to eq(4)
       #expect(revision).to eq(user.revision(4))
       expect(revision.attributes).to eq(user.revision(4).attributes)
     end
 
     it "should be able to get the previous revision repeatedly" do
       previous = user.revision(:previous)
-      expect(previous.version).to eq(4)
-      expect(previous.revision(:previous).version).to eq(3)
+      expect(previous.audit_version).to eq(4)
+      expect(previous.revision(:previous).audit_version).to eq(3)
     end
 
     it "should be able to set protected attributes" do
@@ -405,7 +405,7 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
       audit.created_at = 1.hour.ago
       audit.save!
       user.update_attributes :name => 'updated'
-      expect(user.revision_at( 2.minutes.ago ).version).to eq(1)
+      expect(user.revision_at( 2.minutes.ago ).audit_version).to eq(1)
     end
 
     it "should be nil if given a time before audits" do
