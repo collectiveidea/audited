@@ -17,10 +17,7 @@ Audited may work just fine with a Ruby version not listed above, but we can't gu
 
 ## Supported ORMs
 
-In a previous life, Audited was ActiveRecord-only. Audited will now audit models for the following backends:
-
-* ActiveRecord
-* MongoMapper
+Audited is currently ActiveRecord-only. In a previous life, Audited worked with MongoMapper. Use the [4.2-stable branch](https://github.com/collectiveidea/audited/tree/4.2-stable) if you need MongoMapper.
 
 ## Installation
 
@@ -52,11 +49,6 @@ $ rake db:migrate
 
 Upgrading will only make changes if changes are needed.
 
-### MongoMapper
-
-```ruby
-gem "audited-mongo_mapper", "~> 4.0"
-```
 
 ## Usage
 
@@ -264,10 +256,6 @@ class User < ActiveRecord::Base
   attr_protected :logins, :audit_ids
 end
 ```
-
-### MongoMapper Embedded Documents
-
-Currently, Audited does not track changes on embedded documents. Audited works by tracking a model's [dirty changes](http://api.rubyonrails.org/classes/ActiveModel/Dirty.html) but changes to embedded documents don't appear in dirty tracking.
 
 ## Support
 
