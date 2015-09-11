@@ -11,6 +11,7 @@ env:
 before_script:
   - mysql -e 'create database audited_test;'
   - psql -c 'create database audited_test;' -U postgres
+  - rake db:setup
 gemfile:
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile

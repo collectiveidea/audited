@@ -16,8 +16,4 @@ RSpec.configure do |config|
   config.before(:each, :adapter => :active_record) do
     Audited.audit_class = Audited::Adapters::ActiveRecord::Audit
   end
-
-  config.before(:each, :adapter => :mongo_mapper) do
-    Audited.audit_class = Audited::Adapters::MongoMapper::Audit
-  end
 end
