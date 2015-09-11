@@ -7,20 +7,7 @@ require 'appraisal'
 
 Bundler::GemHelper.install_tasks(:name => 'audited')
 
-ADAPTERS = %w(active_record)
-
-ADAPTERS.each do |adapter|
-  desc "Run RSpec code examples for #{adapter} adapter"
-  RSpec::Core::RakeTask.new(adapter) do |t|
-    t.pattern = "spec/audited/adapters/#{adapter}/**/*_spec.rb"
-  end
-end
-
-task :spec do
-  ADAPTERS.each do |adapter|
-    Rake::Task[adapter].invoke
-  end
-end
+RSpec::Core::RakeTask.new(:spec)
 
 Rake::TestTask.new do |t|
   t.libs << "test"
