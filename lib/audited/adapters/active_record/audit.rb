@@ -19,7 +19,7 @@ module Audited
         include Audited::Audit
         include ActiveModel::Observing
 
-        serialize :audited_changes
+        #serialize :audited_changes
 
         default_scope         ->{ order(:version)}
         scope :descending,    ->{ reorder("version DESC")}
