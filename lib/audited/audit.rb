@@ -69,7 +69,7 @@ module Audited
     # Returns a hash of the changed attributes with the new values
     def new_attributes
       (audited_changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
-        attrs[attr] = values.is_a?(Array) ? values.last : values
+        attrs[attr] = (action == 'update') ? values.last : values
         attrs
       end
     end
@@ -77,8 +77,7 @@ module Audited
     # Returns a hash of the changed attributes with the old values
     def old_attributes
       (audited_changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
-        attrs[attr] = Array(values).first
-
+        attrs[attr] = (action == 'update') ? values.first : values
         attrs
       end
     end

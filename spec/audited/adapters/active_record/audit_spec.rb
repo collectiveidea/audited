@@ -122,7 +122,7 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
   describe "new_attributes" do
 
     it "should return a hash of the new values" do
-      new_attributes = Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes
+      new_attributes = Audited.audit_class.new(:action => 'update', :audited_changes => {:a => [1, 2], :b => [3, 4]}).new_attributes
       expect(new_attributes).to eq({'a' => 2, 'b' => 4})
     end
 
@@ -131,7 +131,7 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
   describe "old_attributes" do
 
     it "should return a hash of the old values" do
-      old_attributes = Audited.audit_class.new(:audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes
+      old_attributes = Audited.audit_class.new(:action => 'update', :audited_changes => {:a => [1, 2], :b => [3, 4]}).old_attributes
       expect(old_attributes).to eq({'a' => 1, 'b' => 3})
     end
 
