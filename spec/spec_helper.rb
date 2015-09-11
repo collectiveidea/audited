@@ -17,6 +17,10 @@ RSpec.configure do |config|
     Audited.audit_class = Audited::Adapters::ActiveRecord::Audit
   end
 
+  config.before(:each, :adapter => :postgresql) do
+    Audited.audit_class = Audited::Adapters::Postgresql::Audit
+  end
+
   config.before(:each, :adapter => :mongo_mapper) do
     Audited.audit_class = Audited::Adapters::MongoMapper::Audit
   end
