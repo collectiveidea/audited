@@ -33,7 +33,7 @@ module Audited
         scope :auditable_finder, ->(auditable_id, auditable_type){where(auditable_id: auditable_id, auditable_type: auditable_type)}
         # Return all audits older than the current one.
         def ancestors
-          self.class.where(['auditable_id = ? and auditable_type = ? and version <= ?',
+          self.class.ascending.where(['auditable_id = ? and auditable_type = ? and version <= ?',
             auditable_id, auditable_type, version])
         end
 
