@@ -1,6 +1,10 @@
 Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.png)](http://travis-ci.org/collectiveidea/audited) [![Dependency Status](https://gemnasium.com/collectiveidea/audited.png)](https://gemnasium.com/collectiveidea/audited)[![Code Climate](https://codeclimate.com/github/collectiveidea/audited.png)](https://codeclimate.com/github/collectiveidea/audited)
 =======
 
+> ## Important version disclaimer
+> ***This README is for a branch which is still in development.
+> Please switch to the [4.2-stable branch](https://github.com/collectiveidea/audited/tree/4.2-stable) for a stable version.***
+
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited also allows you to record who made those changes, save comments and associate models related to the changes.
 
 Audited currently (4.x) works with Rails 4.2. For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
@@ -17,21 +21,14 @@ Audited may work just fine with a Ruby version not listed above, but we can't gu
 
 ## Supported ORMs
 
-In a previous life, Audited was ActiveRecord-only. Audited will now audit models for the following backends:
-
-* ActiveRecord
-* MongoMapper
+Audited is currently ActiveRecord-only. In a previous life, Audited worked with MongoMapper. Use the [4.2-stable branch](https://github.com/collectiveidea/audited/tree/4.2-stable) if you need MongoMapper.
 
 ## Installation
 
-The installation process depends on what ORM your app is using.
-
-### ActiveRecord
-
-Add the appropriate gem to your Gemfile:
+Add the gem to your Gemfile:
 
 ```ruby
-gem "audited-activerecord", "~> 4.0"
+gem "audited", "~> 4.0"
 ```
 
 Then, from your Rails app directory, create the `audits` table:
@@ -52,11 +49,6 @@ $ rake db:migrate
 
 Upgrading will only make changes if changes are needed.
 
-### MongoMapper
-
-```ruby
-gem "audited-mongo_mapper", "~> 4.0"
-```
 
 ## Usage
 
@@ -264,10 +256,6 @@ class User < ActiveRecord::Base
   attr_protected :logins, :audit_ids
 end
 ```
-
-### MongoMapper Embedded Documents
-
-Currently, Audited does not track changes on embedded documents. Audited works by tracking a model's [dirty changes](http://api.rubyonrails.org/classes/ActiveModel/Dirty.html) but changes to embedded documents don't appear in dirty tracking.
 
 ## Support
 

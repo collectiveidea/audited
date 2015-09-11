@@ -1,6 +1,5 @@
 require 'rails/observers/active_model/active_model'
 
-
 module Audited
   class << self
     attr_accessor :ignored_attributes, :current_user_method, :audit_class
@@ -14,3 +13,5 @@ module Audited
 
   @current_user_method = :current_user
 end
+
+require 'audited/adapters/active_record'
