@@ -21,11 +21,11 @@ module Audited
 
         serialize :audited_changes
 
-        scope :ascending,     ->{ order(:version) }
-        scope :descending,    ->{ order("version DESC")}
-        scope :creates,       ->{ where({:action => 'create'})}
-        scope :updates,       ->{ where({:action => 'update'})}
-        scope :destroys,      ->{ where({:action => 'destroy'})}
+        scope :ascending,     ->{ reorder(version: :asc) }
+        scope :descending,    ->{ reorder(version: :desc)}
+        scope :creates,       ->{ where(action: 'create')}
+        scope :updates,       ->{ where(action: 'update')}
+        scope :destroys,      ->{ where(action: 'destroy')}
 
         scope :up_until,      ->(date_or_time){where("created_at <= ?", date_or_time) }
         scope :from_version,  ->(version){where(['version >= ?', version]) }
