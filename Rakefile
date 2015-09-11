@@ -7,9 +7,10 @@ require 'appraisal'
 
 Bundler::GemHelper.install_tasks(:name => 'audited')
 Bundler::GemHelper.install_tasks(:name => 'audited-activerecord')
+Bundler::GemHelper.install_tasks(:name => 'audited-postgresql')
 Bundler::GemHelper.install_tasks(:name => 'audited-mongo_mapper')
 
-ADAPTERS = %w(active_record mongo_mapper)
+ADAPTERS = %w(active_record postgresql mongo_mapper)
 
 ADAPTERS.each do |adapter|
   desc "Run RSpec code examples for #{adapter} adapter"

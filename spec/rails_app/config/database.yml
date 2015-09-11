@@ -8,8 +8,8 @@ sqlite3: &SQLITE
 
 postgresql: &POSTGRES
   adapter: postgresql
-  username: postgres
-  password:
+  # username: postgres
+  # password:
   database: audited_test
   min_messages: ERROR
 
