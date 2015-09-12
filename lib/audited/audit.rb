@@ -7,9 +7,9 @@ module Audited
 
     module ClassMethods
       def setup_audit
-        belongs_to :auditable,  :polymorphic => true
-        belongs_to :user,       :polymorphic => true
-        belongs_to :associated, :polymorphic => true
+        belongs_to :auditable,  polymorphic: true
+        belongs_to :user,       polymorphic: true
+        belongs_to :associated, polymorphic: true
 
         before_create :set_version_number, :set_audit_user, :set_request_uuid
 
@@ -36,7 +36,7 @@ module Audited
       def reconstruct_attributes(audits)
         attributes = {}
         result = audits.collect do |audit|
-          attributes.merge!(audit.new_attributes).merge!(:version => audit.version)
+          attributes.merge!(audit.new_attributes).merge!(version: audit.version)
           yield attributes if block_given?
         end
         block_given? ? result : attributes
@@ -48,7 +48,7 @@ module Audited
           record = record.dup if record.frozen?
 
           if record.respond_to?("#{attr}=")
-            record.attributes.has_key?(attr.to_s) ?
+            record.attributes.key?(attr.to_s) ?
               record[attr] = val :
               record.send("#{attr}=", val)
           end
@@ -62,13 +62,13 @@ module Audited
     def revision
       clazz = auditable_type.constantize
       (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge({ :version => version }))
+        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(version: version))
       end
     end
 
     # Returns a hash of the changed attributes with the new values
     def new_attributes
-      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
+      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs, (attr, values)|
         attrs[attr] = values.is_a?(Array) ? values.last : values
         attrs
       end
@@ -76,7 +76,7 @@ module Audited
 
     # Returns a hash of the changed attributes with the old values
     def old_attributes
-      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs,(attr,values)|
+      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs, (attr, values)|
         attrs[attr] = Array(values).first
 
         attrs
@@ -84,11 +84,12 @@ module Audited
     end
 
     private
+
     def set_version_number
       max = self.class.where(
-        :auditable_id => auditable_id,
-        :auditable_type => auditable_type
-      ).order(:version.desc).first.try(:version) || 0
+        auditable_id: auditable_id,
+        auditable_type: auditable_type
+      ).order(version: :desc).first.try(:version) || 0
       self.version = max + 1
     end
 

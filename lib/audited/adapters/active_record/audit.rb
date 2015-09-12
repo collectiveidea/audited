@@ -51,7 +51,7 @@ module Audited
 
         # @private
         def user_as_string
-          self.user_as_model || self.username
+          user_as_model || username
         end
         alias_method :user_as_model, :user
         alias_method :user, :user_as_string

@@ -4,7 +4,7 @@ require 'audited/adapters/active_record/audit'
 
 module Audited::Auditor::ClassMethods
   def default_ignored_attributes
-    [self.primary_key, inheritance_column]
+    [primary_key, inheritance_column]
   end
 end
 

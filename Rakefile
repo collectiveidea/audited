@@ -5,7 +5,7 @@ require 'rspec/core/rake_task'
 require 'rake/testtask'
 require 'appraisal'
 
-Bundler::GemHelper.install_tasks(:name => 'audited')
+Bundler::GemHelper.install_tasks(name: 'audited')
 
 RSpec::Core::RakeTask.new(:spec)
 
@@ -15,7 +15,7 @@ Rake::TestTask.new do |t|
   t.verbose = true
 end
 
-task :default => [:spec, :test]
+task default: [:spec, :test]
 
 namespace :db do
   desc "setup the test database"

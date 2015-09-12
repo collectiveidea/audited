@@ -36,7 +36,7 @@ module Audited
 
     def define_callback(klass)
       observer = self
-      callback_meth = :"_notify_audited_sweeper"
+      callback_meth = :_notify_audited_sweeper
       klass.send(:define_method, callback_meth) do
         observer.update(:before_create, self)
       end
@@ -53,7 +53,7 @@ module Audited
   end
 end
 
-if defined?(ActionController) and defined?(ActionController::Base)
+if defined?(ActionController) && defined?(ActionController::Base)
   # Create dynamic subclass of Audited::Sweeper otherwise rspec will
   # fail with both ActiveRecord and MongoMapper tests as there will be
   # around_filter collision
