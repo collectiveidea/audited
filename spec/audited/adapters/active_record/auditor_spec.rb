@@ -66,7 +66,7 @@ describe Audited::Auditor, :adapter => :active_record do
 
     it "should set the action to create" do
       expect(user.audits.first.action).to eq('create')
-      expect(Audited.audit_class.creates.reorder(:id).last).to eq(user.audits.first)
+      expect(Audited.audit_class.creates.order(:id).last).to eq(user.audits.first)
       expect(user.audits.creates.count).to eq(1)
       expect(user.audits.updates.count).to eq(0)
       expect(user.audits.destroys.count).to eq(0)
@@ -109,7 +109,7 @@ describe Audited::Auditor, :adapter => :active_record do
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
       expect(@user.audits.last.action).to eq('update')
-      expect(Audited.audit_class.updates.reorder(:id).last).to eq(@user.audits.last)
+      expect(Audited.audit_class.updates.order(:id).last).to eq(@user.audits.last)
       expect(@user.audits.updates.last).to eq(@user.audits.last)
     end
 
@@ -169,7 +169,7 @@ describe Audited::Auditor, :adapter => :active_record do
       @user.destroy
 
       expect(@user.audits.last.action).to eq('destroy')
-      expect(Audited.audit_class.destroys.reorder(:id).last).to eq(@user.audits.last)
+      expect(Audited.audit_class.destroys.order(:id).last).to eq(@user.audits.last)
       expect(@user.audits.destroys.last).to eq(@user.audits.last)
     end
 
