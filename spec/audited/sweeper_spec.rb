@@ -1,14 +1,14 @@
-require File.expand_path('../active_record_spec_helper', __FILE__)
+require "spec_helper"
 
 class AuditsController < ActionController::Base
   def audit
     @company = Models::ActiveRecord::Company.create
-    render :nothing => true
+    render nothing: true
   end
 
   def update_user
-    current_user.update_attributes( :password => 'foo')
-    render :nothing => true
+    current_user.update_attributes(password: 'foo')
+    render nothing: true
   end
 
   private
@@ -17,7 +17,7 @@ class AuditsController < ActionController::Base
   attr_accessor :custom_user
 end
 
-describe AuditsController, :adapter => :active_record do
+describe AuditsController do
   include RSpec::Rails::ControllerExampleGroup
   render_views
 
@@ -83,7 +83,7 @@ describe AuditsController, :adapter => :active_record do
 end
 
 
-describe Audited::Sweeper, :adapter => :active_record do
+describe Audited::Sweeper do
 
   it "should be thread-safe" do
     t1 = Thread.new do

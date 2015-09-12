@@ -1,4 +1,5 @@
 require 'rails/observers/active_model/active_model'
+require 'active_record'
 
 module Audited
   class << self
@@ -14,4 +15,11 @@ module Audited
   @current_user_method = :current_user
 end
 
-require 'audited/adapters/active_record'
+require 'audited/auditor'
+require 'audited/audit'
+
+::ActiveRecord::Base.send :include, Audited::Auditor
+
+Audited.audit_class = Audited::Audit
+
+require 'audited/sweeper'

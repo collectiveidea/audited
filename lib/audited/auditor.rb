@@ -9,7 +9,7 @@ module Audited
   # To store an audit comment set model.audit_comment to your comment before
   # a create, update or destroy operation.
   #
-  # See <tt>Audited::Adapters::ActiveRecord::Auditor::ClassMethods#audited</tt>
+  # See <tt>Audited::Auditor::ClassMethods#audited</tt>
   # for configuration options
   module Auditor #:nodoc:
     extend ActiveSupport::Concern
@@ -82,6 +82,10 @@ module Audited
 
       def has_associated_audits
         has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name
+      end
+
+      def default_ignored_attributes
+        [primary_key, inheritance_column]
       end
     end
 

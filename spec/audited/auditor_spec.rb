@@ -1,6 +1,6 @@
-require File.expand_path('../active_record_spec_helper', __FILE__)
+require "spec_helper"
 
-describe Audited::Auditor, :adapter => :active_record do
+describe Audited::Auditor do
 
   describe "configuration" do
     it "should include instance methods" do
@@ -27,7 +27,7 @@ describe Audited::Auditor, :adapter => :active_record do
     end
 
     it "should not save non-audited columns" do
-      expect(create_active_record_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }).to eq(false)
+      expect(create_user.audits.first.audited_changes.keys.any? { |col| ['created_at', 'updated_at', 'password'].include?( col ) }).to eq(false)
     end
   end
 
@@ -52,7 +52,7 @@ describe Audited::Auditor, :adapter => :active_record do
   end
 
   describe "on create" do
-    let( :user ) { create_active_record_user :audit_comment => "Create" }
+    let( :user ) { create_user :audit_comment => "Create" }
 
     it "should change the audit count" do
       expect {
@@ -94,7 +94,7 @@ describe Audited::Auditor, :adapter => :active_record do
 
   describe "on update" do
     before do
-      @user = create_active_record_user( :name => 'Brandon', :audit_comment => 'Update' )
+      @user = create_user( :name => 'Brandon', :audit_comment => 'Update' )
     end
 
     it "should save an audit" do
@@ -154,7 +154,7 @@ describe Audited::Auditor, :adapter => :active_record do
 
   describe "on destroy" do
     before do
-      @user = create_active_record_user
+      @user = create_user
     end
 
     it "should save an audit" do
@@ -257,7 +257,7 @@ describe Audited::Auditor, :adapter => :active_record do
     end
 
     it "should have one revision for a new record" do
-      expect(create_active_record_user.revisions.size).to eq(1)
+      expect(create_user.revisions.size).to eq(1)
     end
 
     it "should have one revision for each audit" do
@@ -393,7 +393,7 @@ describe Audited::Auditor, :adapter => :active_record do
   end
 
   describe "revision_at" do
-    let( :user ) { create_active_record_user }
+    let( :user ) { create_user }
 
     it "should find the latest revision before the given time" do
       audit = user.audits.first
