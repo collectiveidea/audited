@@ -4,7 +4,7 @@ require File.expand_path('../schema', __FILE__)
 module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
-      audited :allow_mass_assignment => true, :except => :password
+      audited allow_mass_assignment: true, except: :password
 
       attr_protected :logins
 
@@ -15,7 +15,7 @@ module Models
 
     class CommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
-      audited :comment_required => true
+      audited comment_required: true
     end
 
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
@@ -32,7 +32,7 @@ module Models
 
     class NoAttributeProtectionUser < ::ActiveRecord::Base
       self.table_name = :users
-      audited :allow_mass_assignment => true
+      audited allow_mass_assignment: true
     end
 
     class UserWithAfterAudit < ::ActiveRecord::Base
@@ -61,29 +61,29 @@ module Models
 
     class OwnedCompany < ::ActiveRecord::Base
       self.table_name = 'companies'
-      belongs_to :owner, :class_name => "Owner"
+      belongs_to :owner, class_name: "Owner"
       attr_accessible :name, :owner # declare attr_accessible before calling aaa
-      audited :associated_with => :owner
+      audited associated_with: :owner
     end
 
     class OnUpdateDestroy < ::ActiveRecord::Base
       self.table_name = 'companies'
-      audited :on => [:update, :destroy]
+      audited on: [:update, :destroy]
     end
 
     class OnCreateDestroy < ::ActiveRecord::Base
       self.table_name = 'companies'
-      audited :on => [:create, :destroy]
+      audited on: [:create, :destroy]
     end
 
     class OnCreateDestroyExceptName < ::ActiveRecord::Base
       self.table_name = 'companies'
-      audited :except => :name, :on => [:create, :destroy]
+      audited except: :name, on: [:create, :destroy]
     end
 
     class OnCreateUpdate < ::ActiveRecord::Base
       self.table_name = 'companies'
-      audited :on => [:create, :update]
+      audited on: [:create, :update]
     end
   end
 end
