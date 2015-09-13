@@ -6,13 +6,14 @@ module Audited
     observe Audited.audit_class
 
     attr_accessor :controller
-    def before(controller)
-      self.controller = controller
-      true
-    end
 
-    def after(controller)
-      self.controller = nil
+    def around(controller)
+      begin
+        self.controller = controller
+        yield
+      ensure
+        self.controller = nil
+      end
     end
 
     def before_create(audit)
