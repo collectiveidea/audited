@@ -22,6 +22,7 @@ matrix:
 branches:
   only:
   - master
+  - 4.2-stable
 sudo: false
 notifications:
   webhooks:
