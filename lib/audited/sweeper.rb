@@ -30,8 +30,10 @@ module Audited
     end
 
     def add_observer!(klass)
-      super
-      define_callback(klass)
+      if defined?(ActiveRecord) and defined?(ActiveRecord::Callbacks)
+        super
+        define_callback(klass)
+      end
     end
 
     def define_callback(klass)
