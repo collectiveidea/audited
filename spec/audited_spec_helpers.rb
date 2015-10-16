@@ -28,4 +28,12 @@ module AuditedSpecHelpers
     create_versions(n, true)
   end
 
+  def with_ignored_attributes(attributes)
+    old_attributes = Audited.ignored_attributes
+    Audited.ignored_attributes = attributes
+    yield
+  ensure
+    Audited.ignored_attributes = old_attributes
+  end
+
 end

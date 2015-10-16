@@ -18,13 +18,14 @@ describe Audited::Auditor, :adapter => :mongo_mapper do
     end
 
     it "should be configurable which attributes are not audited" do
-      Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
-      class Secret
-        include MongoMapper::Document
-        audited
-      end
+      with_ignored_attributes(['delta', 'top_secret', 'created_at']) do
+        class Secret
+          include MongoMapper::Document
+          audited
+        end
 
-      Secret.non_audited_columns.should include('delta', 'top_secret', 'created_at')
+        Secret.non_audited_columns.should include('delta', 'top_secret', 'created_at')
+      end
     end
 
     it "should not save non-audited columns" do
