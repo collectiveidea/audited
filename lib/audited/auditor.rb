@@ -47,17 +47,14 @@ module Audited
         # don't allow multiple calls
         return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
-        class_attribute :non_audited_columns,   :instance_writer => false
+        class_attribute :column_options,        :instance_writer => false
         class_attribute :auditing_enabled,      :instance_writer => false
         class_attribute :audit_associated_with, :instance_writer => false
 
-        if options[:only]
-          except = self.column_names - options[:only].flatten.map(&:to_s)
-        else
-          except = default_ignored_attributes + Audited.ignored_attributes
-          except |= Array(options[:except]).collect(&:to_s) if options[:except]
-        end
-        self.non_audited_columns = except
+        # Store column options and evaluate them lazily when required
+        # This avoids access to the database at the time of requiring,
+        # which can cause problems under certain circumstances
+        self.column_options = { only: options[:only], except: options[:except] }
         self.audit_associated_with = options[:associated_with]
 
         if options[:comment_required]
@@ -137,6 +134,10 @@ module Audited
       def revision_at(date_or_time)
         audits = self.audits.up_until(date_or_time)
         revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
+      end
+
+      def non_audited_columns
+        self.class.non_audited_columns
       end
 
       # List of attributes that are audited.
@@ -233,6 +234,21 @@ module Audited
     end # InstanceMethods
 
     module AuditedClassMethods
+      def non_audited_columns
+        return @non_audited_columns if @non_audited_columns
+
+        if column_options[:only]
+          @non_audited_columns = self.column_names - column_options[:only].flatten.map(&:to_s)
+        else
+          @non_audited_columns = default_ignored_attributes + Audited.ignored_attributes
+          if column_options[:except]
+            @non_audited_columns |= Array(column_options[:except]).collect(&:to_s)
+          end
+        end
+
+        @non_audited_columns
+      end
+
       # Returns an array of columns that are audited. See non_audited_columns
       def audited_columns
         self.columns.select { |c| !non_audited_columns.include?(c.name) }
