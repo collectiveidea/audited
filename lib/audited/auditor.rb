@@ -38,17 +38,19 @@ module Audited
         # don't allow multiple calls
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
-        class_attribute :non_audited_columns,   instance_writer: false
-        class_attribute :auditing_enabled,      instance_writer: false
-        class_attribute :audit_associated_with, instance_writer: false
+        class_attribute :non_audited_column_init, instance_accessor: false
+        class_attribute :auditing_enabled,        instance_writer: false
+        class_attribute :audit_associated_with,   instance_writer: false
 
-        if options[:only]
-          except = column_names - Array(options[:only]).flatten.map(&:to_s)
-        else
-          except = default_ignored_attributes + Audited.ignored_attributes
-          except |= Array(options[:except]).collect(&:to_s) if options[:except]
+        self.non_audited_column_init = -> do
+          if options[:only]
+            except = column_names - Array(options[:only]).flatten.map(&:to_s)
+          else
+            except = default_ignored_attributes + Audited.ignored_attributes
+            except |= Array(options[:except]).collect(&:to_s) if options[:except]
+          end
+          except
         end
-        self.non_audited_columns = except
         self.audit_associated_with = options[:associated_with]
 
         if options[:comment_required]
@@ -136,6 +138,10 @@ module Audited
       # List of attributes that are audited.
       def audited_attributes
         attributes.except(*non_audited_columns)
+      end
+
+      def non_audited_columns
+        self.class.non_audited_columns
       end
 
       protected
@@ -234,6 +240,10 @@ module Audited
       # Returns an array of columns that are audited. See non_audited_columns
       def audited_columns
         columns.select {|c| !non_audited_columns.include?(c.name) }
+      end
+
+      def non_audited_columns
+        @non_audited_columns ||= non_audited_column_init.call
       end
 
       # Executes the block with auditing disabled.
