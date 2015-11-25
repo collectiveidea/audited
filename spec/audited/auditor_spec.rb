@@ -316,21 +316,12 @@ describe Audited::Auditor do
     it "should find the given revision" do
       revision = user.revision(3)
       expect(revision).to be_a_kind_of( Models::ActiveRecord::User )
-      expect(revision.version).to eq(3)
       expect(revision.name).to eq('Foobar 3')
     end
 
     it "should find the previous revision with :previous" do
       revision = user.revision(:previous)
-      expect(revision.version).to eq(4)
-      #expect(revision).to eq(user.revision(4))
       expect(revision.attributes).to eq(user.revision(4).attributes)
-    end
-
-    it "should be able to get the previous revision repeatedly" do
-      previous = user.revision(:previous)
-      expect(previous.version).to eq(4)
-      expect(previous.revision(:previous).version).to eq(3)
     end
 
     it "should be able to set protected attributes" do
@@ -396,11 +387,12 @@ describe Audited::Auditor do
     let( :user ) { create_user }
 
     it "should find the latest revision before the given time" do
+      nom = user.name
       audit = user.audits.first
       audit.created_at = 1.hour.ago
       audit.save!
       user.update_attributes :name => 'updated'
-      expect(user.revision_at( 2.minutes.ago ).version).to eq(1)
+      expect(user.revision_at( 2.minutes.ago ).name).to eq(nom)
     end
 
     it "should be nil if given a time before audits" do
