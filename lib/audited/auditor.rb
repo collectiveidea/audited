@@ -58,7 +58,7 @@ module Audited
 
         attr_accessor :audit_comment
 
-        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name
+        has_many :audits, -> { order(id: :asc) }, as: :auditable, class_name: Audited.audit_class.name
         Audited.audit_class.audited_class_names << to_s
 
         after_create :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
@@ -181,12 +181,7 @@ module Audited
 
       def audits_to(version = nil)
         if version == :previous
-          version = if self.version
-                      self.version - 1
-                    else
-                      previous = audits.descending.offset(1).first
-                      previous ? previous.version : 1
-                    end
+          version = self.audits.count - 1
         end
         audits.to_version(version)
       end
