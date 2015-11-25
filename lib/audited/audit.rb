@@ -8,7 +8,6 @@ module Audited
   # * <tt>action</tt>: one of create, update, or delete
   # * <tt>audited_changes</tt>: a serialized hash of all the changes
   # * <tt>comment</tt>: a comment set with the audit
-  # * <tt>version</tt>: the version of the model
   # * <tt>request_uuid</tt>: a uuid based that allows audits from the same controller request
   # * <tt>created_at</tt>: Time that the change was performed
   #
@@ -25,20 +24,18 @@ module Audited
     self.audited_class_names = Set.new
 
     serialize :audited_changes
-
-    scope :ascending,     ->{ reorder(version: :asc) }
-    scope :descending,    ->{ reorder(version: :desc)}
+    scope :ascending,     ->{ reorder(id: :asc) }
+    scope :descending,    ->{ reorder(id: :desc)}
     scope :creates,       ->{ where(action: 'create')}
     scope :updates,       ->{ where(action: 'update')}
     scope :destroys,      ->{ where(action: 'destroy')}
 
-    scope :up_until,      ->(date_or_time){ where("created_at <= ?", date_or_time) }
-    scope :from_version,  ->(version){ where('version >= ?', version) }
-    scope :to_version,    ->(version){ where('version <= ?', version) }
-    scope :auditable_finder, ->(auditable_id, auditable_type){ where(auditable_id: auditable_id, auditable_type: auditable_type)}
+    scope :up_until,      ->(date_or_time){where("created_at <= ?", date_or_time) }
+
+    scope :auditable_finder, ->(auditable_id, auditable_type){where(auditable_id: auditable_id, auditable_type: auditable_type)}
     # Return all audits older than the current one.
     def ancestors
-      self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
+      self.class.ascending.auditable_finder(auditable_id, auditable_type).where("id <= ?", id)
     end
 
     # Return an instance of what the object looked like at this revision. If
@@ -46,7 +43,7 @@ module Audited
     def revision
       clazz = auditable_type.constantize
       (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(version: version))
+        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors))
       end
     end
 
@@ -101,11 +98,23 @@ module Audited
       Thread.current[:audited_user] = nil
     end
 
+    def self.from_version(version)
+      version ||= 1
+      version_id = ascending.offset(version - 1).first
+      where("id >= ?", version_id)
+    end
+
+    def self.to_version(version)
+      version ||= 1
+      version_id = ascending.offset(version - 1).first
+      where("id <= ?", version_id)
+    end
+
     # @private
     def self.reconstruct_attributes(audits)
       attributes = {}
       result = audits.collect do |audit|
-        attributes.merge!(audit.new_attributes)[:version] = audit.version
+        attributes.merge!(audit.new_attributes)
         yield attributes if block_given?
       end
       block_given? ? result : attributes
@@ -133,8 +142,7 @@ module Audited
     private
 
     def set_version_number
-      max = self.class.auditable_finder(auditable_id, auditable_type).descending.first.try(:version) || 0
-      self.version = max + 1
+      nil
     end
 
     def set_audit_user
