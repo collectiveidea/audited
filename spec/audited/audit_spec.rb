@@ -190,9 +190,9 @@ describe Audited::Audit do
     it "should reset audited_user when the yield block raises an exception" do
       expect {
         Audited.audit_class.as_user('foo') do
-          raise StandardError
+          raise StandardError.new('expected')
         end
-      }.to raise_exception
+      }.to raise_exception('expected')
       expect(Thread.current[:audited_user]).to be_nil
     end
 
