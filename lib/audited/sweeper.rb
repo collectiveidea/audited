@@ -1,5 +1,5 @@
-require "rails/observers/activerecord/active_record"
-require "rails/observers/action_controller/caching"
+require 'rails/observers/activerecord/active_record'
+require 'rails/observers/action_controller/caching'
 
 module Audited
   class Sweeper < ActionController::Caching::Sweeper

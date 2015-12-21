@@ -1,5 +1,6 @@
-require 'rails/observers/active_model/active_model'
-
+if defined?(ActionController) and defined?(ActionController::Base)
+  require 'rails/observers/active_model/active_model'
+end
 
 module Audited
   class << self

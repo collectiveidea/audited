@@ -12,4 +12,4 @@ end
 
 Audited.audit_class = Audited::Adapters::ActiveRecord::Audit
 
-require 'audited/sweeper'
+require 'audited/sweeper' if defined?(ActionController) and defined?(ActionController::Base)
