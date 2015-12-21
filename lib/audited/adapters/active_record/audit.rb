@@ -17,7 +17,7 @@ module Audited
       #
       class Audit < ::ActiveRecord::Base
         include Audited::Audit
-        include ActiveModel::Observing
+        include ActiveModel::Observing if defined?(ActionController) and defined?(ActionController::Base)
 
         serialize :audited_changes
 
