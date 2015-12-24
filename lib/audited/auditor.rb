@@ -115,11 +115,9 @@ module Audited
       def revisions(from_version = 1)
         audits = self.audits.from_version(from_version)
         return [] if audits.empty?
-        revisions = []
-        audits.each do |audit|
+        audits.inject([]) do |revisions, audit|
           revisions << audit.revision
         end
-        revisions
       end
 
       # Get a specific revision specified by the version number, or +:previous+
@@ -139,17 +137,38 @@ module Audited
       end
 
       protected
+      #def revision_with(attributes)
+      #  dup.tap do |revision|
+      #    revision.id = id
+      #    revision.send :instance_variable_set, '@attributes', self.attributes if rails_below?('4.2.0')
+      #    revision.send :instance_variable_set, '@new_record', self.destroyed?
+      #    revision.send :instance_variable_set, '@persisted', !self.destroyed?
+      #    revision.send :instance_variable_set, '@readonly', false
+      #    revision.send :instance_variable_set, '@destroyed', false
+      #    revision.send :instance_variable_set, '@_destroyed', false
+      #    revision.send :instance_variable_set, '@marked_for_destruction', false
+      #    Audited.audit_class.assign_revision_attributes(revision, attributes)
+
+      #    # Remove any association proxies so that they will be recreated
+      #    # and reference the correct object for this revision. The only way
+      #    # to determine if an instance variable is a proxy object is to
+      #    # see if it responds to certain methods, as it forwards almost
+      #    # everything to its target.
+      #    for ivar in revision.instance_variables
+      #      proxy = revision.instance_variable_get ivar
+      #      if !proxy.nil? && proxy.respond_to?(:proxy_respond_to?)
+      #        revision.instance_variable_set ivar, nil
+      #      end
+      #    end
+      #  end
+      #end
 
       def revision_with(attributes)
+        instance_variables = { "new_record" => self.destroyed?, "persisted" => !self.destroyed?, "readonly" => false, "destroyed" => false, "_destroyed" => false, "marked_for_destruction" => false }
         dup.tap do |revision|
           revision.id = id
           revision.send :instance_variable_set, '@attributes', self.attributes if rails_below?('4.2.0')
-          revision.send :instance_variable_set, '@new_record', self.destroyed?
-          revision.send :instance_variable_set, '@persisted', !self.destroyed?
-          revision.send :instance_variable_set, '@readonly', false
-          revision.send :instance_variable_set, '@destroyed', false
-          revision.send :instance_variable_set, '@_destroyed', false
-          revision.send :instance_variable_set, '@marked_for_destruction', false
+          instance_variables.each { |key, value| revision.send("#{:instance_variable_set}", "@#{key}", value) }
           Audited.audit_class.assign_revision_attributes(revision, attributes)
 
           # Remove any association proxies so that they will be recreated
