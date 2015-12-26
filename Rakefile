@@ -16,12 +16,3 @@ Rake::TestTask.new do |t|
 end
 
 task default: [:spec, :test]
-
-namespace :db do
-  desc "setup the test database"
-  task :setup do
-    ENV['RAILS_ENV'] = 'test'
-    require File.expand_path("../spec/rails_app/config/environment", __FILE__)
-    require File.expand_path("../spec/support/active_record/schema", __FILE__)
-  end
-end

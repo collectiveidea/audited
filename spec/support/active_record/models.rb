@@ -6,7 +6,7 @@ module Models
     class User < ::ActiveRecord::Base
       audited allow_mass_assignment: true, except: :password
 
-      attr_protected :logins
+      attr_protected :logins if respond_to?(:attr_protected)
 
       def name=(val)
         write_attribute(:name, CGI.escapeHTML(val))
@@ -21,12 +21,12 @@ module Models
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
       audited
-      attr_accessible :name, :username, :password
+      attr_accessible :name, :username, :password if respond_to?(:attr_accessible)
     end
 
     class AccessibleBeforeDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
-      attr_accessible :name, :username, :password # declare attr_accessible before calling aaa
+      attr_accessible :name, :username, :password if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
       audited
     end
 
@@ -62,7 +62,7 @@ module Models
     class OwnedCompany < ::ActiveRecord::Base
       self.table_name = 'companies'
       belongs_to :owner, class_name: "Owner"
-      attr_accessible :name, :owner # declare attr_accessible before calling aaa
+      attr_accessible :name, :owner if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
       audited associated_with: :owner
     end
 

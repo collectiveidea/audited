@@ -217,7 +217,8 @@ module Audited
       def require_comment
         if auditing_enabled && audit_comment.blank?
           errors.add(:audit_comment, "Comment required before destruction")
-          return false
+          return false if Rails.version.start_with?('4.')
+          throw :abort
         end
       end
 
