@@ -30,6 +30,7 @@ module Audited
         key :comment, String
         key :remote_address, String
         key :request_uuid, String
+        key :user_agent, String
         key :created_at, Time
 
         include Audited::Audit
