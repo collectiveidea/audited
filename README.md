@@ -80,6 +80,15 @@ audit.action # => "update"
 audit.audited_changes # => {"name"=>["Steve", "Ryan"]}
 ```
 
+You can get previous versions of a record by index or date, or list all
+revisions.
+
+```ruby
+user.revisions
+user.revision(1)
+user.revision_at(Date.parse("2016-01-01"))
+```
+
 ### Specifying columns
 
 By default, a new audit is created for any attribute changes. You can, however, limit the columns to be considered.
