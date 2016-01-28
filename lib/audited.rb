@@ -1,9 +1,7 @@
-require 'rails/observers/active_model/active_model' 
-
+require 'rails/observers/active_model/active_model'
+require 'active_record'
 
 module Audited
-  VERSION = '4.0.0'
-
   class << self
     attr_accessor :ignored_attributes, :current_user_method, :audit_class
 
@@ -16,3 +14,12 @@ module Audited
 
   @current_user_method = :current_user
 end
+
+require 'audited/auditor'
+require 'audited/audit'
+
+::ActiveRecord::Base.send :include, Audited::Auditor
+
+Audited.audit_class = Audited::Audit
+
+require 'audited/sweeper'

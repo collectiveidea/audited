@@ -9,7 +9,7 @@ module Audited
   # To store an audit comment set model.audit_comment to your comment before
   # a create, update or destroy operation.
   #
-  # See <tt>Audited::Adapters::ActiveRecord::Auditor::ClassMethods#audited</tt>
+  # See <tt>Audited::Auditor::ClassMethods#audited</tt>
   # for configuration options
   module Auditor #:nodoc:
     extend ActiveSupport::Concern
@@ -28,7 +28,7 @@ module Audited
       #   You can add to those by passing one or an array of fields to skip.
       #
       #     class User < ActiveRecord::Base
-      #       audited :except => :password
+      #       audited except: :password
       #     end
       #
       # * +require_comment+ - Ensures that audit_comment is supplied before
@@ -66,7 +66,7 @@ module Audited
       #
       def audited(options = {})
         # don't allow multiple calls
-        return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
+        return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
         class_attribute :non_audited_columns,   :instance_writer => false
         class_attribute :auditing_enabled,      :instance_writer => false
@@ -74,7 +74,7 @@ module Audited
         class_attribute :includes_columns,      :instance_writer => false
 
         if options[:only]
-          except = self.column_names - options[:only].flatten.map(&:to_s)
+          except = column_names - Array(options[:only]).flatten.map(&:to_s)
         else
           except = default_ignored_attributes + Audited.ignored_attributes
           except |= Array(options[:except]).collect(&:to_s) if options[:except]
@@ -89,16 +89,16 @@ module Audited
         self.includes_columns = includes 
 
         if options[:comment_required]
-          validates_presence_of :audit_comment, :if => :auditing_enabled
+          validates_presence_of :audit_comment, if: :auditing_enabled
           before_destroy :require_comment
         end
 
         attr_accessor :audit_comment
 
-        has_many :audits, :as => :auditable, :class_name => Audited.audit_class.name
-        Audited.audit_class.audited_class_names << self.to_s
+        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name
+        Audited.audit_class.audited_class_names << to_s
 
-        after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
+        after_create :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
         before_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
 
@@ -106,8 +106,8 @@ module Audited
         # to notify a party after the audit has been created or if you want to access the newly-created
         # audit.
         define_callbacks :audit
-        set_callback :audit, :after, :after_audit, :if => lambda { self.respond_to?(:after_audit) }
-        set_callback :audit, :around, :around_audit, :if => lambda { self.respond_to?(:around_audit) }
+        set_callback :audit, :after, :after_audit, if: lambda { self.respond_to?(:after_audit) }
+        set_callback :audit, :around, :around_audit, if: lambda { self.respond_to?(:around_audit) }
 
         attr_accessor :version
 
@@ -118,7 +118,11 @@ module Audited
       end
 
       def has_associated_audits
-        has_many :associated_audits, :as => :associated, :class_name => Audited.audit_class.name
+        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name
+      end
+
+      def default_ignored_attributes
+        [primary_key, inheritance_column]
       end
     end
 
@@ -174,9 +178,9 @@ module Audited
       protected
 
       def revision_with(attributes)
-        self.dup.tap do |revision|
+        dup.tap do |revision|
           revision.id = id
-          revision.send :instance_variable_set, '@attributes', self.attributes
+          revision.send :instance_variable_set, '@attributes', self.attributes if rails_below?('4.2.0')
           revision.send :instance_variable_set, '@new_record', self.destroyed?
           revision.send :instance_variable_set, '@persisted', !self.destroyed?
           revision.send :instance_variable_set, '@readonly', false
@@ -192,17 +196,21 @@ module Audited
           # everything to its target.
           for ivar in revision.instance_variables
             proxy = revision.instance_variable_get ivar
-            if !proxy.nil? and proxy.respond_to? :proxy_respond_to?
+            if !proxy.nil? && proxy.respond_to?(:proxy_respond_to?)
               revision.instance_variable_set ivar, nil
             end
           end
         end
       end
 
+      def rails_below?(rails_version)
+        Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
+      end
+
       private
 
       def audited_changes
-        changed_attributes.except(*non_audited_columns).inject({}) do |changes,(attr, old_value)|
+        changed_attributes.except(*non_audited_columns).inject({}) do |changes, (attr, old_value)|
           changes[attr] = [old_value, self[attr]]
           changes
         end
@@ -221,20 +229,20 @@ module Audited
       end
 
       def audit_create
-        write_audit(:action => 'create', :audited_changes => audited_attributes,
-                    :comment => audit_comment)
+        write_audit(action: 'create', audited_changes: audited_attributes,
+                    comment: audit_comment)
       end
 
       def audit_update
         unless (changes = audited_changes).empty? && audit_comment.blank?
-          write_audit(:action => 'update', :audited_changes => changes,
-                      :comment => audit_comment)
+          write_audit(action: 'update', audited_changes: changes,
+                      comment: audit_comment)
         end
       end
 
       def audit_destroy
-        write_audit(:action => 'destroy', :audited_changes => audited_attributes,
-                    :comment => audit_comment) unless self.new_record?
+        write_audit(action: 'destroy', audited_changes: audited_attributes,
+                    comment: audit_comment) unless self.new_record?
       end
 
       def write_audit(attrs)
@@ -265,7 +273,7 @@ module Audited
     module AuditedClassMethods
       # Returns an array of columns that are audited. See non_audited_columns
       def audited_columns
-        self.columns.select { |c| !non_audited_columns.include?(c.name) }
+        columns.select {|c| !non_audited_columns.include?(c.name) }
       end
 
       # Executes the block with auditing disabled.
@@ -294,8 +302,8 @@ module Audited
       # made by +user+. This is not model specific, the method is a
       # convenience wrapper around
       # @see Audit#as_user.
-      def audit_as( user, &block )
-        Audited.audit_class.as_user( user, &block )
+      def audit_as(user, &block)
+        Audited.audit_class.as_user(user, &block)
       end
     end
   end

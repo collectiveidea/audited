@@ -6,13 +6,14 @@ module Audited
     observe Audited.audit_class
 
     attr_accessor :controller
-    def before(controller)
-      self.controller = controller
-      true
-    end
 
-    def after(controller)
-      self.controller = nil
+    def around(controller)
+      begin
+        self.controller = controller
+        yield
+      ensure
+        self.controller = nil
+      end
     end
 
     def before_create(audit)
@@ -36,7 +37,7 @@ module Audited
 
     def define_callback(klass)
       observer = self
-      callback_meth = :"_notify_audited_sweeper"
+      callback_meth = :_notify_audited_sweeper
       klass.send(:define_method, callback_meth) do
         observer.update(:before_create, self)
       end
@@ -53,17 +54,8 @@ module Audited
   end
 end
 
-if defined?(ActionController) and defined?(ActionController::Base)
-  # Create dynamic subclass of Audited::Sweeper otherwise rspec will
-  # fail with both ActiveRecord and MongoMapper tests as there will be
-  # around_filter collision
-  sweeper_class = Class.new(Audited::Sweeper) do
-    def self.name
-      "#{Audited.audit_class}::Sweeper"
-    end
-  end
-
+if defined?(ActionController) && defined?(ActionController::Base)
   ActionController::Base.class_eval do
-    around_filter sweeper_class.instance
+    around_filter Audited::Sweeper.instance
   end
 end

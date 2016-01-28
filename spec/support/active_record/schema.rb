@@ -1,8 +1,8 @@
 require 'active_record'
 require 'logger'
 
-ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ':memory:')
-ActiveRecord::Base.logger = Logger.new(SPEC_ROOT.join('debug.log'))
+ActiveRecord::Base.establish_connection
+ActiveRecord::Base.logger = Logger.new(Pathname.new(File.expand_path('../debug.log', __FILE__)))
 ActiveRecord::Migration.verbose = false
 
 ActiveRecord::Schema.define do

@@ -1,14 +1,14 @@
-require File.expand_path('../mongo_mapper_spec_helper', __FILE__)
+require "spec_helper"
 
-class MongoAuditsController < ActionController::Base
+class AuditsController < ActionController::Base
   def audit
-    @company = Models::MongoMapper::Company.create
-    render :nothing => true
+    @company = Models::ActiveRecord::Company.create
+    render nothing: true
   end
 
   def update_user
-    current_user.update_attributes( :password => 'foo')
-    render :nothing => true
+    current_user.update_attributes(password: 'foo')
+    render nothing: true
   end
 
   private
@@ -17,20 +17,20 @@ class MongoAuditsController < ActionController::Base
   attr_accessor :custom_user
 end
 
-describe MongoAuditsController, :adapter => :mongo_mapper do
+describe AuditsController do
   include RSpec::Rails::ControllerExampleGroup
+  render_views
 
   before(:each) do
     Audited.current_user_method = :current_user
   end
 
-  let( :user ) { create_mongo_user }
+  let( :user ) { create_user }
 
   describe "POST audit" do
 
     it "should audit user" do
       controller.send(:current_user=, user)
-
       expect {
         post :audit
       }.to change( Audited.audit_class, :count )
@@ -83,7 +83,7 @@ describe MongoAuditsController, :adapter => :mongo_mapper do
 end
 
 
-describe Audited::Sweeper, :adapter => :mongo_mapper do
+describe Audited::Sweeper do
 
   it "should be thread-safe" do
     t1 = Thread.new do

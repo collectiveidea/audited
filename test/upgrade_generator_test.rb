@@ -1,6 +1,5 @@
 require 'test_helper'
 
-require 'audited/adapters/active_record'
 require 'generators/audited/upgrade_generator'
 
 class UpgradeGeneratorTest < Rails::Generators::TestCase

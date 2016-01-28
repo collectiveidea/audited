@@ -1,15 +1,18 @@
 Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.png)](http://travis-ci.org/collectiveidea/audited) [![Dependency Status](https://gemnasium.com/collectiveidea/audited.png)](https://gemnasium.com/collectiveidea/audited)[![Code Climate](https://codeclimate.com/github/collectiveidea/audited.png)](https://codeclimate.com/github/collectiveidea/audited)
 =======
 
+> ## Important version disclaimer
+> ***This README is for a branch which is still in development.
+> Please switch to the [4.2-stable branch](https://github.com/collectiveidea/audited/tree/4.2-stable) for a stable version.***
+
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited also allows you to record who made those changes, save comments and associate models related to the changes.
 
-Audited currently (4.x) works with Rails 4. For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
+Audited currently (4.x) works with Rails 4.2. For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
 
 ## Supported Rubies
 
 Audited supports and is [tested against](http://travis-ci.org/collectiveidea/audited) the following Ruby versions:
 
-* 1.9.3
 * 2.0.0
 * 2.1.5
 * 2.2.0
@@ -18,21 +21,14 @@ Audited may work just fine with a Ruby version not listed above, but we can't gu
 
 ## Supported ORMs
 
-In a previous life, Audited was ActiveRecord-only. Audited will now audit models for the following backends:
-
-* ActiveRecord
-* MongoMapper
+Audited is currently ActiveRecord-only. In a previous life, Audited worked with MongoMapper. Use the [4.2-stable branch](https://github.com/collectiveidea/audited/tree/4.2-stable) if you need MongoMapper.
 
 ## Installation
 
-The installation process depends on what ORM your app is using.
-
-### ActiveRecord
-
-Add the appropriate gem to your Gemfile:
+Add the gem to your Gemfile:
 
 ```ruby
-gem "audited-activerecord", "~> 4.0"
+gem "audited", "~> 4.0"
 ```
 
 Then, from your Rails app directory, create the `audits` table:
@@ -53,11 +49,6 @@ $ rake db:migrate
 
 Upgrading will only make changes if changes are needed.
 
-### MongoMapper
-
-```ruby
-gem "audited-mongo_mapper", "~> 4.0"
-```
 
 ## Usage
 
@@ -72,9 +63,9 @@ end
 By default, whenever a user is created, updated or destroyed, a new audit is created.
 
 ```ruby
-user = User.create!(:name => "Steve")
+user = User.create!(name: "Steve")
 user.audits.count # => 1
-user.update_attributes!(:name => "Ryan")
+user.update_attributes!(name: "Ryan")
 user.audits.count # => 2
 user.destroy
 user.audits.count # => 3
@@ -83,7 +74,7 @@ user.audits.count # => 3
 Audits contain information regarding what action was taken on the model and what changes were made.
 
 ```ruby
-user.update_attributes!(:name => "Ryan")
+user.update_attributes!(name: "Ryan")
 audit = user.audits.last
 audit.action # => "update"
 audit.audited_changes # => {"name"=>["Steve", "Ryan"]}
@@ -128,7 +119,7 @@ end
 You can attach comments to each audit using an `audit_comment` attribute on your model.
 
 ```ruby
-user.update_attributes!(:name => "Ryan", :audit_comment => "Changing name, just because")
+user.update_attributes!(name: "Ryan", audit_comment: "Changing name, just because")
 user.audits.last.comment # => "Changing name, just because"
 ```
 
@@ -164,7 +155,7 @@ Outside of a request, Audited can still record the user with the `as_user` metho
 
 ```ruby
 Audited.audit_class.as_user(User.find(1)) do
-  post.update_attribute!(:title => "Hello, world!")
+  post.update_attribute!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
 ```
@@ -189,7 +180,7 @@ Every change to a user is audited, but what if you want to grab all of the audit
 ```ruby
 class User < ActiveRecord::Base
   belongs_to :company
-  audited :associated_with => :company
+  audited associated_with: :company
 end
 
 class Company < ActiveRecord::Base
@@ -201,9 +192,9 @@ end
 Now, when a audit is created for a user, that user's company is also saved alongside the audit. This makes it much easier (and faster) to access audits indirectly related to a company.
 
 ```ruby
-company = Company.create!(:name => "Collective Idea")
-user = company.users.create!(:name => "Steve")
-user.update_attribute!(:name => "Steve Richert")
+company = Company.create!(name: "Collective Idea")
+user = company.users.create!(name: "Steve")
+user.update_attribute!(name: "Steve Richert")
 user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
@@ -248,27 +239,23 @@ Audited assumes you are using `attr_accessible`. If you're using
 two.
 
 
-If you're using `strong_parameters` with Rails 3.x, be sure to add `:allow_mass_assignment => true` to your `audited` call; otherwise Audited will
+If you're using `strong_parameters` with Rails 3.x, be sure to add `allow_mass_assignment: true` to your `audited` call; otherwise Audited will
 interfere with `strong_parameters` and none of your `save` calls will work.
 
 ```ruby
 class User < ActiveRecord::Base
-  audited :allow_mass_assignment => true
+  audited allow_mass_assignment: true
 end
 ```
 
-If using `attr_protected`, add `:allow_mass_assignment => true`, and also be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
+If using `attr_protected`, add `allow_mass_assignment: true`, and also be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
 
 ```ruby
 class User < ActiveRecord::Base
-  audited :allow_mass_assignment => true
+  audited allow_mass_assignment: true
   attr_protected :logins, :audit_ids
 end
 ```
-
-### MongoMapper Embedded Documents
-
-Currently, Audited does not track changes on embedded documents. Audited works by tracking a model's [dirty changes](http://api.rubyonrails.org/classes/ActiveModel/Dirty.html) but changes to embedded documents don't appear in dirty tracking.
 
 ## Support
 
