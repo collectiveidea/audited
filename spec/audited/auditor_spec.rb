@@ -46,7 +46,7 @@ describe Audited::Auditor do
       expect(u.username).to eq('username')
       expect(u.password).to eq('password')
       expect(u.activated).to eq(true)
-      expect(u.suspended_at).to eq(yesterday)
+      expect(u.suspended_at.to_i).to eq(yesterday.to_i)
       expect(u.logins).to eq(2)
     end
   end

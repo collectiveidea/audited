@@ -82,15 +82,15 @@ describe Audited::Audit do
     user = Models::ActiveRecord::User.create! name: "Set Version Number"
     expect(user.audits.first.version).to eq(1)
     user.update_attribute :name, "Set to 2"
-    expect(user.audits(true).first.version).to eq(1)
-    expect(user.audits(true).last.version).to eq(2)
+    expect(user.audits.reload.first.version).to eq(1)
+    expect(user.audits.reload.last.version).to eq(2)
     user.destroy
     expect(Audited.audit_class.where(auditable_type: "Models::ActiveRecord::User", auditable_id: user.id).last.version).to eq(3)
   end
 
   it "should set the request uuid on create" do
     user = Models::ActiveRecord::User.create! name: "Set Request UUID"
-    expect(user.audits(true).first.request_uuid).not_to be_blank
+    expect(user.audits.reload.first.request_uuid).not_to be_blank
   end
 
   describe "reconstruct_attributes" do
@@ -175,10 +175,8 @@ describe Audited::Audit do
 
         t1.join
         t2.join
-      rescue ActiveRecord::StatementInvalid
-        STDERR.puts "Thread safety tests cannot be run with SQLite"
       end
-    end
+    end if ActiveRecord::Base.connection.adapter_name != 'SQLite'
 
     it "should return the value from the yield block" do
       result = Audited.audit_class.as_user('foo') do
