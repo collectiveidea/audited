@@ -68,6 +68,12 @@ describe AuditsController do
       expect(controller.company.audits.last.request_uuid).to eq("abc123")
     end
 
+    it "should record the name for the service responsible for the change" do
+      post :audit
+
+      expect(controller.company.audits.last.service_name).to eq("RailsApp")
+    end
+
   end
 
   describe "POST update_user" do
