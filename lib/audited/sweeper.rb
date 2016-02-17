@@ -18,6 +18,7 @@ module Audited
       audit.user ||= current_user
       audit.remote_address = controller.try(:request).try(:remote_ip)
       audit.request_uuid = request_uuid if request_uuid
+      audit.service_name = Rails.application.class.parent_name
     end
 
     def current_user
@@ -54,9 +55,9 @@ end
 
 ActiveSupport.on_load(:action_controller) do
   if defined?(ActionController::Base)
-    ActionController::Base.around_action Audited::Sweeper.instance 
+    ActionController::Base.around_action Audited::Sweeper.instance
   end
   if defined?(ActionController::API)
-    ActionController::API.around_action Audited::Sweeper.instance 
+    ActionController::API.around_action Audited::Sweeper.instance
   end
 end

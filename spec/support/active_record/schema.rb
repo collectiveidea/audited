@@ -11,8 +11,8 @@ begin
     db_file.unlink if db_file.file?
   else
     if defined?(JRUBY_VERSION)
-      db_config.symbolize_keys! 
-      db_config[:configure_connection] = false 
+      db_config.symbolize_keys!
+      db_config[:configure_connection] = false
     end
     adapter = ActiveRecord::Base.send("#{db_type}_connection", db_config)
     adapter.recreate_database db_name
@@ -70,6 +70,7 @@ ActiveRecord::Schema.define do
     t.column :remote_address, :string
     t.column :request_uuid, :string
     t.column :created_at, :datetime
+    t.column :service_name, :string
   end
 
   add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
@@ -77,4 +78,5 @@ ActiveRecord::Schema.define do
   add_index :audits, [:user_id, :user_type], :name => 'user_index'
   add_index :audits, :request_uuid
   add_index :audits, :created_at
+  add_index :audits, :service_name
 end
