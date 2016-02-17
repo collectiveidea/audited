@@ -147,7 +147,7 @@ end
 
 If you're using Audited in a Rails application, all audited changes made within a request will automatically be attributed to the current user. By default, Audited uses the `current_user` method in your controller.
 
-```
+```ruby
 class PostsController < ApplicationController
   def create
     current_user # => #<User name: "Steve">
