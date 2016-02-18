@@ -20,5 +20,5 @@ mysql: &MYSQL
   password:
   database: audited_test
 
-test:
+gemtest:
   <<: *<%= ENV['DB'] || 'SQLITE3MEM' %>
