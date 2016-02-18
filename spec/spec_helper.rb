@@ -1,4 +1,4 @@
-ENV['RAILS_ENV'] = 'test'
+ENV['RAILS_ENV'] = 'gemtest'
 
 if Bundler.definition.dependencies.map(&:name).include?('protected_attributes')
   require 'protected_attributes'
