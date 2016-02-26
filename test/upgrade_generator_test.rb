@@ -6,6 +6,7 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
   destination File.expand_path('../../tmp', __FILE__)
   setup :prepare_destination
   tests Audited::Generators::UpgradeGenerator
+  self.use_transactional_fixtures = false
 
   test "should add 'comment' to audits table" do
     load_schema 1
