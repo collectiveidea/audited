@@ -39,7 +39,6 @@ module Audited
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
         class_attribute :non_audited_column_init, instance_accessor: false
-        class_attribute :auditing_enabled,        instance_writer: false
         class_attribute :audit_associated_with,   instance_writer: false
 
         self.non_audited_column_init = -> do
@@ -235,9 +234,20 @@ module Audited
       def empty_callback #:nodoc:
       end
 
+      def auditing_enabled
+        self.class.auditing_enabled
+      end
+
+      def auditing_enabled= val
+        self.class.auditing_enabled = val
+      end
+
     end # InstanceMethods
 
     module AuditedClassMethods
+      def self.extended(base)
+        base.const_set('AUDIT_VAR_NAME', "#{base.name.tableize}_auditing_enabled")
+      end
       # Returns an array of columns that are audited. See non_audited_columns
       def audited_columns
         columns.select {|c| !non_audited_columns.include?(c.name) }
@@ -275,6 +285,18 @@ module Audited
       # @see Audit#as_user.
       def audit_as(user, &block)
         Audited.audit_class.as_user(user, &block)
+      end
+
+      def auditing_enabled
+        if (val = Thread.current[const_get('AUDIT_VAR_NAME')]).nil?
+          true # default if not set yet
+        else
+          val
+        end
+      end
+
+      def auditing_enabled= val
+        Thread.current[const_get('AUDIT_VAR_NAME')] = val
       end
     end
   end
