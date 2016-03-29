@@ -265,6 +265,35 @@ class User < ActiveRecord::Base
   attr_protected :logins, :audit_ids
 end
 ```
+### Single Table Inherited(STI) table audits
+
+If you're making audits for a STI record ,then you'll have to change your steps to identify the record's model.You wouldn't be able to retrieve `auditable_type` for the child table record associated audits as it always give parent table class name.
+
+Synario:
+```ruby
+class Patient < ActiveRecord::Base
+ has_many :diseases
+ has_associated_audits
+end
+
+class Disease < MedicalHistory
+ belongs_to :patient
+ audited associated_with :patient
+end
+
+class MedicalHistory < ActiveRecord::Base
+end
+```
+when you make `Patient.last.associated_audits.last.auditable_type` give `MedicalHistory` instead of Disease.
+
+But you can retrieve the audited record first and then identify its class name like :
+```ruby
+Patient.last.associated_audits.last.auditable.class.name
+```
+Actually, in Single table inheritance (STI) each record will have a unique id so you can identify the record using the record id from the parent class as 
+```ruby
+MedicalHistory.find(child_id)
+```
 
 ## Support
 
