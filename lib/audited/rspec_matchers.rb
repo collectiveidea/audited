@@ -76,6 +76,8 @@ module Audited
         "Did not expect #{@expectation}"
       end
 
+      alias_method :failure_message_when_negated, :negative_failure_message
+
       def description
         description = "audited"
         description += " associated with #{@options[:associated_with]}" if @options.key?(:associated_with)
@@ -148,6 +150,8 @@ module Audited
       def negative_failure_message
         "Expected #{model_class} to not have associated audits"
       end
+
+      alias_method :failure_message_when_negated, :negative_failure_message
 
       def description
         "has associated audits"
