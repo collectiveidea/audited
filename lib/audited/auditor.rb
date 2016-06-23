@@ -35,7 +35,7 @@ module Audited
       #   any create, update or destroy operation.
       #
       def audited(options = {})
-        return if Rails.env.test?
+        return if Rails.env.test? || Rails.env.development?
 
         # don't allow multiple calls
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
