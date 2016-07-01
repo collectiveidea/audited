@@ -1,7 +1,6 @@
 language: ruby
 cache: bundler
 rvm:
-  - 2.0
   - 2.1
   - 2.2.4
   - 2.3.0
@@ -21,8 +20,6 @@ matrix:
     - rvm: ruby-head
     - rvm: jruby-head
   exclude:
-    - rvm: 2.0
-      gemfile: gemfiles/rails50.gemfile
     - rvm: 2.1
       gemfile: gemfiles/rails50.gemfile
     - rvm: jruby-head
