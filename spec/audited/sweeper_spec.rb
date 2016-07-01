@@ -34,7 +34,7 @@ describe AuditsController do
       controller.send(:current_user=, user)
       expect {
         post :audit
-      }.to change( Audited.audit_class, :count )
+      }.to change( Audited::Audit, :count )
 
       expect(controller.company.audits.last.user).to eq(user)
     end
@@ -45,7 +45,7 @@ describe AuditsController do
 
       expect {
         post :audit
-      }.to change( Audited.audit_class, :count )
+      }.to change( Audited::Audit, :count )
 
       expect(controller.company.audits.last.user).to eq(user)
     end
@@ -77,7 +77,7 @@ describe AuditsController do
 
       expect {
         post :update_user
-      }.to_not change( Audited.audit_class, :count )
+      }.to_not change( Audited::Audit, :count )
     end
 
   end

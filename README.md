@@ -166,7 +166,7 @@ Audited.current_user_method = :authenticated_user
 Outside of a request, Audited can still record the user with the `as_user` method:
 
 ```ruby
-Audited.audit_class.as_user(User.find(1)) do
+Audited::Audit.as_user(User.find(1)) do
   post.update_attribute!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>

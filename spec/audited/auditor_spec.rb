@@ -57,7 +57,7 @@ describe Audited::Auditor do
     it "should change the audit count" do
       expect {
         user
-      }.to change( Audited.audit_class, :count ).by(1)
+      }.to change( Audited::Audit, :count ).by(1)
     end
 
     it "should create associated audit" do
@@ -66,7 +66,7 @@ describe Audited::Auditor do
 
     it "should set the action to create" do
       expect(user.audits.first.action).to eq('create')
-      expect(Audited.audit_class.creates.order(:id).last).to eq(user.audits.first)
+      expect(Audited::Audit.creates.order(:id).last).to eq(user.audits.first)
       expect(user.audits.creates.count).to eq(1)
       expect(user.audits.updates.count).to eq(0)
       expect(user.audits.destroys.count).to eq(0)
@@ -88,7 +88,7 @@ describe Audited::Auditor do
     it "should not save an audit if only specified on update/destroy" do
       expect {
         Models::ActiveRecord::OnUpdateDestroy.create!( :name => 'Bart' )
-      }.to_not change( Audited.audit_class, :count )
+      }.to_not change( Audited::Audit, :count )
     end
   end
 
@@ -100,16 +100,16 @@ describe Audited::Auditor do
     it "should save an audit" do
       expect {
         @user.update_attribute(:name, "Someone")
-      }.to change( Audited.audit_class, :count ).by(1)
+      }.to change( Audited::Audit, :count ).by(1)
       expect {
         @user.update_attribute(:name, "Someone else")
-      }.to change( Audited.audit_class, :count ).by(1)
+      }.to change( Audited::Audit, :count ).by(1)
     end
 
     it "should set the action to 'update'" do
       @user.update_attributes :name => 'Changed'
       expect(@user.audits.last.action).to eq('update')
-      expect(Audited.audit_class.updates.order(:id).last).to eq(@user.audits.last)
+      expect(Audited::Audit.updates.order(:id).last).to eq(@user.audits.last)
       expect(@user.audits.updates.last).to eq(@user.audits.last)
     end
 
@@ -126,28 +126,28 @@ describe Audited::Auditor do
       on_create_destroy = Models::ActiveRecord::OnCreateDestroy.create( :name => 'Bart' )
       expect {
         on_create_destroy.update_attributes :name => 'Changed'
-      }.to_not change( Audited.audit_class, :count )
+      }.to_not change( Audited::Audit, :count )
     end
 
     it "should not save an audit if the value doesn't change after type casting" do
       @user.update_attributes! :logins => 0, :activated => true
-      expect { @user.update_attribute :logins, '0' }.to_not change( Audited.audit_class, :count )
-      expect { @user.update_attribute :activated, 1 }.to_not change( Audited.audit_class, :count )
-      expect { @user.update_attribute :activated, '1' }.to_not change( Audited.audit_class, :count )
+      expect { @user.update_attribute :logins, '0' }.to_not change( Audited::Audit, :count )
+      expect { @user.update_attribute :activated, 1 }.to_not change( Audited::Audit, :count )
+      expect { @user.update_attribute :activated, '1' }.to_not change( Audited::Audit, :count )
     end
 
     describe "with no dirty changes" do
       it "does not create an audit if the record is not changed" do
         expect {
           @user.save!
-        }.to_not change( Audited.audit_class, :count )
+        }.to_not change( Audited::Audit, :count )
       end
 
       it "creates an audit when an audit comment is present" do
         expect {
           @user.audit_comment = "Comment"
           @user.save!
-        }.to change( Audited.audit_class, :count )
+        }.to change( Audited::Audit, :count )
       end
     end
   end
@@ -160,7 +160,7 @@ describe Audited::Auditor do
     it "should save an audit" do
       expect {
         @user.destroy
-      }.to change( Audited.audit_class, :count )
+      }.to change( Audited::Audit, :count )
 
       expect(@user.audits.size).to eq(2)
     end
@@ -169,7 +169,7 @@ describe Audited::Auditor do
       @user.destroy
 
       expect(@user.audits.last.action).to eq('destroy')
-      expect(Audited.audit_class.destroys.order(:id).last).to eq(@user.audits.last)
+      expect(Audited::Audit.destroys.order(:id).last).to eq(@user.audits.last)
       expect(@user.audits.destroys.last).to eq(@user.audits.last)
     end
 
@@ -192,7 +192,7 @@ describe Audited::Auditor do
 
       expect {
         on_create_update.destroy
-      }.to_not change( Audited.audit_class, :count )
+      }.to_not change( Audited::Audit, :count )
     end
 
     it "should audit dependent destructions" do
@@ -201,7 +201,7 @@ describe Audited::Auditor do
 
       expect {
         owner.destroy
-      }.to change( Audited.audit_class, :count )
+      }.to change( Audited::Audit, :count )
 
       expect(company.audits.map { |a| a.action }).to eq(['create', 'destroy'])
     end
@@ -413,13 +413,13 @@ describe Audited::Auditor do
       expect {
         u = Models::ActiveRecord::User.new(:name => 'Brandon')
         expect(u.save_without_auditing).to eq(true)
-      }.to_not change( Audited.audit_class, :count )
+      }.to_not change( Audited::Audit, :count )
     end
 
     it "should not save an audit inside of the #without_auditing block" do
       expect {
         Models::ActiveRecord::User.without_auditing { Models::ActiveRecord::User.create!( :name => 'Brandon' ) }
-      }.to_not change( Audited.audit_class, :count )
+      }.to_not change( Audited::Audit, :count )
     end
 
     it "should reset auditing status even it raises an exception" do
