@@ -18,7 +18,7 @@ appraise 'rails42' do
 end
 
 appraise 'rails50' do
-  gem 'rails', '>= 5.0.0.alpha', '< 5.1'
+  gem 'rails', '~> 5.0.0'
 
   # The following needs to point to Github until the release of 0.1.3
   gem 'rails-observers', :github => 'rails/rails-observers', :branch => 'master'
