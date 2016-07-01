@@ -5,7 +5,6 @@ rvm:
   - 2.2.4
   - 2.3.1
   - ruby-head
-  - jruby-head
 env:
   - DB=SQLITE
   - DB=POSTGRES
@@ -18,11 +17,8 @@ gemfile:
 matrix:
   allow_failures:
     - rvm: ruby-head
-    - rvm: jruby-head
   exclude:
     - rvm: 2.1
-      gemfile: gemfiles/rails50.gemfile
-    - rvm: jruby-head
       gemfile: gemfiles/rails50.gemfile
   fast_finish: true
 branches:
