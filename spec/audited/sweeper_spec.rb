@@ -1,13 +1,14 @@
 require "spec_helper"
 
 class AuditsController < ActionController::Base
-  def audit
+  attr_reader :company
+
+  def create
     @company = Models::ActiveRecord::Company.create
     head :ok
   end
-  attr_reader :company
 
-  def update_user
+  def update
     current_user.update_attributes(password: 'foo')
     head :ok
   end
@@ -33,7 +34,7 @@ describe AuditsController do
     it "should audit user" do
       controller.send(:current_user=, user)
       expect {
-        post :audit
+        post :create
       }.to change( Audited::Audit, :count )
 
       expect(controller.company.audits.last.user).to eq(user)
@@ -44,7 +45,7 @@ describe AuditsController do
       Audited.current_user_method = :custom_user
 
       expect {
-        post :audit
+        post :create
       }.to change( Audited::Audit, :count )
 
       expect(controller.company.audits.last.user).to eq(user)
@@ -54,7 +55,7 @@ describe AuditsController do
       request.env['REMOTE_ADDR'] = "1.2.3.4"
       controller.send(:current_user=, user)
 
-      post :audit
+      post :create
 
       expect(controller.company.audits.last.remote_address).to eq('1.2.3.4')
     end
@@ -63,23 +64,21 @@ describe AuditsController do
       allow_any_instance_of(ActionDispatch::Request).to receive(:uuid).and_return("abc123")
       controller.send(:current_user=, user)
 
-      post :audit
+      post :create
 
       expect(controller.company.audits.last.request_uuid).to eq("abc123")
     end
 
   end
 
-  describe "POST update_user" do
-
+  describe "PUT update" do
     it "should not save blank audits" do
       controller.send(:current_user=, user)
 
       expect {
-        post :update_user
+        put :update, id: 123
       }.to_not change( Audited::Audit, :count )
     end
-
   end
 end
 

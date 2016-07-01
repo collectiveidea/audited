@@ -6,12 +6,10 @@ module Audited
     observe Audited::Audit
 
     def around(controller)
-      begin
-        self.controller = controller
-        yield
-      ensure
-        self.controller = nil
-      end
+      self.controller = controller
+      yield
+    ensure
+      self.controller = nil
     end
 
     def before_create(audit)
