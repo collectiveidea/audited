@@ -3,7 +3,7 @@ cache: bundler
 rvm:
   - 2.1
   - 2.2.4
-  - 2.3.0
+  - 2.3.1
   - ruby-head
   - jruby-head
 env:
