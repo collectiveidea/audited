@@ -39,7 +39,6 @@ module Audited
         return if self.included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
         class_attribute :non_audited_columns,   :instance_writer => false
-        class_attribute :auditing_enabled,      :instance_writer => false
         class_attribute :audit_associated_with, :instance_writer => false
 
         if options[:only]
@@ -224,6 +223,14 @@ module Audited
       def empty_callback #:nodoc:
       end
 
+      def auditing_enabled
+        self.class.auditing_enabled
+      end
+
+      def auditing_enabled= val
+        self.class.auditing_enabled = val
+      end
+
     end # InstanceMethods
 
     module AuditedClassMethods
@@ -260,6 +267,14 @@ module Audited
       # @see Audit#as_user.
       def audit_as( user, &block )
         Audited.audit_class.as_user( user, &block )
+      end
+
+      def auditing_enabled
+        Audited.store.fetch("#{name.tableize}_auditing_enabled", true)
+      end
+
+      def auditing_enabled= val
+        Audited.store["#{name.tableize}_auditing_enabled"] = val
       end
     end
   end
