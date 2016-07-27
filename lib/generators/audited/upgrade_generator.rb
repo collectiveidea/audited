@@ -48,6 +48,10 @@ module Audited
           yield :add_request_uuid_to_audits
         end
 
+        unless columns.include?( 'user_agent' )
+          yield :add_user_agent_to_audits
+        end
+
         unless columns.include?( 'association_id' )
           if columns.include?('auditable_parent_id')
             yield :rename_parent_to_association

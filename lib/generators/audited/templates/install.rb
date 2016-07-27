@@ -14,6 +14,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration
       t.column :comment, :string
       t.column :remote_address, :string
       t.column :request_uuid, :string
+      t.column :user_agent, :string
       t.column :created_at, :datetime
     end
 
@@ -21,6 +22,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration
     add_index :audits, [:associated_id, :associated_type], :name => 'associated_index'
     add_index :audits, [:user_id, :user_type], :name => 'user_index'
     add_index :audits, :request_uuid
+    add_index :audits, :user_agent
     add_index :audits, :created_at
   end
 

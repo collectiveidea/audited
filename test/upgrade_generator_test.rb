@@ -74,4 +74,14 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
       assert_match /add_index :audits, :request_uuid/, content
     end
   end
+
+  test "should add a 'user_agent' to audits table" do
+    load_schema 7
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/add_user_agent_to_audits.rb" do |content|
+      assert_match /add_column :audits, :user_agent, :string/, content
+    end
+  end
 end

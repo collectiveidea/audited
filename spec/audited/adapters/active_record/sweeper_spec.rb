@@ -58,6 +58,16 @@ describe AuditsController, :adapter => :active_record do
       expect(assigns(:company).audits.last.remote_address).to eq('1.2.3.4')
     end
 
+    it "should record the user agent responsible for the change" do
+      user_agent_string = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36"
+      request.env['HTTP_USER_AGENT'] = user_agent_string
+      controller.send(:current_user=, user)
+
+      post :audit
+
+      expect(assigns(:company).audits.last.user_agent).to eq(user_agent_string)
+    end
+
     it "should record a UUID for the web request responsible for the change" do
       allow_any_instance_of(ActionDispatch::Request).to receive(:uuid).and_return("abc123")
       controller.send(:current_user=, user)
