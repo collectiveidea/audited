@@ -25,18 +25,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'mongo_mapper', '~> 0.13.0.beta2'
   gem.add_development_dependency 'rails', '~> 4.2.0'
   gem.add_development_dependency 'rspec-rails', '~> 3.0'
-
-  # JRuby support for the test ENV
-  unless defined?(JRUBY_VERSION)
-    gem.add_development_dependency 'sqlite3', '~> 1.2'
-    gem.add_development_dependency 'mysql2', '~> 0.3'
-    gem.add_development_dependency 'pg', '~> 0.17'
-    gem.add_development_dependency 'bson_ext', '~> 1.6'
-  else
-    gem.add_development_dependency 'activerecord-jdbcsqlite3-adapter', '~> 1.3'
-    gem.add_development_dependency 'activerecord-jdbcpostgresql-adapter', '~> 1.3'
-    gem.add_development_dependency 'activerecord-jdbcmysql-adapter', '~> 1.3'
-    gem.add_development_dependency 'bson', '~> 1.6'
-  end
 end
 
