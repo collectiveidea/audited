@@ -20,6 +20,7 @@ ActiveRecord::Schema.define do
   create_table :companies, :force => true do |t|
     t.column :name, :string
     t.column :owner_id, :integer
+    t.column :type, :string
   end
 
   create_table :authors, :force => true do |t|
