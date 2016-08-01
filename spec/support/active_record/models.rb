@@ -53,6 +53,9 @@ module Models
       audited
     end
 
+    class Company::STICompany < Company
+    end
+
     class Owner < ::ActiveRecord::Base
       self.table_name = 'users'
       has_associated_audits

@@ -11,8 +11,8 @@ begin
     db_file.unlink if db_file.file?
   else
     if defined?(JRUBY_VERSION)
-      db_config.symbolize_keys! 
-      db_config[:configure_connection] = false 
+      db_config.symbolize_keys!
+      db_config[:configure_connection] = false
     end
     adapter = ActiveRecord::Base.send("#{db_type}_connection", db_config)
     adapter.recreate_database db_name
@@ -44,6 +44,7 @@ ActiveRecord::Schema.define do
   create_table :companies do |t|
     t.column :name, :string
     t.column :owner_id, :integer
+    t.column :type, :string
   end
 
   create_table :authors do |t|

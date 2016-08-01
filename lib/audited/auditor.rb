@@ -285,11 +285,11 @@ module Audited
       end
 
       def auditing_enabled
-        Audited.store.fetch("#{name.tableize}_auditing_enabled", true)
+        Audited.store.fetch("#{self.table_name}_auditing_enabled", true)
       end
 
       def auditing_enabled= val
-        Audited.store["#{name.tableize}_auditing_enabled"] = val
+        Audited.store["#{self.table_name}_auditing_enabled"] = val
       end
     end
   end
