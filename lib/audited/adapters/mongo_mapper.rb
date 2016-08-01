@@ -7,6 +7,10 @@ module Audited::Auditor::ClassMethods
   def default_ignored_attributes
     ['id', '_id']
   end
+
+  def table_name
+    name.tableize
+  end
 end
 
 ::MongoMapper::Document.plugin Audited::Auditor

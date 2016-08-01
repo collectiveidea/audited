@@ -270,11 +270,11 @@ module Audited
       end
 
       def auditing_enabled
-        Audited.store.fetch("#{self.table_name}_auditing_enabled", true)
+        Audited.store.fetch("#{table_name}_auditing_enabled", true)
       end
 
       def auditing_enabled= val
-        Audited.store["#{self.table_name}_auditing_enabled"] = val
+        Audited.store["#{table_name}_auditing_enabled"] = val
       end
     end
   end
