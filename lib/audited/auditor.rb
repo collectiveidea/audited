@@ -14,7 +14,7 @@ module Audited
   module Auditor #:nodoc:
     extend ActiveSupport::Concern
 
-    CALLBACKS = [:audit_create, :audit_update, :audit_destroy]
+    CALLBACKS = [:audit_create, :audit_update, :audit_destroy, :audit_queue]
 
     module ClassMethods
       # == Configuration options
@@ -33,6 +33,25 @@ module Audited
       #
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
+      #
+      # * +async+ - Batches and asynchronously processes the creation of
+      #   audit records.
+      #
+      #     class User < ActiveRecord::Base
+      #       audited async: :resque
+      #     end
+      #
+      #   Only Resque is implemented now.
+      #
+      #   While audits are being triggered by Audited callbacks, the
+      #   attributes needed to create the audit are saved in class instance
+      #   variables. When transactions are committed, the batched attributes
+      #   are sent to an asynchronous job so the audit records can be
+      #   created.
+      #
+      #   Wyen creating audits asynchronously, if a transaction fails the
+      #   `after_commit` callback will never get run so all of the audits
+      #   will be ignored. This is what we want.
       #
       def audited(options = {})
         # don't allow multiple calls
@@ -65,6 +84,18 @@ module Audited
         after_create :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
         before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
         before_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
+
+        class_attribute :async_enabled, instance_writer: false
+        if options[:async]
+          class_attribute :async_class, instance_writer: false
+          class_attribute :batched_audit_attrs_sym, instance_writer: false
+          after_commit :audit_queue
+          self.batched_audit_attrs_sym = "#{self.name}_batched_audit_attrs".to_sym
+          Thread.current[self.batched_audit_attrs_sym] = []
+          self.async_enabled = true
+        else
+          self.async_enabled = false
+        end
 
         # Define and set after_audit and around_audit callbacks. This might be useful if you want
         # to notify a party after the audit has been created or if you want to access the newly-created
@@ -104,6 +135,21 @@ module Audited
       #
       def without_auditing(&block)
         self.class.without_auditing(&block)
+      end
+
+      # Temporarily turns off auditing while saving.
+      def save_without_async_auditing
+        without_async_auditing { save }
+      end
+
+      # Executes the block with synchronous writing.
+      #
+      #   @foo.without_async_auditing do
+      #     @foo.save
+      #   end
+      #
+      def without_async_auditing(&block)
+        self.class.without_async_auditing(&block)
       end
 
       # Gets an array of the revisions available
@@ -213,10 +259,53 @@ module Audited
                     comment: audit_comment) unless self.new_record?
       end
 
+      # Sends batched audits to a queue for processing and empties the
+      # batch. Called after commit. If anything goes wrong, the audit
+      # records are written synchronously.
+      def audit_queue
+        raise "nil Audited.async_class" unless Audited.async_class # rescue below
+        Audited.async_class.enqueue(Audited.audit_class.name,
+                                    Thread.current[self.class.batched_audit_attrs_sym])
+      rescue
+        without_async_auditing do
+          Thread.current[self.class.batched_audit_attrs_sym].each do |attrs|
+            write_audit(attrs)
+          end
+        end
+      ensure
+        Thread.current[self.class.batched_audit_attrs_sym] = []
+      end
+
       def write_audit(attrs)
+        return unless auditing_enabled
+
         attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        run_callbacks(:audit)  { self.audits.create(attrs) } if auditing_enabled
+        if self.async_enabled
+          async_write_audit(attrs)
+        else
+          run_callbacks(:audit)  { self.audits.create!(attrs) }
+        end
+      end
+
+      # Add all of the details necessary for creating an audit record
+      # without having the original objects around. Adds the attributes to a
+      # class attribute that batches them up for later processing.
+      def async_write_audit(attrs)
+        attrs[:auditable_id] = self.id
+        attrs[:auditable_type] = self.class.name
+        attrs.delete(:auditable) # don't bother sending whole object to queue
+        if attrs[:associated]
+          attrs[:associated_id] = attrs[:associated].id
+          attrs[:associated_type] = attrs[:associated].class.name
+          attrs.delete(:associated)
+        end
+        user = Thread.current[:audited_user]
+        if user
+          attrs[:user_id] = user.id
+          attrs[:user_type] = user.class.name
+        end
+        Thread.current[self.class.batched_audit_attrs_sym] << attrs
       end
 
       def require_comment
@@ -240,6 +329,14 @@ module Audited
 
       def auditing_enabled= val
         self.class.auditing_enabled = val
+      end
+
+      def async_enabled
+        self.class.async_enabled
+      end
+
+      def async_enabled= val
+        self.class.async_enabled = val
       end
 
     end # InstanceMethods
@@ -276,6 +373,28 @@ module Audited
         self.auditing_enabled = true
       end
 
+      # Executes the block with async auditing disabled.
+      #
+      #   Foo.without_async_auditing do
+      #     @foo.save
+      #   end
+      #
+      def without_async_auditing
+        auditing_was_async = async_enabled
+        disable_async
+        yield
+      ensure
+        enable_async if auditing_was_async
+      end
+
+      def disable_async
+        self.async_enabled = false
+      end
+
+      def enable_async
+        self.async_enabled = true
+      end
+
       # All audit operations during the block are recorded as being
       # made by +user+. This is not model specific, the method is a
       # convenience wrapper around
@@ -290,6 +409,14 @@ module Audited
 
       def auditing_enabled= val
         Audited.store["#{self.table_name}_auditing_enabled"] = val
+      end
+
+      def async_enabled
+        Audited.store.fetch("#{self.table_name}_async_enabled", true)
+      end
+
+      def async_enabled= val
+        Audited.store["#{self.table_name}_async_enabled"] = val
       end
     end
   end

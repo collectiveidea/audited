@@ -88,5 +88,13 @@ module Models
       self.table_name = 'companies'
       audited on: [:create, :update]
     end
+
+    class AsyncOwnedCompanyRequired < ::ActiveRecord::Base
+      self.table_name = 'companies'
+      belongs_to :owner, class_name: "Owner"
+      validates_presence_of :owner
+      attr_accessible :name, :owner if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
+      audited associated_with: :owner, async: true
+    end
   end
 end

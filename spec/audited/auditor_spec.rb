@@ -1,4 +1,5 @@
 require "spec_helper"
+require "audited/async/synchronous"
 
 describe Audited::Auditor do
 
@@ -583,6 +584,109 @@ describe Audited::Auditor do
         company.update_attributes :name => 'STI auditors'
         Models::ActiveRecord::Company.auditing_enabled = true
       }.to_not change( Audited.audit_class, :count )
+    end
+  end
+
+  describe "asynchronous" do
+    let!(:owner) { Models::ActiveRecord::Owner.create(:name => 'Models::ActiveRecord::Owner') }
+    let!(:owned_company) {
+      Models::ActiveRecord::AsyncOwnedCompanyRequired.new(:name => 'The auditors', :owner => owner)
+    }
+
+    before do
+      @old_async_class = Audited.async_class
+      Audited.async_class = Audited::Async::Synchronous
+    end
+
+    after do
+      Audited.async_class = @old_async_class
+    end
+
+    it "should have async enabled" do
+      expect(owned_company.async_enabled).to be_truthy
+    end
+
+    it "should have a class attribute that can store attrs" do
+      expect(Thread.current[owned_company.class.batched_audit_attrs_sym]).to eq []
+    end
+
+    it "should enqueue the job" do
+      expect(Audited::Async::Synchronous)
+        .to receive(:enqueue)
+             .with(Audited.audit_class.name, [
+                     {action: "create",
+                      audited_changes: {"name"=>"The auditors", "owner_id"=>owner.id},
+                      comment: nil,
+                      auditable_type: owned_company.class.name,
+                      auditable_id: anything,
+                      associated_type: owner.class.name,
+                      associated_id: owner.id}])
+      owned_company.save
+    end
+
+    it "should save audit records to the database" do
+      expect {
+        owned_company.save
+      }.to change( Audited.audit_class, :count )
+    end
+
+    it "should save the owned_company's id and type" do
+      expect {
+        owned_company.save
+      }.to change {
+        Audited.audit_class
+          .where(auditable_type: owned_company.class.name)
+          .count
+      }.by(1)
+    end
+
+    it "should not save if validation failed" do
+      owned_company.owner = nil
+      expect {
+        expect(owned_company.save).to eq false
+      }.not_to change( Audited.audit_class, :count )
+    end
+
+    it "should not save if transaction is rolled back" do
+      expect {
+        owned_company.class.transaction do
+          expect(owned_company.save).to eq true
+          raise ActiveRecord::Rollback
+        end
+      }.not_to change( Audited.audit_class, :count )
+    end
+
+    it "should empty the class variable after saving" do
+      owned_company.save
+      expect(Thread.current[owned_company.class.batched_audit_attrs_sym]).to be_empty
+    end
+
+    it "should write synchronously on async error" do
+      allow(Audited::Async::Synchronous).to receive(:enqueue).and_raise(StandardError)
+      expect {
+        owned_company.save
+      }.to change {
+        Audited.audit_class
+          .where(auditable_type: owned_company.class.name)
+          .count
+      }.by(1)
+    end
+
+    it "should write synchronously if no audit class defined" do
+      Audited.async_class = nil
+      expect {
+        owned_company.save
+      }.to change {
+        Audited.audit_class
+          .where(auditable_type: owned_company.class.name)
+          .count
+      }.by(1)
+    end
+
+    it "should save the associated audit records" do
+      owned_company.save
+      expect(owner.associated_audits.length).to eq(1)
+      expect(owner.associated_audits.first.auditable).to eq(owned_company)
     end
   end
 end

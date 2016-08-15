@@ -246,6 +246,113 @@ To disable auditing on an entire model:
 User.auditing_enabled = false
 ```
 
+### Asynchronous Auditing
+
+To create audit records asynchronously, you need to tell Audited which
+adapter to use by setting `Audited.async_class`. Here is an example
+`config/initializers/audited.rb`:
+
+```ruby
+if Rails.env.test?
+  Audited.async_class = Audited::Async::Synchronous
+else
+  Audited.async_class = Audited::Async::Resque
+  # The default queue name is :audit. To specify your own, do this:
+  Audited::Async::Resque.queue = :my_queue
+end
+```
+
+In your model, set `async` to true:
+
+```ruby
+class User < ActiveRecord::Base
+  audited async: true
+end
+```
+
+There are two adapter currently available: `Audited::Async::Resque` and
+`Audited::Async::Synchronous`. The Resque adapter's default queue name is
+`:audit`. The latter is mostly used for testing, since it synchronously
+creates all audits passed to it.
+
+Using asynchronous auditing will trigger a deprecation warning in some
+versions of Rails related to the use of `after_commit`. The warning
+describes the issue and includes directions on how to opt in to the new
+behaviour and remove the warning:
+
+```ruby
+config.active_record.raise_in_transactional_callbacks = true
+```
+
+#### Behind the Scenes
+
+When an audit records should be created, its attributes are put into a
+class-level array. On commit, that array is sent to the async adapter for
+processing.
+
+If the adapter raises an error when trying to enqueue audits, the audits are
+written synchronously instead.
+
+#### Creating an Async Adapter
+
+Each Audited::Async adapter must implemented an `enqueue` class method that
+takes two arguments: the name of the audit class to instantiate and an array
+of audit creation attribute hashes. For each attribute hash, it should
+asynchronously create the audit record from the class and attributes. Here's
+an example:
+
+```ruby
+module Audited
+  module Async
+    class Resque
+      @queue = :audit
+
+      def self.enqueue(klass_name, audits_attrs)
+        Resque.enqueue(self, klass_name, audits_attrs)
+      end
+
+      # Takes a model `klass` and an array of hashes of audit `attrs` and
+      # creates audit records from them.
+      def self.perform(klass_name, audits_attrs)
+        klass = Module.const_get(klass_name)
+        audits_attrs.each do |attrs|
+          klass.create(attrs)
+        end
+      end
+    end
+  end
+end
+```
+
+When adding an adapter, make sure to add it to the list of autoloads in
+`lib/audited/audit.rb`.
+
+### Disabling Asynchronous Auditing
+
+If you want to disable asynchronous auditing, forcing audit records to be
+created synchronously, while temporarily doing certain tasks there are a few
+methods available.
+
+To disable async auditing on a save:
+
+```ruby
+@user.save_without_async_auditing
+```
+
+or:
+
+```ruby
+@user.without_async_auditing do
+  @user.save
+end
+```
+
+To disable asyncronous auditing on an entire model:
+
+```ruby
+User.async_enabled = false
+```
+
 ## Gotchas
 
 ### Using attr_protected with Rails 4.x
