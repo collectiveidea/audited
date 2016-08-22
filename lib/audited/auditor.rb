@@ -62,9 +62,10 @@ module Audited
         has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name
         Audited.audit_class.audited_class_names << to_s
 
-        after_create :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
-        before_update :audit_update if !options[:on] || (options[:on] && options[:on].include?(:update))
-        before_destroy :audit_destroy if !options[:on] || (options[:on] && options[:on].include?(:destroy))
+        on = Array(options[:on])
+        after_create :audit_create    if on.empty? || on.include?(:create)
+        before_update :audit_update   if on.empty? || on.include?(:update)
+        before_destroy :audit_destroy if on.empty? || on.include?(:destroy)
 
         # Define and set after_audit and around_audit callbacks. This might be useful if you want
         # to notify a party after the audit has been created or if you want to access the newly-created
