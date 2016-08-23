@@ -40,6 +40,8 @@ module Models
       audited
       attr_accessor :bogus_attr, :around_attr
 
+      private
+
       def after_audit
         self.bogus_attr = "do something"
       end

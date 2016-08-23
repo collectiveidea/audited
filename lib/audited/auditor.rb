@@ -70,8 +70,8 @@ module Audited
         # to notify a party after the audit has been created or if you want to access the newly-created
         # audit.
         define_callbacks :audit
-        set_callback :audit, :after, :after_audit, if: lambda { self.respond_to?(:after_audit) }
-        set_callback :audit, :around, :around_audit, if: lambda { self.respond_to?(:around_audit) }
+        set_callback :audit, :after, :after_audit, if: lambda { self.respond_to?(:after_audit, true) }
+        set_callback :audit, :around, :around_audit, if: lambda { self.respond_to?(:around_audit, true) }
 
         attr_accessor :version
 
