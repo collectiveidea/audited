@@ -38,10 +38,10 @@ module Audited
       #   audit records.
       #
       #     class User < ActiveRecord::Base
-      #       audited async: :resque
+      #       audited async: true
       #     end
       #
-      #   Only Resque is implemented now.
+      #   See the README for details.
       #
       #   While audits are being triggered by Audited callbacks, the
       #   attributes needed to create the audit are saved in class instance
@@ -49,7 +49,7 @@ module Audited
       #   are sent to an asynchronous job so the audit records can be
       #   created.
       #
-      #   Wyen creating audits asynchronously, if a transaction fails the
+      #   When creating audits asynchronously, if a transaction fails the
       #   `after_commit` callback will never get run so all of the audits
       #   will be ignored. This is what we want.
       #
