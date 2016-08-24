@@ -298,13 +298,6 @@ processing.
 If the adapter raises an error when trying to enqueue audits, the audits are
 written synchronously instead.
 
-One disadvantage to an asynchronous approach is that the `created_at` time
-stamps of the audit records will reflect when the audit records were written
-by the background job, which is not as close to the time of the original
-action that created the audit. It would be relatively easy to modify the
-audited gem so that it passed in the current time when it passed the
-attributes to the background job (see `Audited::Auditor#async_write_audit`).
-
 #### Creating an Async Adapter
 
 Each Audited::Async adapter must implemented an `enqueue` class method that
