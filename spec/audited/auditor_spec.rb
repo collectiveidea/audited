@@ -620,7 +620,8 @@ describe Audited::Auditor do
                       auditable_type: owned_company.class.name,
                       auditable_id: anything,
                       associated_type: owner.class.name,
-                      associated_id: owner.id}])
+                      associated_id: owner.id,
+                      created_at: anything}])
       owned_company.save
     end
 
