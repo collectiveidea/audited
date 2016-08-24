@@ -249,9 +249,9 @@ User.auditing_enabled = false
 ### Asynchronous Auditing
 
 Generating a lot of auditing data can slow down an application, as it must
-wait for auditing data to be saved to a database before continuing. Moving
-the audit record creation to an asynchronous process such as a background
-job queue frees up your application to continue working without waiting.
+wait for the to be saved to a database before continuing. Moving the audit
+record creation to an asynchronous process such as a background job queue
+frees up your application to continue working without waiting.
 
 To create audit records asynchronously, you need to tell Audited which
 adapter to use by setting `Audited.async_class`. Here is an example
