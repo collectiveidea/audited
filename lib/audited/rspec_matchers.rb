@@ -84,6 +84,7 @@ module Audited
         description += " only => #{@options[:only].join ', '}"          if @options.key?(:only)
         description += " except => #{@options[:except].join(', ')}"     if @options.key?(:except)
         description += " requires audit_comment"                        if @options.key?(:comment_required)
+        description += " async"                                         if @options.key?(:async)
 
         description
       end
@@ -97,6 +98,11 @@ module Audited
       def auditing_enabled?
         expects "#{model_class} to be audited"
         model_class.respond_to?(:auditing_enabled) && model_class.auditing_enabled
+      end
+
+      def async_enabled?
+        expects "#{model_class} to be async"
+        model_class.respond_to?(:async_enabled) && model_class.async_enabled
       end
 
       def model_class
