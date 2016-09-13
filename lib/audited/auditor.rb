@@ -259,7 +259,7 @@ module Audited
         @non_audited_columns ||= begin
           options = audited_options
           if options[:only]
-            except = self.column_names - options[:only].flatten.map(&:to_s)
+            except = self.column_names - Array.wrap(options[:only]).flatten.map(&:to_s)
           else
             except = default_ignored_attributes + Audited.ignored_attributes
             except |= Array(options[:except]).collect(&:to_s) if options[:except]
