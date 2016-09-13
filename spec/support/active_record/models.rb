@@ -13,6 +13,11 @@ module Models
       end
     end
 
+    class UserOnlyPassword < ::ActiveRecord::Base
+      self.table_name = :users
+      audited allow_mass_assignment: true, only: [:password]
+    end
+
     class CommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
       audited comment_required: true
