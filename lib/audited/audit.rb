@@ -26,16 +26,16 @@ module Audited
 
     serialize :audited_changes
 
-    scope :ascending,     ->{ reorder(version: :asc) }
-    scope :descending,    ->{ reorder(version: :desc)}
-    scope :creates,       ->{ where(action: 'create')}
-    scope :updates,       ->{ where(action: 'update')}
-    scope :destroys,      ->{ where(action: 'destroy')}
+    scope :ascending,     -> { reorder(version: :asc) }
+    scope :descending,    -> { reorder(version: :desc) }
+    scope :creates,       -> { where(action: 'create') }
+    scope :updates,       -> { where(action: 'update') }
+    scope :destroys,      -> { where(action: 'destroy') }
 
-    scope :up_until,      ->(date_or_time){where("created_at <= ?", date_or_time) }
-    scope :from_version,  ->(version){where(['version >= ?', version]) }
-    scope :to_version,    ->(version){where(['version <= ?', version]) }
-    scope :auditable_finder, ->(auditable_id, auditable_type){where(auditable_id: auditable_id, auditable_type: auditable_type)}
+    scope :up_until,      ->(date_or_time) { where('created_at <= ?', date_or_time) }
+    scope :from_version,  ->(version) { where(['version >= ?', version]) }
+    scope :to_version,    ->(version) { where(['version <= ?', version]) }
+    scope :auditable_finder, ->(auditable_id, auditable_type) { where(auditable_id: auditable_id, auditable_type: auditable_type) }
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
@@ -52,20 +52,14 @@ module Audited
 
     # Returns a hash of the changed attributes with the new values
     def new_attributes
-      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs, (attr, values)|
-        attrs[attr] = values.is_a?(Array) ? values.last : values
-        attrs
-      end
+      old_or_new_attributes("new")
     end
 
     # Returns a hash of the changed attributes with the old values
     def old_attributes
-      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs, (attr, values)|
-        attrs[attr] = Array(values).first
-
-        attrs
-      end
+      old_or_new_attributes("old")
     end
+
 
     # Allows user to be set to either a string or an ActiveRecord object
     # @private
@@ -139,6 +133,18 @@ module Audited
 
     def set_request_uuid
       self.request_uuid ||= SecureRandom.uuid
+    end
+
+    # Returns a hash of the changed values. "new" for new values, "old" for old values
+    def old_or_new_attributes(type)
+      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs, (attr, values)|
+        if type == "new"
+          attrs[attr] = values.is_a?(Array) ? values.last : values
+        else
+          attrs[attr] = Array(values).first
+        end
+        attrs
+      end
     end
   end
 
