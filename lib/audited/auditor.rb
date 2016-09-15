@@ -51,8 +51,8 @@ module Audited
 
         attr_accessor :audit_comment
 
-        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name
-        Audited.audit_class.audited_class_names << to_s
+        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audit.name
+        Audit.audited_class_names << to_s
 
         on = Array(options[:on])
         after_create :audit_create    if on.empty? || on.include?(:create)
@@ -75,7 +75,7 @@ module Audited
       end
 
       def has_associated_audits
-        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name
+        has_many :associated_audits, as: :associated, class_name: Audit.name
       end
 
       def default_ignored_attributes
@@ -118,13 +118,13 @@ module Audited
 
       # Get a specific revision specified by the version number, or +:previous+
       def revision(version)
-        revision_with Audited.audit_class.reconstruct_attributes(audits_to(version))
+        revision_with Audit.reconstruct_attributes(audits_to(version))
       end
 
       # Find the oldest revision recorded prior to the date/time provided.
       def revision_at(date_or_time)
         audits = self.audits.up_until(date_or_time)
-        revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
+        revision_with Audit.reconstruct_attributes(audits) unless audits.empty?
       end
 
       # List of attributes that are audited.
@@ -152,7 +152,7 @@ module Audited
           revision.send :instance_variable_set, '@destroyed', false
           revision.send :instance_variable_set, '@_destroyed', false
           revision.send :instance_variable_set, '@marked_for_destruction', false
-          Audited.audit_class.assign_revision_attributes(revision, attributes)
+          Audit.assign_revision_attributes(revision, attributes)
 
           # Remove any association proxies so that they will be recreated
           # and reference the correct object for this revision. The only way
@@ -295,7 +295,7 @@ module Audited
       # convenience wrapper around
       # @see Audit#as_user.
       def audit_as(user, &block)
-        Audited.audit_class.as_user(user, &block)
+        Audit.as_user(user, &block)
       end
 
       def auditing_enabled

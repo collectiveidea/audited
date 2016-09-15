@@ -3,7 +3,13 @@ require 'active_record'
 
 module Audited
   class << self
-    attr_accessor :ignored_attributes, :current_user_method, :audit_class
+    attr_accessor :ignored_attributes, :current_user_method
+
+    # Deprecate audit_class accessors in preperation of their removal
+    def audit_class
+      Audited::Audit
+    end
+    deprecate audit_class: "Audited.audit_class is now always Audited::Audit. This method will be removed."
 
     def store
       Thread.current[:audited_store] ||= {}
@@ -19,7 +25,5 @@ require 'audited/auditor'
 require 'audited/audit'
 
 ::ActiveRecord::Base.send :include, Audited::Auditor
-
-Audited.audit_class = Audited::Audit
 
 require 'audited/sweeper'

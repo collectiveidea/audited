@@ -3,15 +3,13 @@ require "rails/observers/action_controller/caching"
 
 module Audited
   class Sweeper < ActionController::Caching::Sweeper
-    observe Audited.audit_class
+    observe Audited::Audit
 
     def around(controller)
-      begin
-        self.controller = controller
-        yield
-      ensure
-        self.controller = nil
-      end
+      self.controller = controller
+      yield
+    ensure
+      self.controller = nil
     end
 
     def before_create(audit)
@@ -54,9 +52,9 @@ end
 
 ActiveSupport.on_load(:action_controller) do
   if defined?(ActionController::Base)
-    ActionController::Base.around_action Audited::Sweeper.instance 
+    ActionController::Base.around_action Audited::Sweeper.instance
   end
   if defined?(ActionController::API)
-    ActionController::API.around_action Audited::Sweeper.instance 
+    ActionController::API.around_action Audited::Sweeper.instance
   end
 end
