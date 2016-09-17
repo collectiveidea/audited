@@ -39,7 +39,7 @@ module Audited
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
         class_attribute :audit_associated_with,   instance_writer: false
-        class_attribute :audited_options,       :instance_writer => false
+        class_attribute :audited_options,       instance_writer: false
 
         self.audited_options = options
         self.audit_associated_with = options[:associated_with]
