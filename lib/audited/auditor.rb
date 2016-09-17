@@ -63,8 +63,8 @@ module Audited
         # to notify a party after the audit has been created or if you want to access the newly-created
         # audit.
         define_callbacks :audit
-        set_callback :audit, :after, :after_audit, if: lambda { self.respond_to?(:after_audit, true) }
-        set_callback :audit, :around, :around_audit, if: lambda { self.respond_to?(:around_audit, true) }
+        set_callback :audit, :after, :after_audit, if: lambda { respond_to?(:after_audit, true) }
+        set_callback :audit, :around, :around_audit, if: lambda { respond_to?(:around_audit, true) }
 
         attr_accessor :version
 
@@ -146,8 +146,8 @@ module Audited
         dup.tap do |revision|
           revision.id = id
           revision.send :instance_variable_set, '@attributes', self.attributes if rails_below?('4.2.0')
-          revision.send :instance_variable_set, '@new_record', self.destroyed?
-          revision.send :instance_variable_set, '@persisted', !self.destroyed?
+          revision.send :instance_variable_set, '@new_record', destroyed?
+          revision.send :instance_variable_set, '@persisted', !destroyed?
           revision.send :instance_variable_set, '@readonly', false
           revision.send :instance_variable_set, '@destroyed', false
           revision.send :instance_variable_set, '@_destroyed', false
@@ -159,7 +159,7 @@ module Audited
           # to determine if an instance variable is a proxy object is to
           # see if it responds to certain methods, as it forwards almost
           # everything to its target.
-          for ivar in revision.instance_variables
+          revision.instance_variables.each do |ivar|
             proxy = revision.instance_variable_get ivar
             if !proxy.nil? && proxy.respond_to?(:proxy_respond_to?)
               revision.instance_variable_set ivar, nil
@@ -215,13 +215,13 @@ module Audited
 
       def audit_destroy
         write_audit(action: 'destroy', audited_changes: audited_attributes,
-                    comment: audit_comment) unless self.new_record?
+                    comment: audit_comment) unless new_record?
       end
 
       def write_audit(attrs)
-        attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
+        attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        run_callbacks(:audit)  { self.audits.create(attrs) } if auditing_enabled
+        run_callbacks(:audit)  { audits.create(attrs) } if auditing_enabled
       end
 
       def require_comment
@@ -243,10 +243,9 @@ module Audited
         self.class.auditing_enabled
       end
 
-      def auditing_enabled= val
+      def auditing_enabled=(val)
         self.class.auditing_enabled = val
       end
-
     end # InstanceMethods
 
     module AuditedClassMethods
@@ -259,7 +258,7 @@ module Audited
         @non_audited_columns ||= begin
           options = audited_options
           if options[:only]
-            except = self.column_names - Array.wrap(options[:only]).flatten.map(&:to_s)
+            except = column_names - Array.wrap(options[:only]).flatten.map(&:to_s)
           else
             except = default_ignored_attributes + Audited.ignored_attributes
             except |= Array(options[:except]).collect(&:to_s) if options[:except]
@@ -299,11 +298,11 @@ module Audited
       end
 
       def auditing_enabled
-        Audited.store.fetch("#{self.table_name}_auditing_enabled", true)
+        Audited.store.fetch("#{table_name}_auditing_enabled", true)
       end
 
-      def auditing_enabled= val
-        Audited.store["#{self.table_name}_auditing_enabled"] = val
+      def auditing_enabled=(val)
+        Audited.store["#{table_name}_auditing_enabled"] = val
       end
     end
   end

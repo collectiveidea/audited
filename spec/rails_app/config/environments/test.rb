@@ -18,7 +18,7 @@ RailsApp::Application.configure do
     config.public_file_server.headers = { 'Cache-Control' => 'public, max-age=3600' }
   else
     config.static_cache_control = 'public, max-age=3600'
-    config.serve_static_files   = true 
+    config.serve_static_files   = true
   end
 
   # Show full error reports and disable caching.

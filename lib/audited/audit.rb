@@ -105,7 +105,7 @@ module Audited
     def self.reconstruct_attributes(audits)
       attributes = {}
       result = audits.collect do |audit|
-        attributes.merge!(audit.new_attributes).merge!(version: audit.version)
+        attributes.merge!(audit.new_attributes)[:version] = audit.version
         yield attributes if block_given?
       end
       block_given? ? result : attributes
@@ -141,5 +141,4 @@ module Audited
       self.request_uuid ||= SecureRandom.uuid
     end
   end
-
 end

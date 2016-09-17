@@ -24,33 +24,31 @@ module Audited
         Audited::Audit.reset_column_information
         columns = Audited::Audit.columns.map(&:name)
 
-        unless columns.include?( 'comment' )
-          yield :add_comment_to_audits
-        end
+        yield :add_comment_to_audits unless columns.include?('comment')
 
-        if columns.include?( 'changes' )
+        if columns.include?('changes')
           yield :rename_changes_to_audited_changes
         end
 
-        unless columns.include?( 'remote_address' )
+        unless columns.include?('remote_address')
           yield :add_remote_address_to_audits
         end
 
-        unless columns.include?( 'request_uuid' )
+        unless columns.include?('request_uuid')
           yield :add_request_uuid_to_audits
         end
 
-        unless columns.include?( 'association_id' )
+        unless columns.include?('association_id')
           if columns.include?('auditable_parent_id')
             yield :rename_parent_to_association
           else
-            unless columns.include?( 'associated_id' )
+            unless columns.include?('associated_id')
               yield :add_association_to_audits
             end
           end
         end
 
-        if columns.include?( 'association_id' )
+        if columns.include?('association_id')
           yield :rename_association_to_associated
         end
       end

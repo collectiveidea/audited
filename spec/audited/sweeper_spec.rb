@@ -27,7 +27,7 @@ describe AuditsController do
     Audited.current_user_method = :current_user
   end
 
-  let( :user ) { create_user }
+  let(:user) { create_user }
 
   describe "POST audit" do
 
