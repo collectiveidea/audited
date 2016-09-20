@@ -125,6 +125,11 @@ module Audited
       record
     end
 
+    # use created_at as timestamp cache key
+    def self.collection_cache_key(collection = all, timestamp_column = :created_at)
+      super(collection, :created_at)
+    end
+
     private
 
     def set_version_number
