@@ -217,7 +217,7 @@ class Company < ActiveRecord::Base
 end
 ```
 
-Now, when a audit is created for a user, that user's company is also saved alongside the audit. This makes it much easier (and faster) to access audits indirectly related to a company.
+Now, when an audit is created for a user, that user's company is also saved alongside the audit. This makes it much easier (and faster) to access audits indirectly related to a company.
 
 ```ruby
 company = Company.create!(name: "Collective Idea")
