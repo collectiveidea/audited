@@ -9,6 +9,8 @@ env:
   - DB=SQLITE
   - DB=POSTGRES
   - DB=MYSQL
+addons:
+  postgresql: "9.4"
 gemfile:
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile
