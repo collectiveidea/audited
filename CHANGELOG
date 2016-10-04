@@ -1,5 +1,14 @@
 Audited ChangeLog
 -------------------------------------------------------------------------------
+* 2016-08-01 - 4.2.2
+               Correct auditing_enabled for STI models
+               Properly set table name for mongomapper
+* 2016-07-29 - 4.2.1
+               Fix bug when only: is a single field.
+               update gemspec to use mongomapper 0.13
+               sweeper need not run observer for mongomapper
+               Make temporary disabling of auditing threadsafe
+               Centralize `Audited.store` as thread safe variable store
 * 2012-04-10 - Add Audit scopes for creates, updates and destroys [chriswfx]
 * 2011-10-25 - Made ignored_attributes configurable [senny]
 * 2011-09-09 - Rails 3.x support
