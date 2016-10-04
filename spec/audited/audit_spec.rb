@@ -195,5 +195,4 @@ describe Audited::Audit do
     end
 
   end
-
 end
