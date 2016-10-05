@@ -16,7 +16,19 @@ Fixed
 
 ## 4.3.0 (2016-09-17)
 
-Not yet documented.
+Breaking changes
+
+- None
+
+Added
+
+- Support singular arguments for options: `on` and `only`
+
+Fixed
+
+- Fix auditing instance attributes if "only" option specified
+- Allow private / protected callback declarations
+- Do not eagerly connect to database
 
 ## 4.2.2 (2016-08-01)
 
