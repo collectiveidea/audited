@@ -3,6 +3,6 @@
 source "https://rubygems.org"
 
 gem "rails", "~> 4.1.0"
-gem "rails-observers"
+gem "protected_attributes"
 
 gemspec :name => "audited", :path => "../"

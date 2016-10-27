@@ -32,10 +32,10 @@ module Audited
     scope :updates,       ->{ where(action: 'update')}
     scope :destroys,      ->{ where(action: 'destroy')}
 
-    scope :up_until,      ->(date_or_time){where("created_at <= ?", date_or_time) }
-    scope :from_version,  ->(version){where(['version >= ?', version]) }
-    scope :to_version,    ->(version){where(['version <= ?', version]) }
-    scope :auditable_finder, ->(auditable_id, auditable_type){where(auditable_id: auditable_id, auditable_type: auditable_type)}
+    scope :up_until,      ->(date_or_time){ where("created_at <= ?", date_or_time) }
+    scope :from_version,  ->(version){ where('version >= ?', version) }
+    scope :to_version,    ->(version){ where('version <= ?', version) }
+    scope :auditable_finder, ->(auditable_id, auditable_type){ where(auditable_id: auditable_id, auditable_type: auditable_type)}
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
@@ -105,7 +105,7 @@ module Audited
     def self.reconstruct_attributes(audits)
       attributes = {}
       result = audits.collect do |audit|
-        attributes.merge!(audit.new_attributes).merge!(version: audit.version)
+        attributes.merge!(audit.new_attributes)[:version] = audit.version
         yield attributes if block_given?
       end
       block_given? ? result : attributes
@@ -125,6 +125,11 @@ module Audited
       record
     end
 
+    # use created_at as timestamp cache key
+    def self.collection_cache_key(collection = all, timestamp_column = :created_at)
+      super(collection, :created_at)
+    end
+
     private
 
     def set_version_number
@@ -141,5 +146,4 @@ module Audited
       self.request_uuid ||= SecureRandom.uuid
     end
   end
-
 end

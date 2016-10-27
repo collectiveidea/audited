@@ -1,24 +1,26 @@
 language: ruby
+cache: bundler
 rvm:
-  - 2.0
   - 2.1
-  - 2.2
-  - jruby-head
+  - 2.2.4
+  - 2.3.1
+  - ruby-head
 env:
   - DB=SQLITE
   - DB=POSTGRES
   - DB=MYSQL
-before_script:
-  - mysql -e 'create database audited_test;'
-  - psql -c 'create database audited_test;' -U postgres
-  - rake db:setup
 gemfile:
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile
   - gemfiles/rails42.gemfile
+  - gemfiles/rails50.gemfile
 matrix:
   allow_failures:
-    - rvm: jruby-head
+    - rvm: ruby-head
+  exclude:
+    - rvm: 2.1
+      gemfile: gemfiles/rails50.gemfile
+  fast_finish: true
 branches:
   only:
   - master
@@ -27,4 +29,4 @@ notifications:
   webhooks:
     urls:
     - http://buildlight.collectiveidea.com/
-    on_start: true
+    on_start: always

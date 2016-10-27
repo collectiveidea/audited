@@ -1,14 +1,16 @@
 require "spec_helper"
 
 class AuditsController < ActionController::Base
-  def audit
+  attr_reader :company
+
+  def create
     @company = Models::ActiveRecord::Company.create
-    render nothing: true
+    head :ok
   end
 
-  def update_user
+  def update
     current_user.update_attributes(password: 'foo')
-    render nothing: true
+    head :ok
   end
 
   private
@@ -25,17 +27,17 @@ describe AuditsController do
     Audited.current_user_method = :current_user
   end
 
-  let( :user ) { create_user }
+  let(:user) { create_user }
 
   describe "POST audit" do
 
     it "should audit user" do
       controller.send(:current_user=, user)
       expect {
-        post :audit
-      }.to change( Audited.audit_class, :count )
+        post :create
+      }.to change( Audited::Audit, :count )
 
-      expect(assigns(:company).audits.last.user).to eq(user)
+      expect(controller.company.audits.last.user).to eq(user)
     end
 
     it "should support custom users for sweepers" do
@@ -43,42 +45,40 @@ describe AuditsController do
       Audited.current_user_method = :custom_user
 
       expect {
-        post :audit
-      }.to change( Audited.audit_class, :count )
+        post :create
+      }.to change( Audited::Audit, :count )
 
-      expect(assigns(:company).audits.last.user).to eq(user)
+      expect(controller.company.audits.last.user).to eq(user)
     end
 
     it "should record the remote address responsible for the change" do
       request.env['REMOTE_ADDR'] = "1.2.3.4"
       controller.send(:current_user=, user)
 
-      post :audit
+      post :create
 
-      expect(assigns(:company).audits.last.remote_address).to eq('1.2.3.4')
+      expect(controller.company.audits.last.remote_address).to eq('1.2.3.4')
     end
 
     it "should record a UUID for the web request responsible for the change" do
       allow_any_instance_of(ActionDispatch::Request).to receive(:uuid).and_return("abc123")
       controller.send(:current_user=, user)
 
-      post :audit
+      post :create
 
-      expect(assigns(:company).audits.last.request_uuid).to eq("abc123")
+      expect(controller.company.audits.last.request_uuid).to eq("abc123")
     end
 
   end
 
-  describe "POST update_user" do
-
+  describe "PUT update" do
     it "should not save blank audits" do
       controller.send(:current_user=, user)
 
       expect {
-        post :update_user
-      }.to_not change( Audited.audit_class, :count )
+        put :update, id: 123
+      }.to_not change( Audited::Audit, :count )
     end
-
   end
 end
 

@@ -11,7 +11,7 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     run_generator %w(install)
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      assert_match /class InstallAudited/, content
+      assert_match(/class InstallAudited/, content)
     end
   end
 end

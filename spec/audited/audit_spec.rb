@@ -82,20 +82,20 @@ describe Audited::Audit do
     user = Models::ActiveRecord::User.create! name: "Set Version Number"
     expect(user.audits.first.version).to eq(1)
     user.update_attribute :name, "Set to 2"
-    expect(user.audits(true).first.version).to eq(1)
-    expect(user.audits(true).last.version).to eq(2)
+    expect(user.audits.reload.first.version).to eq(1)
+    expect(user.audits.reload.last.version).to eq(2)
     user.destroy
-    expect(Audited.audit_class.where(auditable_type: "Models::ActiveRecord::User", auditable_id: user.id).last.version).to eq(3)
+    expect(Audited::Audit.where(auditable_type: "Models::ActiveRecord::User", auditable_id: user.id).last.version).to eq(3)
   end
 
   it "should set the request uuid on create" do
     user = Models::ActiveRecord::User.create! name: "Set Request UUID"
-    expect(user.audits(true).first.request_uuid).not_to be_blank
+    expect(user.audits.reload.first.request_uuid).not_to be_blank
   end
 
   describe "reconstruct_attributes" do
     it "should work with the old way of storing just the new value" do
-      audits = Audited.audit_class.reconstruct_attributes([Audited.audit_class.new(audited_changes: {"attribute" => "value"})])
+      audits = Audited::Audit.reconstruct_attributes([Audited::Audit.new(audited_changes: {"attribute" => "value"})])
       expect(audits["attribute"]).to eq("value")
     end
   end
@@ -108,31 +108,31 @@ describe Audited::Audit do
     end
 
     it "should include audited classes" do
-      expect(Audited.audit_class.audited_classes).to include(Models::ActiveRecord::User)
+      expect(Audited::Audit.audited_classes).to include(Models::ActiveRecord::User)
     end
 
     it "should include subclasses" do
-      expect(Audited.audit_class.audited_classes).to include(Models::ActiveRecord::CustomUserSubclass)
+      expect(Audited::Audit.audited_classes).to include(Models::ActiveRecord::CustomUserSubclass)
     end
   end
 
   describe "new_attributes" do
     it "should return a hash of the new values" do
-      new_attributes = Audited.audit_class.new(audited_changes: {a: [1, 2], b: [3, 4]}).new_attributes
+      new_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).new_attributes
       expect(new_attributes).to eq({"a" => 2, "b" => 4})
     end
   end
 
   describe "old_attributes" do
     it "should return a hash of the old values" do
-      old_attributes = Audited.audit_class.new(audited_changes: {a: [1, 2], b: [3, 4]}).old_attributes
+      old_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).old_attributes
       expect(old_attributes).to eq({"a" => 1, "b" => 3})
     end
   end
 
   describe "as_user" do
     it "should record user objects" do
-      Audited.audit_class.as_user(user) do
+      Audited::Audit.as_user(user) do
         company = Models::ActiveRecord::Company.create name: "The auditors"
         company.name = "The Auditors, Inc"
         company.save
@@ -144,7 +144,7 @@ describe Audited::Audit do
     end
 
     it "should record usernames" do
-      Audited.audit_class.as_user(user.name) do
+      Audited::Audit.as_user(user.name) do
         company = Models::ActiveRecord::Company.create name: "The auditors"
         company.name = "The Auditors, Inc"
         company.save
@@ -160,14 +160,14 @@ describe Audited::Audit do
         expect(user.save).to eq(true)
 
         t1 = Thread.new do
-          Audited.audit_class.as_user(user) do
+          Audited::Audit.as_user(user) do
             sleep 1
             expect(Models::ActiveRecord::Company.create(name: "The Auditors, Inc").audits.first.user).to eq(user)
           end
         end
 
         t2 = Thread.new do
-          Audited.audit_class.as_user(user.name) do
+          Audited::Audit.as_user(user.name) do
             expect(Models::ActiveRecord::Company.create(name: "The Competing Auditors, LLC").audits.first.username).to eq(user.name)
             sleep 0.5
           end
@@ -175,13 +175,11 @@ describe Audited::Audit do
 
         t1.join
         t2.join
-      rescue ActiveRecord::StatementInvalid
-        STDERR.puts "Thread safety tests cannot be run with SQLite"
       end
-    end
+    end if ActiveRecord::Base.connection.adapter_name != 'SQLite'
 
     it "should return the value from the yield block" do
-      result = Audited.audit_class.as_user('foo') do
+      result = Audited::Audit.as_user('foo') do
         42
       end
       expect(result).to eq(42)
@@ -189,7 +187,7 @@ describe Audited::Audit do
 
     it "should reset audited_user when the yield block raises an exception" do
       expect {
-        Audited.audit_class.as_user('foo') do
+        Audited::Audit.as_user('foo') do
           raise StandardError.new('expected')
         end
       }.to raise_exception('expected')
