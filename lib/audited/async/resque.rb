@@ -9,7 +9,7 @@ module Audited
       end
 
       def self.enqueue(klass_name, audits_attrs)
-        Resque.enqueue(self, klass_name, audits_attrs)
+        ::Resque.enqueue(self, klass_name, audits_attrs)
       end
 
       # Takes a model `klass` and an array of hashes of audit `attrs` and
