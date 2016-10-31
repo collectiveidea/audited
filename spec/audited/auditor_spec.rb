@@ -606,10 +606,6 @@ describe Audited::Auditor do
       expect(owned_company.async_enabled).to be_truthy
     end
 
-    it "should have a class attribute that can store attrs" do
-      expect(Thread.current[owned_company.class.batched_audit_attrs_sym]).to eq []
-    end
-
     it "should enqueue the job" do
       expect(Audited::Async::Synchronous)
         .to receive(:enqueue)
@@ -659,7 +655,7 @@ describe Audited::Auditor do
 
     it "should empty the class variable after saving" do
       owned_company.save
-      expect(Thread.current[owned_company.class.batched_audit_attrs_sym]).to be_empty
+      expect(Thread.current[owned_company.class.batched_audit_attrs_sym]).to be_nil
     end
 
     it "should write synchronously on async error" do
