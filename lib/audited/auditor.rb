@@ -284,7 +284,7 @@ module Audited
         if self.async_enabled
           async_write_audit(attrs)
         else
-          run_callbacks(:audit)  { self.audits.create!(attrs) }
+          run_callbacks(:audit) { self.audits.create(attrs) } if auditing_enabled
         end
       end
 
