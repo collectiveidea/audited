@@ -71,6 +71,7 @@ ActiveRecord::Schema.define do
     t.column :remote_address, :string
     t.column :request_uuid, :string
     t.column :created_at, :datetime
+    t.column :service_name, :string
   end
 
   add_index :audits, [:auditable_id, :auditable_type], name: 'auditable_index'
@@ -78,4 +79,5 @@ ActiveRecord::Schema.define do
   add_index :audits, [:user_id, :user_type], name: 'user_index'
   add_index :audits, :request_uuid
   add_index :audits, :created_at
+  add_index :audits, :service_name
 end
