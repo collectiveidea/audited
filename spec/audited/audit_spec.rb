@@ -49,8 +49,8 @@ describe Audited::Audit do
       user = Models::ActiveRecord::User.create name: "1"
       5.times {|i| user.update_attribute :name, (i + 2).to_s }
 
-      user.audits.each do |audit|
-        expect(audit.revision.name).to eq(audit.version.to_s)
+      user.audits.each_with_index do |audit, i|
+        expect(audit.revision.name).to eq("#{i+1}")
       end
     end
 
@@ -76,16 +76,6 @@ describe Audited::Audit do
       expect(revision.name).to eq(user.name)
       expect(revision).to be_a_new_record
     end
-  end
-
-  it "should set the version number on create" do
-    user = Models::ActiveRecord::User.create! name: "Set Version Number"
-    expect(user.audits.first.version).to eq(1)
-    user.update_attribute :name, "Set to 2"
-    expect(user.audits.reload.first.version).to eq(1)
-    expect(user.audits.reload.last.version).to eq(2)
-    user.destroy
-    expect(Audited::Audit.where(auditable_type: "Models::ActiveRecord::User", auditable_id: user.id).last.version).to eq(3)
   end
 
   it "should set the request uuid on create" do
