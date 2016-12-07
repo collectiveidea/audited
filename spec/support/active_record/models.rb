@@ -13,6 +13,33 @@ module Models
       end
     end
 
+    class UserIfBySymbol < ::ActiveRecord::Base
+      self.table_name = :users
+      audited allow_mass_assignment: true, if: :audit?
+
+      attr_accessor :flag
+
+      def audit?(attrs)
+        flag
+      end
+    end
+
+    class UserIfByProc < ::ActiveRecord::Base
+      self.table_name = :users
+
+      attr_accessor :flag
+
+      audited allow_mass_assignment: true, if: ->(user, attrs) { user.flag }
+    end
+
+    class UserIfByBadness < ::ActiveRecord::Base
+      self.table_name = :users
+
+      attr_accessor :flag
+
+      audited allow_mass_assignment: true, if: "bad"
+    end
+
     class UserOnlyPassword < ::ActiveRecord::Base
       self.table_name = :users
       audited allow_mass_assignment: true, only: :password

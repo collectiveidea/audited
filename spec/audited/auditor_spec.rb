@@ -427,6 +427,49 @@ describe Audited::Auditor do
     end
   end
 
+  describe "conditional auditing" do
+    context "by proc" do
+      it "should save an audit when asked to" do
+        expect {
+          u = Models::ActiveRecord::UserIfByProc.new(name: 'Brandon')
+          u.flag = true
+          expect(u.save).to eq(true)
+        }.to change( Audited::Audit, :count ).by(1)
+      end
+      it "should not save an audit when asked not to" do
+        expect {
+          u = Models::ActiveRecord::UserIfByProc.new(name: 'Brandon')
+          u.flag = false
+          expect(u.save).to eq(true)
+        }.to_not change( Audited::Audit, :count )
+      end
+    end
+    context "by symbol" do
+      it "should save an audit when asked to" do
+        expect {
+          u = Models::ActiveRecord::UserIfBySymbol.new(name: 'Brandon')
+          u.flag = true 
+          expect(u.save).to eq(true)
+        }.to change( Audited::Audit, :count ).by(1)
+      end
+      it "should save an audit when asked not to" do
+        expect {
+          u = Models::ActiveRecord::UserIfBySymbol.new(name: 'Brandon')
+          u.flag = false
+          expect(u.save).to eq(true)
+        }.to_not change( Audited::Audit, :count )
+      end
+    end
+    context "by weirdness" do
+      it "should not save, but record should save" do
+        expect {
+          u = Models::ActiveRecord::UserIfByBadness.new(name: 'Brandon')
+          expect(u.save).to eq(true)
+        }.to_not change( Audited::Audit, :count )
+      end
+    end
+  end
+
   describe "without auditing" do
     it "should not save an audit when calling #save_without_auditing" do
       expect {
