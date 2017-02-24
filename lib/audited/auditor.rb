@@ -219,6 +219,8 @@ module Audited
       end
 
       def write_audit(attrs)
+        return if skip_writing?
+
         attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
         run_callbacks(:audit)  { audits.create(attrs) } if auditing_enabled
@@ -245,6 +247,10 @@ module Audited
 
       def auditing_enabled=(val)
         self.class.auditing_enabled = val
+      end
+
+      def skip_writing?
+        Audited.only_authenticated_user ? ::Audited.store[:current_controller]&.send(Audited.current_user_method).blank? : false
       end
     end # InstanceMethods
 
