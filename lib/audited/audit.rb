@@ -13,13 +13,11 @@ module Audited
   # * <tt>created_at</tt>: Time that the change was performed
   #
   class Audit < ::ActiveRecord::Base
-    include ActiveModel::Observing
-
     belongs_to :auditable,  polymorphic: true
     belongs_to :user,       polymorphic: true
     belongs_to :associated, polymorphic: true
 
-    before_create :set_version_number, :set_audit_user, :set_request_uuid
+    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
 
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
@@ -95,10 +93,10 @@ module Audited
     # by +user+. This method is hopefully threadsafe, making it ideal
     # for background operations that require audit information.
     def self.as_user(user, &block)
-      Thread.current[:audited_user] = user
+      ::Audited.store[:audited_user] = user
       yield
     ensure
-      Thread.current[:audited_user] = nil
+      ::Audited.store[:audited_user] = nil
     end
 
     # @private
@@ -138,12 +136,18 @@ module Audited
     end
 
     def set_audit_user
-      self.user = Thread.current[:audited_user] if Thread.current[:audited_user]
+      self.user ||= ::Audited.store[:audited_user] # from .as_user
+      self.user ||= ::Audited.store[:current_user] # from Sweeper
       nil # prevent stopping callback chains
     end
 
     def set_request_uuid
+      self.request_uuid ||= ::Audited.store[:current_request_uuid]
       self.request_uuid ||= SecureRandom.uuid
+    end
+
+    def set_remote_address
+      self.remote_address ||= ::Audited.store[:current_remote_address]
     end
   end
 end

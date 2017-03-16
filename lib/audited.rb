@@ -1,4 +1,3 @@
-require 'rails/observers/active_model/active_model'
 require 'active_record'
 
 module Audited

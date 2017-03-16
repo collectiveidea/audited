@@ -191,7 +191,7 @@ describe Audited::Audit do
           raise StandardError.new('expected')
         end
       }.to raise_exception('expected')
-      expect(Thread.current[:audited_user]).to be_nil
+      expect(Audited.store[:audited_user]).to be_nil
     end
 
   end
