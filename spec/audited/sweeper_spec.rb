@@ -86,21 +86,23 @@ end
 describe Audited::Sweeper do
 
   it "should be thread-safe" do
+    instance = Audited::Sweeper.new
+
     t1 = Thread.new do
       sleep 0.5
-      Audited::Sweeper.instance.controller = 'thread1 controller instance'
-      expect(Audited::Sweeper.instance.controller).to eq('thread1 controller instance')
+      instance.controller = 'thread1 controller instance'
+      expect(instance.controller).to eq('thread1 controller instance')
     end
 
     t2 = Thread.new do
-      Audited::Sweeper.instance.controller = 'thread2 controller instance'
+      instance.controller = 'thread2 controller instance'
       sleep 1
-      expect(Audited::Sweeper.instance.controller).to eq('thread2 controller instance')
+      expect(instance.controller).to eq('thread2 controller instance')
     end
 
     t1.join; t2.join
 
-    expect(Audited::Sweeper.instance.controller).to be_nil
+    expect(instance.controller).to be_nil
   end
 
 end
