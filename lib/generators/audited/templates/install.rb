@@ -1,4 +1,4 @@
-class <%= migration_class_name %> < ActiveRecord::Migration
+class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
     create_table :audits, :force => true do |t|
       t.column :auditable_id, :integer

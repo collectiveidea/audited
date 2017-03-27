@@ -78,4 +78,15 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
       assert_match(/add_index :audits, :request_uuid/, content)
     end
   end
+
+  test "generate migration with correct AR migration parent" do
+    load_schema 1
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/add_comment_to_audits.rb" do |content|
+      parent = Rails::VERSION::MAJOR == 4 ? 'ActiveRecord::Migration' : "ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]"
+      assert_includes(content, "class AddCommentToAudits < #{parent}\n")
+    end
+  end
 end
