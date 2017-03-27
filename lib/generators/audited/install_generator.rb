@@ -10,6 +10,8 @@ module Audited
       include Rails::Generators::Migration
       extend Audited::Generators::Migration
 
+      class_option :audited_changes_column_type, type: :string, default: "text", required: false
+
       source_root File.expand_path("../templates", __FILE__)
 
       def copy_migration
