@@ -267,6 +267,10 @@ module Audited
         end
       end
 
+      def non_audited_columns=(columns)
+        @non_audited_columns = columns
+      end
+
       # Executes the block with auditing disabled.
       #
       #   Foo.without_auditing do

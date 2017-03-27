@@ -17,13 +17,22 @@ describe Audited::Auditor do
       end
     end
 
-    it "should be configurable which attributes are not audited" do
+    it "should be configurable which attributes are not audited via ignored_attributes" do
       Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
       class Secret < ::ActiveRecord::Base
         audited
       end
 
       expect(Secret.non_audited_columns).to include('delta', 'top_secret', 'created_at')
+    end
+
+    it "should be configurable which attributes are not audited via non_audited_columns=" do
+      class Secret2 < ::ActiveRecord::Base
+        audited
+        self.non_audited_columns = ['delta', 'top_secret', 'created_at']
+      end
+
+      expect(Secret2.non_audited_columns).to include('delta', 'top_secret', 'created_at')
     end
 
     it "should not save non-audited columns" do
