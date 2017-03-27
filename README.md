@@ -36,6 +36,8 @@ $ rails generate audited:install
 $ rake db:migrate
 ```
 
+If you're using PostgreSQL, then you can use `rails generate audited:install --audited-changes-column-type jsonb` (or `json`) to store audit changes natively with its JSON column types.
+
 #### Upgrading
 
 If you're already using Audited (or acts_as_audited), your `audits` table may require additional columns. After every upgrade, please run:
