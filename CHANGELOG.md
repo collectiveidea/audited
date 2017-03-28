@@ -12,7 +12,8 @@ Added
 
 Fixed
 
-- None
+- SQL error in Rails Conditional GET (304 caching)
+  [#295](https://github.com/collectiveidea/audited/pull/295)
 
 ## 4.3.0 (2016-09-17)
 
