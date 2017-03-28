@@ -163,7 +163,7 @@ Audited.current_user_method = :authenticated_user
 Outside of a request, Audited can still record the user with the `as_user` method:
 
 ```ruby
-Audited::Audit.as_user(User.find(1)) do
+Audited.audit_class.as_user(User.find(1)) do
   post.update_attribute!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
@@ -253,6 +253,26 @@ To disable auditing on an entire model:
 
 ```ruby
 User.auditing_enabled = false
+```
+
+### Custom `Audit` model
+
+If you want to extend or modify the audit model, create a new class that
+inherits from `Audited::Audit`:
+```ruby
+class CustomAudit < Audited::Audit
+  def some_custom_behavior
+    "Hiya!"
+  end
+end
+```
+Then set it in an initializer:
+```ruby
+# config/initializers/audited.rb
+
+Audited.config do |config|
+  config.audit_class = CustomAudit
+end
 ```
 
 ## Gotchas

@@ -2,16 +2,18 @@ require 'active_record'
 
 module Audited
   class << self
-    attr_accessor :ignored_attributes, :current_user_method
+    attr_accessor :ignored_attributes, :current_user_method, :audit_class
 
-    # Deprecate audit_class accessors in preperation of their removal
     def audit_class
-      Audited::Audit
+      @audit_class || Audit
     end
-    deprecate audit_class: "Audited.audit_class is now always Audited::Audit. This method will be removed."
 
     def store
       Thread.current[:audited_store] ||= {}
+    end
+
+    def config
+      yield(self)
     end
   end
 
