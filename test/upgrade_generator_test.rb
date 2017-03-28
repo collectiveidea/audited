@@ -6,7 +6,11 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
   destination File.expand_path('../../tmp', __FILE__)
   setup :prepare_destination
   tests Audited::Generators::UpgradeGenerator
-  self.use_transactional_fixtures = false
+  if Rails::VERSION::MAJOR == 4
+    self.use_transactional_fixtures = false
+  else
+    self.use_transactional_tests = false
+  end
 
   test "should add 'comment' to audits table" do
     load_schema 1
@@ -72,6 +76,17 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
     assert_migration "db/migrate/add_request_uuid_to_audits.rb" do |content|
       assert_match(/add_column :audits, :request_uuid, :string/, content)
       assert_match(/add_index :audits, :request_uuid/, content)
+    end
+  end
+
+  test "generate migration with correct AR migration parent" do
+    load_schema 1
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/add_comment_to_audits.rb" do |content|
+      parent = Rails::VERSION::MAJOR == 4 ? 'ActiveRecord::Migration' : "ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]"
+      assert_includes(content, "class AddCommentToAudits < #{parent}\n")
     end
   end
 end
