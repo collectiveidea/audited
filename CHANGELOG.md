@@ -10,10 +10,46 @@ Added
 
 - None
 
+Changed
+
+- None
+
+Fixed
+
+- None
+
+## 4.4.0 (2017-03-29)
+
+Breaking changes
+
+- None
+
+Added
+
+- Support for `audited_changes` to be a `json` or `jsonb` column in PostgreSQL
+  [#216](https://github.com/collectiveidea/audited/issues/216)
+- Allow `Audited::Audit` to be subclassed by configuring `Audited.audit_class`
+  [#314](https://github.com/collectiveidea/audited/issues/314)
+- Support for Ruby on Rails 5.1
+  [#329](https://github.com/collectiveidea/audited/issues/329)
+- Support for Ruby 2.4
+  [#329](https://github.com/collectiveidea/audited/issues/329)
+
+Changed
+
+- Remove rails-observer dependency
+  [#325](https://github.com/collectiveidea/audited/issues/325)
+- Undeprecated `Audited.audit_class` reader
+  [#314](https://github.com/collectiveidea/audited/issues/314)
+
 Fixed
 
 - SQL error in Rails Conditional GET (304 caching)
   [#295](https://github.com/collectiveidea/audited/pull/295)
+- Fix missing non_audited_columns= configuration setter
+  [#320](https://github.com/collectiveidea/audited/issues/320)
+- Fix migration generators to specify AR migration version
+  [#329](https://github.com/collectiveidea/audited/issues/329)
 
 ## 4.3.0 (2016-09-17)
 
