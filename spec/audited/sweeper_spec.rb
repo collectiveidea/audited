@@ -76,7 +76,7 @@ describe AuditsController do
       controller.send(:current_user=, user)
 
       expect {
-        put :update, id: 123
+        put :update, params: { id: 123 }
       }.to_not change( Audited::Audit, :count )
     end
   end
