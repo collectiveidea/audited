@@ -18,6 +18,13 @@ Fixed
 
 - None
 
+## 4.4.1 (2017-03-29)
+
+Fixed
+
+- Fix ActiveRecord gem dependency to permit 5.1
+  [#332](https://github.com/collectiveidea/audited/pull/332)
+
 ## 4.4.0 (2017-03-29)
 
 Breaking changes
