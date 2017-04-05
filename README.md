@@ -37,7 +37,7 @@ $ rails generate audited:install
 $ rake db:migrate
 ```
 
-If you're using PostgreSQL, then you can use `rails generate audited:install --audited-changes-column-type jsonb` (or `json`) to store audit changes natively with its JSON column types.
+If you're using PostgreSQL, then you can use `rails generate audited:install --audited-changes-column-type jsonb` (or `json`) to store audit changes natively with its JSON column types. If you're using something other than integer primary keys (e.g. UUID) for your User model, then you can use `rails generate audited:install --audited-user-id-column-type uuid` to customize the `audits` table `user_id` column type.
 
 #### Upgrading
 
@@ -169,6 +169,8 @@ Audited.audit_class.as_user(User.find(1)) do
 end
 post.audits.last.user # => #<User id: 1>
 ```
+
+The standard Audited install assumes your User model has an integer primary key type. If this isn't true (e.g. you're using UUID primary keys), you'll need to create a migration to update the `audits` table `user_id` column type. (See Installation above for generator flags if you'd like to regenerate the install migration.)
 
 #### Custom Auditor
 

@@ -34,6 +34,24 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     end
   end
 
+  test "generate migration with 'string' type for user_id column" do
+    run_generator %w(--audited-user-id-column-type string)
+
+    assert_migration "db/migrate/install_audited.rb" do |content|
+      assert_includes(content, 'class InstallAudited')
+      assert_includes(content, 't.column :user_id, :string')
+    end
+  end
+
+  test "generate migration with 'uuid' type for user_id column" do
+    run_generator %w(--audited-user-id-column-type uuid)
+
+    assert_migration "db/migrate/install_audited.rb" do |content|
+      assert_includes(content, 'class InstallAudited')
+      assert_includes(content, 't.column :user_id, :uuid')
+    end
+  end
+
   test "generate migration with correct AR migration parent" do
     run_generator
 
