@@ -31,6 +31,10 @@ module Audited
       #       audited except: :password
       #     end
       #
+      # * +redacted+ - Changes to these fields will be logged, but the values
+      #   will not. This is useful, for example, if you wish to audit when a
+      #   password is changed, without saving the actual password in the log.
+      #
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
       #
@@ -41,7 +45,7 @@ module Audited
         class_attribute :audit_associated_with,   instance_writer: false
         class_attribute :audited_options,       instance_writer: false
 
-        self.audited_options = options
+        normalize_audited_options(options)
         self.audit_associated_with = options[:associated_with]
 
         if options[:comment_required]
@@ -81,9 +85,19 @@ module Audited
       def default_ignored_attributes
         [primary_key, inheritance_column]
       end
+
+      def normalize_audited_options(options)
+        [:only, :except, :redacted].each do |opt|
+          options[opt] = Array.wrap(options[opt]).map(&:to_s)
+        end
+        self.audited_options = options
+      end
     end
 
     module AuditedInstanceMethods
+
+      REDACTED = '[REDACTED]'
+
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
@@ -129,7 +143,10 @@ module Audited
 
       # List of attributes that are audited.
       def audited_attributes
-        attributes.except(*non_audited_columns)
+        attributes.except(*non_audited_columns).inject({}) do |h, (attr,value)|
+          h[attr] = audited_options[:redacted].include?(attr) ? REDACTED : value
+          h
+        end
       end
 
       def non_audited_columns
@@ -137,10 +154,6 @@ module Audited
       end
 
       protected
-
-      def non_audited_columns
-        self.class.non_audited_columns
-      end
 
       def revision_with(attributes)
         dup.tap do |revision|
@@ -176,15 +189,16 @@ module Audited
 
       def audited_changes
         collection =
-          if audited_options[:only]
-            audited_columns = self.class.audited_columns.map(&:name)
-            changed_attributes.slice(*audited_columns)
-          else
+          if audited_options[:only].empty?
             changed_attributes.except(*non_audited_columns)
+          else
+            changed_attributes.slice(*self.class.audited_columns)
           end
 
         collection.inject({}) do |changes, (attr, old_value)|
-          changes[attr] = [old_value, self[attr]]
+          changes[attr] = audited_options[:redacted].include?(attr) ?
+                          [REDACTED, REDACTED] :
+                          [old_value, self[attr]]
           changes
         end
       end
@@ -251,17 +265,17 @@ module Audited
     module AuditedClassMethods
       # Returns an array of columns that are audited. See non_audited_columns
       def audited_columns
-        columns.select {|c| !non_audited_columns.include?(c.name) }
+        column_names - non_audited_columns
       end
 
       def non_audited_columns
         @non_audited_columns ||= begin
           options = audited_options
-          if options[:only]
-            except = column_names - Array.wrap(options[:only]).flatten.map(&:to_s)
-          else
+          if options[:only].empty?
             except = default_ignored_attributes + Audited.ignored_attributes
-            except |= Array(options[:except]).collect(&:to_s) if options[:except]
+            except |= options[:except]
+          else
+            except = column_names - options[:only]
           end
           except
         end

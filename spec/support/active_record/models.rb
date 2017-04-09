@@ -24,6 +24,11 @@ module Models
       audited comment_required: true
     end
 
+    class UserRedactedPassword < ::ActiveRecord::Base
+      self.table_name = :users
+      audited redacted: :password
+    end
+
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
       audited
