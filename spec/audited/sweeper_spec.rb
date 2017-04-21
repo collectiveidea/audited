@@ -1,6 +1,8 @@
 require "spec_helper"
 
 class AuditsController < ActionController::Base
+  before_action :populate_user
+
   attr_reader :company
 
   def create
@@ -17,6 +19,8 @@ class AuditsController < ActionController::Base
 
   attr_accessor :current_user
   attr_accessor :custom_user
+
+  def populate_user; end
 end
 
 describe AuditsController do
@@ -67,6 +71,18 @@ describe AuditsController do
       post :create
 
       expect(controller.company.audits.last.request_uuid).to eq("abc123")
+    end
+
+    it "should call current_user after controller callbacks" do
+      expect(controller).to receive(:populate_user) do
+        controller.send(:current_user=, user)
+      end
+
+      expect {
+        post :create
+      }.to change( Audited::Audit, :count )
+
+      expect(controller.company.audits.last.user).to eq(user)
     end
 
   end
