@@ -158,7 +158,7 @@ module Audited
 
     def set_audit_user
       self.user ||= ::Audited.store[:audited_user] # from .as_user
-      self.user ||= ::Audited.store[:current_user] # from Sweeper
+      self.user ||= ::Audited.store[:current_user].try!(:call) # from Sweeper
       nil # prevent stopping callback chains
     end
 
