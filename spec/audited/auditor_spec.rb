@@ -58,6 +58,16 @@ describe Audited::Auditor do
       expect(user.audits.last.audited_changes.keys).to eq(%w{password})
     end
 
+    it "should redact columns specified in 'redacted' option" do
+      redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
+      user = Models::ActiveRecord::UserRedactedPassword.create(password: "password")
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq(redacted)
+      user.password = "new_password"
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq([redacted, redacted])
+    end
+
     if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL' && Rails.version >= "4.2.0.0" # Postgres json and jsonb support was added in Rails 4.2
       describe "'json' and 'jsonb' audited_changes column type" do
         let(:migrations_path) { SPEC_ROOT.join("support/active_record/postgres") }
