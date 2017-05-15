@@ -250,7 +250,11 @@ module Audited
       end
 
       def skip_writing?
-        Audited.only_authenticated_user ? ::Audited.store[:current_controller]&.send(Audited.current_user_method).blank? : false
+        if Audited.only_authenticated_user
+          ::Audited.store[:current_controller] ? ::Audited.store[:current_controller].send(Audited.current_user_method).blank? : nil
+        else
+          false
+        end
       end
     end # InstanceMethods
 
