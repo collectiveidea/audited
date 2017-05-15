@@ -609,10 +609,14 @@ describe Audited::Auditor do
     before do
       Audited.only_authenticated_user = true
     end
-    
+
     it 'update company without audits' do
       company = Models::ActiveRecord::Company.create name: 'The auditors'
       expect { company.update_attributes name: 'New company name' }.to_not change( Audited.audit_class, :count )
+    end
+
+    after do
+      Audited.only_authenticated_user = false
     end
   end
 end
