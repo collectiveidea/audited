@@ -1,15 +1,15 @@
-class <%= migration_class_name %> < ActiveRecord::Migration
+class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
     create_table :audits, :force => true do |t|
       t.column :auditable_id, :integer
       t.column :auditable_type, :string
       t.column :associated_id, :integer
       t.column :associated_type, :string
-      t.column :user_id, :integer
+      t.column :user_id, :<%= options[:audited_user_id_column_type] %>
       t.column :user_type, :string
       t.column :username, :string
       t.column :action, :string
-      t.column :audited_changes, :text
+      t.column :audited_changes, :<%= options[:audited_changes_column_type] %>
       t.column :version, :integer, :default => 0
       t.column :comment, :string
       t.column :remote_address, :string

@@ -15,6 +15,7 @@ module Models
 
     class UserOnlyPassword < ::ActiveRecord::Base
       self.table_name = :users
+      attribute :non_column_attr if Rails.version >= '5.1'
       audited allow_mass_assignment: true, only: :password
     end
 

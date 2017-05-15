@@ -17,11 +17,10 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(\.gemspec)/ }
   gem.require_paths = ['lib']
 
-  gem.add_dependency 'activerecord', '>= 4.0', '< 5.1'
-  gem.add_dependency 'rails-observers', '~> 0.1.2'
+  gem.add_dependency 'activerecord', '>= 4.0', '< 5.2'
 
   gem.add_development_dependency 'appraisal'
-  gem.add_development_dependency 'rails', '>= 4.0', '< 5.1'
+  gem.add_development_dependency 'rails', '>= 4.0', '< 5.2'
   gem.add_development_dependency 'rspec-rails', '~> 3.5'
 
   # JRuby support for the test ENV

@@ -3,7 +3,7 @@ Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.svg
 
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
-Audited currently (4.x) works with Rails 5.0 and 4.2. It may work with 4.1 and 4.0, but this is not guaranteed.
+Audited currently (4.x) works with Rails 5.1, 5.0 and 4.2. It may work with 4.1 and 4.0, but this is not guaranteed.
 
 For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
 
@@ -14,6 +14,7 @@ Audited supports and is [tested against](http://travis-ci.org/collectiveidea/aud
 * 2.1.5
 * 2.2.4
 * 2.3.1
+* 2.4.1
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
@@ -26,12 +27,7 @@ Audited is currently ActiveRecord-only. In a previous life, Audited worked with 
 Add the gem to your Gemfile:
 
 ```ruby
-gem "audited", "~> 4.3"
-```
-
-If you are using rails 5.0, you would also need the following line in your Gemfile.
-```ruby
-gem "rails-observers", github: 'rails/rails-observers'
+gem "audited", "~> 4.4"
 ```
 
 Then, from your Rails app directory, create the `audits` table:
@@ -40,6 +36,8 @@ Then, from your Rails app directory, create the `audits` table:
 $ rails generate audited:install
 $ rake db:migrate
 ```
+
+If you're using PostgreSQL, then you can use `rails generate audited:install --audited-changes-column-type jsonb` (or `json`) to store audit changes natively with its JSON column types. If you're using something other than integer primary keys (e.g. UUID) for your User model, then you can use `rails generate audited:install --audited-user-id-column-type uuid` to customize the `audits` table `user_id` column type.
 
 #### Upgrading
 
@@ -166,11 +164,13 @@ Audited.current_user_method = :authenticated_user
 Outside of a request, Audited can still record the user with the `as_user` method:
 
 ```ruby
-Audited::Audit.as_user(User.find(1)) do
+Audited.audit_class.as_user(User.find(1)) do
   post.update_attribute!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
 ```
+
+The standard Audited install assumes your User model has an integer primary key type. If this isn't true (e.g. you're using UUID primary keys), you'll need to create a migration to update the `audits` table `user_id` column type. (See Installation above for generator flags if you'd like to regenerate the install migration.)
 
 #### Custom Auditor
 
@@ -256,6 +256,26 @@ To disable auditing on an entire model:
 
 ```ruby
 User.auditing_enabled = false
+```
+
+### Custom `Audit` model
+
+If you want to extend or modify the audit model, create a new class that
+inherits from `Audited::Audit`:
+```ruby
+class CustomAudit < Audited::Audit
+  def some_custom_behavior
+    "Hiya!"
+  end
+end
+```
+Then set it in an initializer:
+```ruby
+# config/initializers/audited.rb
+
+Audited.config do |config|
+  config.audit_class = CustomAudit
+end
 ```
 
 ## Gotchas

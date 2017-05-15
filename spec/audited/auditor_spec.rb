@@ -17,13 +17,22 @@ describe Audited::Auditor do
       end
     end
 
-    it "should be configurable which attributes are not audited" do
+    it "should be configurable which attributes are not audited via ignored_attributes" do
       Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
       class Secret < ::ActiveRecord::Base
         audited
       end
 
       expect(Secret.non_audited_columns).to include('delta', 'top_secret', 'created_at')
+    end
+
+    it "should be configurable which attributes are not audited via non_audited_columns=" do
+      class Secret2 < ::ActiveRecord::Base
+        audited
+        self.non_audited_columns = ['delta', 'top_secret', 'created_at']
+      end
+
+      expect(Secret2.non_audited_columns).to include('delta', 'top_secret', 'created_at')
     end
 
     it "should not save non-audited columns" do
@@ -47,6 +56,38 @@ describe Audited::Auditor do
       user.non_column_attr = "some value"
       user.save!
       expect(user.audits.last.audited_changes.keys).to eq(%w{password})
+    end
+
+    if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL' && Rails.version >= "4.2.0.0" # Postgres json and jsonb support was added in Rails 4.2
+      describe "'json' and 'jsonb' audited_changes column type" do
+        let(:migrations_path) { SPEC_ROOT.join("support/active_record/postgres") }
+
+        after do
+          ActiveRecord::Migrator.rollback([migrations_path])
+        end
+
+        it "should work if column type is 'json'" do
+          ActiveRecord::Migrator.up([migrations_path], 1)
+          Audited::Audit.reset_column_information
+          expect(Audited::Audit.columns_hash["audited_changes"].sql_type).to eq("json")
+
+          user = Models::ActiveRecord::User.create
+          user.name = "new name"
+          user.save!
+          expect(user.audits.last.audited_changes).to eq({"name" => [nil, "new name"]})
+        end
+
+        it "should work if column type is 'jsonb'" do
+          ActiveRecord::Migrator.up([migrations_path], 2)
+          Audited::Audit.reset_column_information
+          expect(Audited::Audit.columns_hash["audited_changes"].sql_type).to eq("jsonb")
+
+          user = Models::ActiveRecord::User.create
+          user.name = "new name"
+          user.save!
+          expect(user.audits.last.audited_changes).to eq({"name" => [nil, "new name"]})
+        end
+      end
     end
   end
 
@@ -601,7 +642,7 @@ describe Audited::Auditor do
         Models::ActiveRecord::Company.auditing_enabled = false
         company.update_attributes name: 'STI auditors'
         Models::ActiveRecord::Company.auditing_enabled = true
-      }.to_not change( Audited.audit_class, :count )
+      }.to_not change( Audited::Audit, :count )
     end
   end
 

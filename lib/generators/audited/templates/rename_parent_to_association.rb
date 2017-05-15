@@ -1,4 +1,4 @@
-class <%= migration_class_name %> < ActiveRecord::Migration
+class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
     rename_column :audits, :auditable_parent_id, :association_id
     rename_column :audits, :auditable_parent_type, :association_type
