@@ -39,6 +39,7 @@ ActiveRecord::Schema.define do
     t.column :logins, :integer, default: 0
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
+    t.column :favourite_device, :string
   end
 
   create_table :companies do |t|
