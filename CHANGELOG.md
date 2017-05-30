@@ -18,6 +18,26 @@ Fixed
 
 - None
 
+## 4.5.0 (2017-05-22)
+
+Breaking changes
+
+- None
+
+Added
+
+- Support for `user_id` column to be a `uuid` type
+  [#333](https://github.com/collectiveidea/audited/pull/333)
+
+Fixed
+
+- Fix retrieval of user from controller when populated in before callbacks
+  [#336](https://github.com/collectiveidea/audited/issues/336)
+- Fix column type check in serializer for Oracle DB adapter
+  [#335](https://github.com/collectiveidea/audited/pull/335)
+- Fix `non_audited_columns` to allow symbol names
+  [#351](https://github.com/collectiveidea/audited/pull/351)
+
 ## 4.4.1 (2017-03-29)
 
 Fixed
