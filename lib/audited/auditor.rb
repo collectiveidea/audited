@@ -184,7 +184,7 @@ module Audited
           end
 
         collection.inject({}) do |changes, (attr, old_value)|
-          changes[attr] = [old_value, self[attr]]
+          changes[attr] = [old_value, self.public_send(attr)]
           changes
         end
       end

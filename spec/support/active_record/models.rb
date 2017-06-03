@@ -13,6 +13,52 @@ module Models
       end
     end
 
+    class DelegatedCompany < ::ActiveRecord::Base
+      self.table_name = :companies
+      belongs_to :user, class_name: "UserDelegateCompany"
+    end
+
+    class UserDelegateCompany < ::ActiveRecord::Base
+      self.table_name = :users
+      has_many :companies, class_name: 'DelegatedCompany', foreign_key: :owner_id
+      after_update :save_company_list
+      audited
+
+      def company_list
+        @company_string.present? ? @company_string : companies.pluck(:name).join(',')
+      end
+
+      def company_list=(val)
+        @changed_attributes ||= ActiveSupport::HashWithIndifferentAccess.new
+        @changed_attributes['company_list'] = company_list
+        @company_string = val
+      end
+
+      def save_company_list
+        @company_string.split(',').each do |name|
+          Company.find_or_create_by(name: name, owner_id: self.id)
+        end
+      end
+
+			# mock activerecord dirty feature
+			def company_list_changed?
+				changed_attributes.include?("company_list")
+			end
+
+			def company_list_was
+				changed_attributes.include?("company_list") ? changed_attributes["company_list"] : __send__("company_list")
+			end
+
+			def company_list_change
+				[changed_attributes['company_list'], __send__('company_list')] if changed_attributes.include?("company_list")
+			end
+
+			def company_list_changes
+				[changed_attributes['company_list'], __send__('company_list')] if changed_attributes.include?("company_list")
+			end
+
+    end
+
     class UserOnlyPassword < ::ActiveRecord::Base
       self.table_name = :users
       attribute :non_column_attr if Rails.version >= '5.1'
@@ -63,6 +109,7 @@ module Models
 
     class Company::STICompany < Company
     end
+
 
     class Owner < ::ActiveRecord::Base
       self.table_name = 'users'
