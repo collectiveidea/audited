@@ -249,7 +249,7 @@ end
 To disable auditing on a column:
 
 ```ruby
-User.non_audited_columns = [:first_name, :last_name]
+User.audited_options[:except] = ["first_name", "last_name"]
 ```
 
 To disable auditing on an entire model:

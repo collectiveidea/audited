@@ -13,32 +13,37 @@ describe Audited::Auditor do
 
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
       it "should not audit #{column}" do
-        expect(Models::ActiveRecord::User.non_audited_columns).to include(column)
+        expect(Models::ActiveRecord::User.new.send(:audited_attributes).keys).to_not include(column)
       end
     end
 
     it "should be configurable which attributes are not audited via ignored_attributes" do
-      Audited.ignored_attributes = ['delta', 'top_secret', 'created_at']
-      class Secret < ::ActiveRecord::Base
-        audited
+      begin
+        old = Audited.ignored_attributes
+        Audited.ignored_attributes = ['activated', 'username', 'created_at']
+        expect(Models::ActiveRecord::User.new.send(:audited_attributes).keys).to_not include('activated', 'username', 'created_at')
+      ensure
+        Audited.ignored_attributes = old
       end
-
-      expect(Secret.non_audited_columns).to include('delta', 'top_secret', 'created_at')
     end
 
-    it "should be configurable which attributes are not audited via non_audited_columns=" do
-      class Secret2 < ::ActiveRecord::Base
-        audited
-        self.non_audited_columns = ['delta', 'top_secret', 'created_at']
+    it "should be configurable which attributes are not audited" do
+      class User2 < ::ActiveRecord::Base
+        self.table_name = "users"
+        audited except: [:activated, :username, :created_at]
       end
 
-      expect(Secret2.non_audited_columns).to include('delta', 'top_secret', 'created_at')
+      expect(User2.new.send(:audited_attributes).keys).to eq(["name", "password", "suspended_at", "logins", "favourite_device"])
     end
 
     it "should not save non-audited columns" do
-      Models::ActiveRecord::User.non_audited_columns = (Models::ActiveRecord::User.non_audited_columns << :favourite_device)
+      begin
+        Models::ActiveRecord::User.audited_options[:except] << "favourite_device"
 
-      expect(create_user.audits.first.audited_changes.keys.any? { |col| ['favourite_device', 'created_at', 'updated_at', 'password'].include?( col ) }).to eq(false)
+        expect(create_user.audits.first.send(:audited_changes).keys).to eq(["name", "username", "activated", "suspended_at", "logins"])
+      ensure
+        Models::ActiveRecord::User.audited_options[:except].pop
+      end
     end
 
     it "should not save other columns than specified in 'only' option" do
@@ -135,7 +140,7 @@ describe Audited::Auditor do
     end
 
     it "should store all the audited attributes" do
-      expect(user.audits.first.audited_changes).to eq(user.audited_attributes)
+      expect(user.audits.first.audited_changes).to eq(user.send(:audited_attributes))
     end
 
     it "should store comment" do
@@ -238,7 +243,7 @@ describe Audited::Auditor do
     it "should store all of the audited attributes" do
       @user.destroy
 
-      expect(@user.audits.last.audited_changes).to eq(@user.audited_attributes)
+      expect(@user.audits.last.audited_changes).to eq(@user.send(:audited_attributes))
     end
 
     it "should be able to reconstruct a destroyed record without history" do
