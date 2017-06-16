@@ -117,7 +117,7 @@ module Audited
 
     # @private
     def user_as_string
-      user_as_model || username
+      user_as_model || username || ("#{user_type}##{user_id}" if user_type && user_id)
     end
     alias_method :user_as_model, :user
     alias_method :user, :user_as_string

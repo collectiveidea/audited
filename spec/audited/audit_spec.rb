@@ -133,6 +133,12 @@ describe Audited::Audit do
       subject.user = user
       expect(subject.username).to be_nil
     end
+
+    it "should find deleted user" do
+      subject.user_type = user.class.name
+      subject.user_id = 123
+      expect(subject.user).to be_nil
+    end
   end
 
   describe "revision" do
