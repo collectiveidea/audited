@@ -38,6 +38,11 @@ module Audited
         # don't allow multiple calls
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
+        options = options.dup
+        [:only, :except].each do |column_list|
+          options[column_list] = Array.wrap(options[column_list]).map(&:to_s) if options[column_list]
+        end
+
         class_attribute :audit_associated_with,   instance_writer: false
         class_attribute :audited_options,       instance_writer: false
 
@@ -127,20 +132,7 @@ module Audited
         revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
       end
 
-      # List of attributes that are audited.
-      def audited_attributes
-        attributes.except(*non_audited_columns.map(&:to_s))
-      end
-
-      def non_audited_columns
-        self.class.non_audited_columns
-      end
-
       protected
-
-      def non_audited_columns
-        self.class.non_audited_columns
-      end
 
       def revision_with(attributes)
         dup.tap do |revision|
@@ -174,18 +166,24 @@ module Audited
 
       private
 
-      def audited_changes
-        collection =
-          if audited_options[:only]
-            audited_columns = self.class.audited_columns.map(&:name)
-            changed_attributes.slice(*audited_columns)
-          else
-            changed_attributes.except(*non_audited_columns)
-          end
+      # Hash of audited attributes and their current value.
+      def audited_attributes
+        select_audited_columns(attributes)
+      end
 
-        collection.inject({}) do |changes, (attr, old_value)|
-          changes[attr] = [old_value, self[attr]]
-          changes
+      # Hash of audited attributes and their [was, is] values.
+      def audited_changes
+        select_audited_columns(changes)
+      end
+
+      def select_audited_columns(hash)
+        options = self.class.audited_options
+        if options[:only]
+          hash.slice(*options[:only])
+        else
+          except = self.class.default_ignored_attributes + Audited.ignored_attributes
+          except |= options[:except] if options[:except]
+          hash.except(*except)
         end
       end
 
@@ -249,28 +247,6 @@ module Audited
     end # InstanceMethods
 
     module AuditedClassMethods
-      # Returns an array of columns that are audited. See non_audited_columns
-      def audited_columns
-        columns.reject { |c| non_audited_columns.map(&:to_s).include?(c.name) }
-      end
-
-      def non_audited_columns
-        @non_audited_columns ||= begin
-          options = audited_options
-          if options[:only]
-            except = column_names - Array.wrap(options[:only]).flatten.map(&:to_s)
-          else
-            except = default_ignored_attributes + Audited.ignored_attributes
-            except |= Array(options[:except]).collect(&:to_s) if options[:except]
-          end
-          except
-        end
-      end
-
-      def non_audited_columns=(columns)
-        @non_audited_columns = columns
-      end
-
       # Executes the block with auditing disabled.
       #
       #   Foo.without_auditing do
@@ -307,6 +283,16 @@ module Audited
 
       def auditing_enabled=(val)
         Audited.store["#{table_name}_auditing_enabled"] = val
+      end
+
+      # remove after 2018-01-01
+      def non_audited_columns
+        raise NotImplementedError, "Use .audited_options[:only] / [:except]"
+      end
+
+      # remove after 2018-01-01
+      def non_audited_columns=
+        raise NotImplementedError, "Use .audited_options[:only]= / [:except]="
       end
     end
   end

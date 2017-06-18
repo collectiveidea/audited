@@ -111,14 +111,15 @@ module Audited
       def records_changes_to_specified_fields?
         if @options[:only] || @options[:except]
           if @options[:only]
-            except = model_class.column_names - @options[:only].map(&:to_s)
+            expected = @options[:only].map(&:to_s)
           else
-            except = model_class.default_ignored_attributes + Audited.ignored_attributes
-            except |= @options[:except].collect(&:to_s) if @options[:except]
+            expected = model_class.column_names - model_class.default_ignored_attributes - Audited.ignored_attributes
+            expected -= @options[:except].map(&:to_s) if @options[:except]
           end
 
-          expects "non audited columns (#{model_class.non_audited_columns.inspect}) to match (#{expect})"
-          model_class.non_audited_columns =~ except
+          actual = model_class.new.send(:audited_attributes).keys
+          expects "audited columns (#{actual.inspect}) to equal (#{expected})"
+          actual == expected
         else
           true
         end

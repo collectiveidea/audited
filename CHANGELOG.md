@@ -4,7 +4,8 @@
 
 Breaking changes
 
-- None
+- remove `non_audited_columns` in favor of editing `audited_options[:except]`
+- `audited_options` keys `:only` and `:except` are converted to array of strings 
 
 Added
 
@@ -12,7 +13,7 @@ Added
 
 Changed
 
-- None
+- creation and deletion will follow same only/except rules updates do
 
 Fixed
 
