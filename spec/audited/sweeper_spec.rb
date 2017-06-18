@@ -1,5 +1,7 @@
 require "spec_helper"
 
+SingleCov.covered! uncovered: 3
+
 class AuditsController < ActionController::Base
   before_action :populate_user
 

@@ -1,5 +1,7 @@
 require "spec_helper"
 
+SingleCov.covered! uncovered: 9 # not testing proxy_respond_to? hack / 2 methods
+
 describe Audited::Auditor do
 
   describe "configuration" do

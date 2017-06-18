@@ -9,7 +9,6 @@
 .ruby-version
 .rvmrc
 .yardoc
-coverage/
 doc/
 Gemfile.lock
 gemfiles/*.lock
