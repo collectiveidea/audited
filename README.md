@@ -12,6 +12,7 @@ For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.c
 Audited supports and is [tested against](http://travis-ci.org/collectiveidea/audited) the following Ruby versions:
 
 * 2.1.5
+* 2.2.2
 * 2.2.4
 * 2.3.1
 * 2.4.1
