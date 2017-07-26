@@ -132,10 +132,6 @@ module Audited
         attributes.except(*non_audited_columns.map(&:to_s))
       end
 
-      def non_audited_columns
-        self.class.non_audited_columns
-      end
-
       protected
 
       def non_audited_columns
