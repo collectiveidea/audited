@@ -124,6 +124,13 @@ describe Audited::Audit do
       expect(revision.name).to eq(user.name)
       expect(revision).to be_a_new_record
     end
+
+    it "should work for deleted records using single-table inheritance" do
+      sti_company = Models::ActiveRecord::Company::STICompany.create
+      sti_company.destroy
+      revision = sti_company.audits.last.revision
+      expect(revision).to be_a(Models::ActiveRecord::Company::STICompany)
+    end
   end
 
   it "should set the version number on create" do

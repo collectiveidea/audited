@@ -4,16 +4,22 @@ describe Audited::Auditor do
 
   describe "configuration" do
     it "should include instance methods" do
-      expect(Models::ActiveRecord::User.new).to be_a_kind_of( Audited::Auditor::AuditedInstanceMethods)
+      expect(Models::ActiveRecord::User.new).to be_a_kind_of(Audited::Auditor::AuditedInstanceMethods)
     end
 
     it "should include class methods" do
-      expect(Models::ActiveRecord::User).to be_a_kind_of( Audited::Auditor::AuditedClassMethods )
+      expect(Models::ActiveRecord::User).to be_a_kind_of(Audited::Auditor::AuditedClassMethods )
     end
 
     ['created_at', 'updated_at', 'created_on', 'updated_on', 'lock_version', 'id', 'password'].each do |column|
       it "should not audit #{column}" do
         expect(Models::ActiveRecord::User.non_audited_columns).to include(column)
+      end
+    end
+
+    context "single-table inheritance record" do
+      it "should audit type to retrieve object revisions without loosing inheritance information" do
+        expect(Models::ActiveRecord::Company::STICompany.non_audited_columns).not_to include('type')
       end
     end
 
