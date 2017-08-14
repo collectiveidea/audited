@@ -143,15 +143,23 @@ end
 
 ### Current User Tracking
 
-If you're using Audited in a Rails application, all audited changes made within a request will automatically be attributed to the current user. By default, Audited uses the `current_user` method in your controller.
+If you're using Audited in a Rails application, add around callback for actions you want to track changes in.
+All audited changes made within a request will automatically be attributed to the current user. By default, Audited uses the `current_user` method in your controller.
 
 ```ruby
 class PostsController < ApplicationController
+  around_action Audited::Sweeper.new
+
   def create
     current_user # => #<User name: "Steve">
     @post = Post.create(params[:post])
     @post.audits.last.user # => #<User name: "Steve">
   end
+end
+
+# or enable this callback for all controllers:
+class ApplicationController < ActionController::Base
+  around_action Audited::Sweeper.new
 end
 ```
 

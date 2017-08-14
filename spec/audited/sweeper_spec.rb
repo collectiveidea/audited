@@ -1,6 +1,7 @@
 require "spec_helper"
 
 class AuditsController < ActionController::Base
+  around_action Audited::Sweeper.new
   before_action :populate_user
 
   attr_reader :company
