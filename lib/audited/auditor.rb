@@ -175,12 +175,13 @@ module Audited
       private
 
       def audited_changes
+        all_changes = respond_to?(:attributes_in_database) ? attributes_in_database : changed_attributes
         collection =
           if audited_options[:only]
             audited_columns = self.class.audited_columns.map(&:name)
-            changed_attributes.slice(*audited_columns)
+            all_changes.slice(*audited_columns)
           else
-            changed_attributes.except(*non_audited_columns)
+            all_changes.except(*non_audited_columns)
           end
 
         collection.inject({}) do |changes, (attr, old_value)|
