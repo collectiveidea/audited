@@ -86,6 +86,25 @@ module Audited
       end
     end
 
+    # Allows user to undo changes
+    def undo
+      model = self.auditable_type.constantize
+      if action == 'create'
+        # destroys a newly created record
+        model.find(auditable_id).destroy!
+      elsif action == 'destroy'
+        # creates a new record with the destroyed record attributes
+        model.create(audited_changes)
+      else
+        # changes back attributes
+        audited_object = model.find(auditable_id)
+        self.audited_changes.each do |k, v|
+          audited_object[k] = v[0]
+        end
+        audited_object.save
+      end
+    end
+
     # Allows user to be set to either a string or an ActiveRecord object
     # @private
     def user_as_string=(user)
