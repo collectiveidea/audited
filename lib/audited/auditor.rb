@@ -178,9 +178,9 @@ module Audited
         collection =
           if audited_options[:only]
             audited_columns = self.class.audited_columns.map(&:name)
-            changed_attributes.slice(*audited_columns)
+            attributes_in_database.slice(*audited_columns)
           else
-            changed_attributes.except(*non_audited_columns)
+            attributes_in_database.except(*non_audited_columns)
           end
 
         collection.inject({}) do |changes, (attr, old_value)|
