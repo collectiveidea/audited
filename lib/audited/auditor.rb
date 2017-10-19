@@ -34,15 +34,51 @@ module Audited
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
       #
+      # == Configuration options
+      #
+      #
+      # * +only+ - Only audit the given attributes
+      # * +except+ - Excludes fields from being saved in the audit log.
+      #   By default, Audited will audit all but these fields:
+      #
+      #     [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
+      #   You can add to those by passing one or an array of fields to skip.
+      #
+      #     class User < ActiveRecord::Base
+      #       audited :except => :password
+      #     end
+      #
+      # * +require_comment+ - Ensures that audit_comment is supplied before
+      #   any create, update or destroy operation.
+      #
+      # * +includes+ - Will add audit for existing value of any column(s), even if unchanged.  
+      #   Useful when using associated_with to store values of associated
+      #   columns, which may not exists later.
+      #
+      #   For example, with a has_many :through relationship, you can add this to the through model:
+      #     audited :associated_with => :contact, includes: ["contact_category.category_name"]
+      #     belongs_to :contact
+      #     belongs_to :contact_category
+      #
+      #   On contact category change, the audit stores only the value that contact category was changed to.
+      #   When looking up the contact_category later, it may no longer exist and lookup of the 
+      #   Category name would not be possible, so we store it with the audit using includes.
+      #
       def audited(options = {})
         # don't allow multiple calls
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 
         class_attribute :audit_associated_with,   instance_writer: false
         class_attribute :audited_options,       instance_writer: false
+        class_attribute :includes_columns,      :instance_writer => false
+ 
+       if options[:includes]
+          includes = Array(options[:includes]).collect(&:to_s)
+        end
 
         self.audited_options = options
         self.audit_associated_with = options[:associated_with]
+        self.includes_columns = includes 
 
         if options[:comment_required]
           validates_presence_of :audit_comment, if: :auditing_enabled
@@ -220,6 +256,9 @@ module Audited
       end
 
       def write_audit(attrs)
+        if self.includes_columns?
+          includes_columns.map{|col| attrs[:audited_changes][col]=[self.instance_eval(col)]} rescue ""
+        end
         attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
         run_callbacks(:audit)  { audits.create(attrs) } if auditing_enabled
