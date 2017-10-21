@@ -117,8 +117,11 @@ module Audited
       end
 
       # Get a specific revision specified by the version number, or +:previous+
+      # Returns nil for versions greater than revisions count
       def revision(version)
-        revision_with Audited.audit_class.reconstruct_attributes(audits_to(version))
+        if version == :previous || revisions.count >= version
+          revision_with Audited.audit_class.reconstruct_attributes(audits_to(version))
+        end
       end
 
       # Find the oldest revision recorded prior to the date/time provided.
