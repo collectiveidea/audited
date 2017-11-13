@@ -33,6 +33,10 @@ matrix:
       gemfile: gemfiles/rails40.gemfile
     - rvm: 2.4.2
       gemfile: gemfiles/rails41.gemfile
+    - rvm: ruby-head
+      gemfile: gemfiles/rails40.gemfile
+    - rvm: ruby-head
+      gemfile: gemfiles/rails41.gemfile
   fast_finish: true
 branches:
   only:
