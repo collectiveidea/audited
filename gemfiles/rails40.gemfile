@@ -6,4 +6,4 @@ gem "rails", "~> 4.0.0"
 gem "protected_attributes"
 gem "test-unit"
 
-gemspec :name => "audited", :path => "../"
+gemspec name: "audited", path: "../"
