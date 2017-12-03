@@ -1,5 +1,6 @@
 ENV['RAILS_ENV'] = 'test'
 
+require 'bundler'
 if Bundler.definition.dependencies.map(&:name).include?('protected_attributes')
   require 'protected_attributes'
 end
