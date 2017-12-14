@@ -51,13 +51,20 @@ module Audited
     scope :updates,       ->{ where(action: 'update')}
     scope :destroys,      ->{ where(action: 'destroy')}
 
+    scope :down_until,    ->(date_or_time){ where("created_at > ?", date_or_time) }
     scope :up_until,      ->(date_or_time){ where("created_at <= ?", date_or_time) }
-    scope :from_version,  ->(version){ where('version >= ?', version) }
+    scope :from_version,  ->(version){ where('version > ?', version) }
     scope :to_version,    ->(version){ where('version <= ?', version) }
     scope :auditable_finder, ->(auditable_id, auditable_type){ where(auditable_id: auditable_id, auditable_type: auditable_type)}
+
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
+    end
+
+    # Return all audits newer than the current one.
+    def descendents
+      self.class.ascending.auditable_finder(auditable_id, auditable_type).from_version(version)
     end
 
     # Return an instance of what the object looked like at this revision. If
@@ -65,7 +72,7 @@ module Audited
     def revision
       clazz = auditable_type.constantize
       (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(version: version))
+        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(descendents).merge(version: version))
       end
     end
 
@@ -124,7 +131,7 @@ module Audited
     def self.reconstruct_attributes(audits)
       attributes = {}
       result = audits.collect do |audit|
-        attributes.merge!(audit.new_attributes)[:version] = audit.version
+        attributes.merge!(audit.old_attributes)[:version] = audit.version
         yield attributes if block_given?
       end
       block_given? ? result : attributes
