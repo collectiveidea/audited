@@ -106,7 +106,7 @@ module Audited
       #     user.version
       #   end
       #
-      def revisions(from_version = 0)
+      def revisions(from_version = 1)
         audits = self.audits.from_version(from_version)
         return [] if audits.empty?
         revisions = []
@@ -118,7 +118,17 @@ module Audited
 
       # Get a specific revision specified by the version number, or +:previous+
       def revision(version)
-        revision_with Audited.audit_class.reconstruct_attributes(audits.from_version(version))
+        if version == :previous
+          version = if self.version
+                      self.version - 1
+                    else
+                      previous = audits.descending.offset(1).first
+                      previous ? previous.version : 1
+                    end
+        end
+        audit = audits.find_by(version: version)
+        audit && audit.revision
+        # revision_with Audited.audit_class.reconstruct_attributes(audits.from_version(version))
       end
 
       # Find the oldest revision recorded prior to the date/time provided.
@@ -188,18 +198,6 @@ module Audited
           changes[attr] = [old_value, self[attr]]
           changes
         end
-      end
-
-      def audits_to(version = nil)
-        if version == :previous
-          version = if self.version
-                      self.version - 1
-                    else
-                      previous = audits.descending.offset(1).first
-                      previous ? previous.version : 1
-                    end
-        end
-        audits.to_version(version)
       end
 
       def audit_create
