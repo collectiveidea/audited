@@ -127,13 +127,13 @@ module Audited
                     end
         end
         audit = audits.find_by(version: version)
-        audit && audit.revision
+        revision_with Audited.audit_class.reconstruct_attributes(audit ? audit.descendents : [])
       end
 
-      # Find the revision at the date/time provided, or the closest known one if none can be found
+      # Find the revision at the date/time provided.
       def revision_at(date_or_time)
         audit = self.audits.ascending.up_until(date_or_time).first || self.audits.descending.down_until(date_or_time).first
-        audit && audit.revision
+        revision_with Audited.audit_class.reconstruct_attributes(audit ? audit.descendents : [])
       end
 
       # List of attributes that are audited.
