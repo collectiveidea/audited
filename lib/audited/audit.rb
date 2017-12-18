@@ -57,9 +57,15 @@ module Audited
     scope :to_version,    ->(version){ where('version <= ?', version) }
     scope :auditable_finder, ->(auditable_id, auditable_type){ where(auditable_id: auditable_id, auditable_type: auditable_type)}
 
-    # Return all audits newer than the current one, including the current audit iff it is a destroy ation.
+    # Return all audits newer than the current one, including the current audit iff it is a create or destroy action.
     def descendents
-      self.class.descending.auditable_finder(auditable_id, auditable_type).from_version(action == 'destroy' ? version : version + 1)
+      self.class.descending.auditable_finder(auditable_id, auditable_type).from_version(
+          case action
+            when 'create' then version
+            when 'destroy' then version
+            else version + 1
+          end
+      )
     end
 
     # Return an instance of what the object looked like at this revision. If
