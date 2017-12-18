@@ -132,7 +132,7 @@ module Audited
 
       # Find the revision at the date/time provided.
       def revision_at(date_or_time)
-        audit = self.audits.ascending.up_until(date_or_time).first || self.audits.descending.down_until(date_or_time).first
+        audit = self.audits.ascending.up_until(date_or_time).last || self.audits.descending.down_until(date_or_time).first
         revision_with Audited.audit_class.reconstruct_attributes(audit ? audit.descendents : [])
       end
 
