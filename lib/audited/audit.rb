@@ -88,7 +88,7 @@ module Audited
     # Returns a hash of the changed attributes with the old values
     def old_attributes
       (audited_changes || {}).inject({}.with_indifferent_access) do |attrs, (attr, values)|
-        attrs[attr] = Array(values).first
+        attrs[attr] = values.is_a?(Array) ? values.first : values
 
         attrs
       end
@@ -132,7 +132,7 @@ module Audited
     def self.reconstruct_attributes(audits)
       attributes = {}
       result = audits.collect do |audit|
-        attributes.merge!(audit.old_attributes)[:version] = audit.version - 1
+        attributes.merge!(audit.old_attributes)[:version] = audit.version - (audit.action.in?(%w[create destroy]) ? 0 : 1)
         yield attributes if block_given?
       end
       block_given? ? result : attributes
