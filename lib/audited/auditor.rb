@@ -142,6 +142,10 @@ module Audited
         self.class.non_audited_columns
       end
 
+      def audited_columns
+        self.class.audited_columns
+      end
+
       def revision_with(attributes)
         dup.tap do |revision|
           revision.id = id
@@ -178,7 +182,6 @@ module Audited
         all_changes = respond_to?(:attributes_in_database) ? attributes_in_database : changed_attributes
         collection =
           if audited_options[:only]
-            audited_columns = self.class.audited_columns.map(&:name)
             all_changes.slice(*audited_columns)
           else
             all_changes.except(*non_audited_columns)
@@ -252,7 +255,7 @@ module Audited
     module AuditedClassMethods
       # Returns an array of columns that are audited. See non_audited_columns
       def audited_columns
-        columns.reject { |c| non_audited_columns.map(&:to_s).include?(c.name) }
+        @audited_columns ||= column_names - non_audited_columns
       end
 
       def non_audited_columns
