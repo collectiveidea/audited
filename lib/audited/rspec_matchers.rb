@@ -117,7 +117,7 @@ module Audited
             except |= @options[:except].collect(&:to_s) if @options[:except]
           end
 
-          expects "non audited columns (#{model_class.non_audited_columns.inspect}) to match (#{expect})"
+          expects "non audited columns (#{model_class.non_audited_columns.inspect}) to match (#{except})"
           model_class.non_audited_columns =~ except
         else
           true
