@@ -2,9 +2,9 @@ language: ruby
 cache: bundler
 rvm:
   - 2.1
-  - 2.2.4
-  - 2.3.1
-  - 2.4.1
+  - 2.2.8
+  - 2.3.5
+  - 2.4.2
   - ruby-head
 env:
   - DB=SQLITE
@@ -29,9 +29,13 @@ matrix:
       gemfile: gemfiles/rails51.gemfile
     - rvm: 2.1
       gemfile: gemfiles/rails52.gemfile
-    - rvm: 2.4.1
+    - rvm: 2.4.2
       gemfile: gemfiles/rails40.gemfile
-    - rvm: 2.4.1
+    - rvm: 2.4.2
+      gemfile: gemfiles/rails41.gemfile
+    - rvm: ruby-head
+      gemfile: gemfiles/rails40.gemfile
+    - rvm: ruby-head
       gemfile: gemfiles/rails41.gemfile
   fast_finish: true
 branches:
