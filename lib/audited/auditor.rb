@@ -175,17 +175,11 @@ module Audited
       private
 
       def audited_changes
-        all_changes = respond_to?(:attributes_in_database) ? attributes_in_database : changed_attributes
-        collection =
-          if audited_options[:only]
-            all_changes.slice(*audited_columns)
-          else
-            all_changes.except(*non_audited_columns)
-          end
-
-        collection.inject({}) do |changes, (attr, old_value)|
-          changes[attr] = [old_value, self[attr]]
-          changes
+        all_changes = respond_to?(:changes_to_save) ? changes_to_save : changes
+        if audited_options[:only]
+          all_changes.slice(*audited_columns)
+        else
+          all_changes.except(*non_audited_columns)
         end
       end
 
