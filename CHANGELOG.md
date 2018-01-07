@@ -8,15 +8,33 @@ Breaking changes
 
 Added
 
-- None
+- Add functionality to undo specific audit
+  [#381](https://github.com/collectiveidea/audited/pull/381)
 
 Changed
 
-- None
+- Removed duplicate declaration of `non_audited_columns` method
+  [#365](https://github.com/collectiveidea/audited/pull/365)
+- Updated `audited_changes` calculation to support Rails>=5.1 change syntax
+  [#377](https://github.com/collectiveidea/audited/pull/377)
+- Improve index ordering for polymorphic indexes
+  [#385](https://github.com/collectiveidea/audited/pull/385)
+- Update CI to test on newer versions of Ruby and Rails
+  [#386](https://github.com/collectiveidea/audited/pull/386)
+  [#387](https://github.com/collectiveidea/audited/pull/387)
+  [#388](https://github.com/collectiveidea/audited/pull/388)
+- Simplify `audited_columns` calculation
+  [#391](https://github.com/collectiveidea/audited/pull/391)
+- Simplify `audited_changes` calculation
+  [#389](https://github.com/collectiveidea/audited/pull/389)
 
 Fixed
 
-- None
+- Fixed typo in rspec causing incorrect test failure
+  [#360](https://github.com/collectiveidea/audited/pull/360)
+- Allow running specs using rake
+  [#390](https://github.com/collectiveidea/audited/pull/390)
+
 
 ## 4.5.0 (2017-05-22)
 
