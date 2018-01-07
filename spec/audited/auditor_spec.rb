@@ -463,10 +463,11 @@ describe Audited::Auditor do
       audit.save!
       user.update_attributes name: 'updated'
       expect(user.revision_at( 2.minutes.ago ).version).to eq(1)
+      expect(user.revision_at( 2.minutes.ago ).name).to eq('Brandon')
     end
 
-    it "should be nil if given a time before audits" do
-      expect(user.revision_at( 1.week.ago )).to be_nil
+    it "should give the last known version if given a time before audits" do
+      expect(user.revision_at( 1.week.ago ).name).to eq('Brandon')
     end
   end
 
