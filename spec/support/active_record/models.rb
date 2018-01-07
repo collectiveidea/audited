@@ -5,7 +5,7 @@ module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
       audited allow_mass_assignment: true, except: :password
-
+      attribute :non_column_attr if Rails.version >= '5.1'
       attr_protected :logins if respond_to?(:attr_protected)
 
       def name=(val)
