@@ -27,6 +27,8 @@ Changed
   [#391](https://github.com/collectiveidea/audited/pull/391)
 - Simplify `audited_changes` calculation
   [#389](https://github.com/collectiveidea/audited/pull/389)
+- Normalize options passed to `audited` method
+  [#397](https://github.com/collectiveidea/audited/pull/397)
 
 Fixed
 
