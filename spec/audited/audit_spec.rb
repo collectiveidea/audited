@@ -146,6 +146,26 @@ describe Audited::Audit do
       expect(revision.name).to eq(user.name)
       expect(revision).to be_a_new_record
     end
+
+    context "single-table inheritance" do
+      it "should return the right subclass for existing records" do
+        sti_company = Models::ActiveRecord::Company::STICompany.create
+        revision = sti_company.audits.last.revision
+        expect(revision).to be_a(Models::ActiveRecord::Company::STICompany)
+      end
+
+      it "should return the right subclass for deleted records" do
+        sti_company = Models::ActiveRecord::Company::STICompany.create
+        sti_company.destroy
+        revision = sti_company.audits.last.revision
+
+        if Models::ActiveRecord::Company::STICompany.respond_to?(:attr_accessible)
+          expect(revision).to be_a(Models::ActiveRecord::Company)
+        else
+          expect(revision).to be_a(Models::ActiveRecord::Company::STICompany)
+        end
+      end
+    end
   end
 
   it "should set the version number on create" do

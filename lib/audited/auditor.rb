@@ -24,7 +24,7 @@ module Audited
       # * +except+ - Excludes fields from being saved in the audit log.
       #   By default, Audited will audit all but these fields:
       #
-      #     [self.primary_key, inheritance_column, 'lock_version', 'created_at', 'updated_at']
+      #     [self.primary_key, 'lock_version', 'created_at', 'updated_at']
       #   You can add to those by passing one or an array of fields to skip.
       #
       #     class User < ActiveRecord::Base
@@ -79,7 +79,7 @@ module Audited
       end
 
       def default_ignored_attributes
-        [primary_key, inheritance_column]
+        [primary_key]
       end
     end
 

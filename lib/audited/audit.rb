@@ -64,9 +64,18 @@ module Audited
     # the object has been destroyed, this will be a new record.
     def revision
       clazz = auditable_type.constantize
-      (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(version: version))
-      end
+      attributes = self.class.reconstruct_attributes(ancestors).merge(version: version)
+      inheritance_column = clazz.inheritance_column.to_s
+
+      instance = if clazz.exists?(id: auditable_id)
+                   clazz.find_by_id(auditable_id)
+                 elsif attributes.key?(inheritance_column)
+                   clazz.new(inheritance_column => attributes.delete(inheritance_column))
+                 else
+                   clazz.new
+                 end
+
+      self.class.assign_revision_attributes(instance, attributes)
     end
 
     # Returns a hash of the changed attributes with the new values
