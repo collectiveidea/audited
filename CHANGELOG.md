@@ -8,6 +8,25 @@ Breaking changes
 
 Added
 
+- None
+
+Changed
+
+- None
+
+Fixed
+
+- None
+
+
+## 4.6.0 (2018-01-10)
+
+Breaking changes
+
+- None
+
+Added
+
 - Add functionality to undo specific audit
   [#381](https://github.com/collectiveidea/audited/pull/381)
 
