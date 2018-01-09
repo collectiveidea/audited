@@ -9,7 +9,6 @@ require 'rspec/rails'
 require 'audited'
 require 'audited_spec_helpers'
 require 'support/active_record/models'
-load "audited/sweeper.rb" # force to reload sweeper
 
 SPEC_ROOT = Pathname.new(File.expand_path('../', __FILE__))
 
