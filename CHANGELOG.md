@@ -38,6 +38,8 @@ Fixed
   [#390](https://github.com/collectiveidea/audited/pull/390)
 - Passing an invalid version to `revision` returns `nil` instead of last version
   [#384](https://github.com/collectiveidea/audited/pull/384)
+- Fix duplicate deceleration warnings
+  [#399](https://github.com/collectiveidea/audited/pull/399)
 
 
 ## 4.5.0 (2017-05-22)
