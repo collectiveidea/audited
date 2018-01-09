@@ -36,6 +36,8 @@ Fixed
   [#360](https://github.com/collectiveidea/audited/pull/360)
 - Allow running specs using rake
   [#390](https://github.com/collectiveidea/audited/pull/390)
+- Passing an invalid version to `revision` returns `nil` instead of last version
+  [#384](https://github.com/collectiveidea/audited/pull/384)
 
 
 ## 4.5.0 (2017-05-22)
