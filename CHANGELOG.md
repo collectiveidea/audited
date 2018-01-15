@@ -12,7 +12,9 @@ Added
 
 Changed
 
-- None
+- Reduced db calls in #revisions method
+  [#402](https://github.com/collectiveidea/audited/pull/402)
+  [#403](https://github.com/collectiveidea/audited/pull/403)
 
 Fixed
 
