@@ -22,7 +22,7 @@ module Audited
     end
 
     def remote_ip
-      controller.try(:request).try(:remote_ip)
+      controller.try(:request).try(:env["HTTP_X_FORWARDED_FOR"])
     end
 
     def request_uuid
