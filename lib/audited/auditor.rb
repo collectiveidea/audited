@@ -101,14 +101,16 @@ module Audited
       #   end
       #
       def revisions(from_version = 1)
-        return [] if audits.from_version(from_version).empty?
+        return [] unless audits.from_version(from_version).exists?
 
-        loaded_audits = audits.select([:audited_changes, :version]).to_a
-        targeted_audits = loaded_audits.select { |audit| audit.version >= from_version }
+        all_audits = audits.select([:audited_changes, :version]).to_a
+        targeted_audits = all_audits.select { |audit| audit.version >= from_version }
+
+        previous_attributes = reconstruct_attributes(all_audits - targeted_audits)
 
         targeted_audits.map do |audit|
-          ancestors = loaded_audits.select { |a| a.version <= audit.version  }
-          revision_with(reconstruct_attributes(ancestors).merge(version: audit.version))
+          previous_attributes.merge!(audit.new_attributes)
+          revision_with(previous_attributes.merge!(version: audit.version))
         end
       end
 
