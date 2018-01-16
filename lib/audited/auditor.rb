@@ -54,12 +54,14 @@ module Audited
 
         class_attribute :audit_associated_with, instance_writer: false
         class_attribute :audited_options,       instance_writer: false
+        class_attribute :keep_audits,             instance_writer: false
         attr_accessor :version, :audit_comment
 
         self.audited_options = options
         normalize_audited_options
 
         self.audit_associated_with = audited_options[:associated_with]
+        self.keep_audits = audited_options[:keep_audits]
 
         if audited_options[:comment_required]
           validate :presence_of_audit_comment
@@ -215,7 +217,13 @@ module Audited
       def audit_update
         unless (changes = audited_changes).empty? && audit_comment.blank?
           write_audit(action: 'update', audited_changes: changes,
-                      comment: audit_comment)
+                      comment: audit_comment) do
+            if keep_audits && audits.count > keep_audits.to_i
+              first_audit, second_audit = audits.limit(2)
+              second_audit.merge!(first_audit)
+              first_audit.destroy!
+            end
+          end
         end
       end
 
@@ -227,7 +235,14 @@ module Audited
       def write_audit(attrs)
         attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        run_callbacks(:audit)  { audits.create(attrs) } if auditing_enabled
+
+        if auditing_enabled
+          run_callbacks(:audit) {
+            audit = audits.create(attrs)
+            yield if block_given?
+            audit
+          }
+        end
       end
 
       def presence_of_audit_comment

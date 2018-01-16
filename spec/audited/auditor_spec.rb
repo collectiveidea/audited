@@ -437,6 +437,36 @@ describe Audited::Auditor do
     end
   end
 
+  describe "keep_audits" do
+    it "should be nil by default" do
+      expect(Models::ActiveRecord::User.keep_audits).to be_nil
+    end
+
+    it "should delete old audits when keeped amount exceeded" do
+      previous_keep_audits = Models::ActiveRecord::User.keep_audits
+      begin
+        Models::ActiveRecord::User.keep_audits = 2
+        user = create_versions(2)
+        user.update(name: "John")
+        expect(user.audits.pluck(:version)).to eq([2, 3])
+      ensure
+        Models::ActiveRecord::User.keep_audits = previous_keep_audits
+      end
+    end
+
+    it "should not delete old audits when keeped amount not exceeded" do
+      previous_keep_audits = Models::ActiveRecord::User.keep_audits
+      begin
+        Models::ActiveRecord::User.keep_audits = 3
+        user = create_versions(2)
+        user.update(name: "John")
+        expect(user.audits.pluck(:version)).to eq([1, 2, 3])
+      ensure
+        Models::ActiveRecord::User.keep_audits = previous_keep_audits
+      end
+    end
+  end
+
   describe "revisions" do
     let( :user ) { create_versions }
 
