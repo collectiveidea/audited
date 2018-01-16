@@ -25,6 +25,7 @@ end
 
 require 'audited/auditor'
 require 'audited/audit'
+require 'audited/audit_associate'
 
 ::ActiveRecord::Base.send :include, Audited::Auditor
 

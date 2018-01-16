@@ -58,6 +58,10 @@ module Audited
         if indexes.any? { |i| i.columns == %w[associated_id associated_type] }
           yield :revert_polymorphic_indexes_order
         end
+
+        unless Audited::Audit.connection.table_exists?(Audited::AuditAssociate.table_name)
+          yield :create_audit_associates
+        end
       end
     end
   end
