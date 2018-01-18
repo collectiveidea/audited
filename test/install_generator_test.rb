@@ -7,12 +7,15 @@ class InstallGeneratorTest < Rails::Generators::TestCase
   setup :prepare_destination
   tests Audited::Generators::InstallGenerator
 
-  test "generate migration with 'text' type for audited_changes column" do
+  test "generate migration with default types" do
     run_generator
 
     assert_migration "db/migrate/install_audited.rb" do |content|
       assert_includes(content, 'class InstallAudited')
       assert_includes(content, 't.column :audited_changes, :text')
+      assert_includes(content, 't.column :user_id, :integer')
+
+      assert_includes(content, 'table = "audits"')
     end
   end
 
@@ -49,6 +52,15 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     assert_migration "db/migrate/install_audited.rb" do |content|
       assert_includes(content, 'class InstallAudited')
       assert_includes(content, 't.column :user_id, :uuid')
+    end
+  end
+
+  test "generate migration with 'custom' for audit table name" do
+    run_generator %w(--audited-audit-table-name custom)
+
+    assert_migration "db/migrate/install_audited.rb" do |content|
+      assert_includes(content, 'class InstallAudited')
+      assert_includes(content, 'table = "custom"')
     end
   end
 

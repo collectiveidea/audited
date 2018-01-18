@@ -42,21 +42,24 @@ module Audited
         include Audited::Auditor::AuditedInstanceMethods
 
         class_attribute :audit_associated_with,   instance_writer: false
-        class_attribute :audited_options,       instance_writer: false
+        class_attribute :audited_options,         instance_writer: false
+        class_attribute :audit_class,             instance_writer: false
+
         attr_accessor :version, :audit_comment
 
         self.audited_options = options
         normalize_audited_options
 
         self.audit_associated_with = audited_options[:associated_with]
+        self.audit_class = audited_options[:class_name].constantize
 
         if audited_options[:comment_required]
           validates_presence_of :audit_comment, if: :auditing_enabled
           before_destroy :require_comment
         end
 
-        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name
-        Audited.audit_class.audited_class_names << to_s
+        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: audit_class.name
+        audit_class.audited_class_names << to_s
 
         after_create :audit_create    if audited_options[:on].include?(:create)
         before_update :audit_update   if audited_options[:on].include?(:update)
@@ -72,8 +75,9 @@ module Audited
         enable_auditing
       end
 
-      def has_associated_audits
-        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name
+      def has_associated_audits(options = {})
+        audit_class_name = options[:class_name] || Audited.audit_class.name
+        has_many :associated_audits, as: :associated, class_name: audit_class_name
       end
     end
 
@@ -116,14 +120,14 @@ module Audited
       # Returns nil for versions greater than revisions count
       def revision(version)
         if version == :previous || self.audits.last.version >= version
-          revision_with Audited.audit_class.reconstruct_attributes(audits_to(version))
+          revision_with audit_class.reconstruct_attributes(audits_to(version))
         end
       end
 
       # Find the oldest revision recorded prior to the date/time provided.
       def revision_at(date_or_time)
         audits = self.audits.up_until(date_or_time)
-        revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
+        revision_with audit_class.reconstruct_attributes(audits) unless audits.empty?
       end
 
       # List of attributes that are audited.
@@ -151,7 +155,7 @@ module Audited
           revision.send :instance_variable_set, '@destroyed', false
           revision.send :instance_variable_set, '@_destroyed', false
           revision.send :instance_variable_set, '@marked_for_destruction', false
-          Audited.audit_class.assign_revision_attributes(revision, attributes)
+          audit_class.assign_revision_attributes(revision, attributes)
 
           # Remove any association proxies so that they will be recreated
           # and reference the correct object for this revision. The only way
@@ -289,7 +293,7 @@ module Audited
       # convenience wrapper around
       # @see Audit#as_user.
       def audit_as(user, &block)
-        Audited.audit_class.as_user(user, &block)
+        audit_class.as_user(user, &block)
       end
 
       def auditing_enabled
@@ -310,6 +314,7 @@ module Audited
         audited_options[:on] = [:create, :update, :destroy] if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
+        audited_options[:class_name] ||= Audited.audit_class.name
       end
     end
   end
