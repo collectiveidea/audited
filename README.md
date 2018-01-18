@@ -278,30 +278,6 @@ Audited.config do |config|
 end
 ```
 
-## Gotchas
-
-### Using attr_protected with Rails 4.x
-
-If you're using the `protected_attributes` gem with Rails 4.0, 4.1 or 4.2 (the gem isn't supported in Rails 5.0 or higher), you'll have to take an extra couple of steps to get `audited` working.
-
-First be sure to add `allow_mass_assignment: true` to your `audited` call; otherwise Audited will
-interfere with `protected_attributes` and none of your `save` calls will work.
-
-```ruby
-class User < ActiveRecord::Base
-  audited allow_mass_assignment: true
-end
-```
-
-Second, be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
-
-```ruby
-class User < ActiveRecord::Base
-  audited allow_mass_assignment: true
-  attr_protected :logins, :audit_ids
-end
-```
-
 ## Support
 
 You can find documentation at: http://rdoc.info/github/collectiveidea/audited
