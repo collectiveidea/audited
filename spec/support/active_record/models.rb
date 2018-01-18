@@ -4,7 +4,7 @@ require File.expand_path('../schema', __FILE__)
 module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
-      audited allow_mass_assignment: true, except: :password
+      audited except: :password
       attribute :non_column_attr if Rails.version >= '5.1'
       attr_protected :logins if respond_to?(:attr_protected)
 
@@ -16,7 +16,7 @@ module Models
     class UserOnlyPassword < ::ActiveRecord::Base
       self.table_name = :users
       attribute :non_column_attr if Rails.version >= '5.1'
-      audited allow_mass_assignment: true, only: :password
+      audited only: :password
     end
 
     class CommentRequiredUser < ::ActiveRecord::Base
@@ -38,7 +38,7 @@ module Models
 
     class NoAttributeProtectionUser < ::ActiveRecord::Base
       self.table_name = :users
-      audited allow_mass_assignment: true
+      audited
     end
 
     class UserWithAfterAudit < ::ActiveRecord::Base
