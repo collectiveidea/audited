@@ -437,32 +437,42 @@ describe Audited::Auditor do
     end
   end
 
-  describe "keep_audits" do
-    it "should be nil by default" do
-      expect(Models::ActiveRecord::User.keep_audits).to be_nil
+  describe "max_audits" do
+    it "should respect global setting" do
+      expect(Models::ActiveRecord::User.max_audits).to eq(10)
+    end
+
+    it "should respect per model setting" do
+      previous_max_audits = Models::ActiveRecord::User.max_audits
+      begin
+        Models::ActiveRecord::User.max_audits = 5
+        expect(Models::ActiveRecord::User.max_audits).to eq(5)
+      ensure
+        Models::ActiveRecord::User.max_audits = previous_max_audits
+      end
     end
 
     it "should delete old audits when keeped amount exceeded" do
-      previous_keep_audits = Models::ActiveRecord::User.keep_audits
+      previous_max_audits = Models::ActiveRecord::User.max_audits
       begin
-        Models::ActiveRecord::User.keep_audits = 2
+        Models::ActiveRecord::User.max_audits = 2
         user = create_versions(2)
         user.update(name: "John")
         expect(user.audits.pluck(:version)).to eq([2, 3])
       ensure
-        Models::ActiveRecord::User.keep_audits = previous_keep_audits
+        Models::ActiveRecord::User.max_audits = previous_max_audits
       end
     end
 
     it "should not delete old audits when keeped amount not exceeded" do
-      previous_keep_audits = Models::ActiveRecord::User.keep_audits
+      previous_max_audits = Models::ActiveRecord::User.max_audits
       begin
-        Models::ActiveRecord::User.keep_audits = 3
+        Models::ActiveRecord::User.max_audits = 3
         user = create_versions(2)
         user.update(name: "John")
         expect(user.audits.pluck(:version)).to eq([1, 2, 3])
       ensure
-        Models::ActiveRecord::User.keep_audits = previous_keep_audits
+        Models::ActiveRecord::User.max_audits = previous_max_audits
       end
     end
   end

@@ -33,6 +33,7 @@ module Audited
       #
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
+      # * +max_audits+ - Limits the number of stored audits.
       #
       # * +if+ - Only audit the model when the given function returns true
       # * +unless+ - Only audit the model when the given function returns false
@@ -54,14 +55,14 @@ module Audited
 
         class_attribute :audit_associated_with, instance_writer: false
         class_attribute :audited_options,       instance_writer: false
-        class_attribute :keep_audits,             instance_writer: false
+        class_attribute :max_audits,              instance_writer: false
         attr_accessor :version, :audit_comment
 
         self.audited_options = options
         normalize_audited_options
 
         self.audit_associated_with = audited_options[:associated_with]
-        self.keep_audits = audited_options[:keep_audits]
+        self.max_audits = audited_options[:max_audits] || Audited.max_audits
 
         if audited_options[:comment_required]
           validate :presence_of_audit_comment
@@ -217,13 +218,7 @@ module Audited
       def audit_update
         unless (changes = audited_changes).empty? && audit_comment.blank?
           write_audit(action: 'update', audited_changes: changes,
-                      comment: audit_comment) do
-            if keep_audits && audits.count > keep_audits.to_i
-              first_audit, second_audit = audits.limit(2)
-              second_audit.merge!(first_audit)
-              first_audit.destroy!
-            end
-          end
+                      comment: audit_comment)
         end
       end
 
@@ -239,7 +234,7 @@ module Audited
         if auditing_enabled
           run_callbacks(:audit) {
             audit = audits.create(attrs)
-            yield if block_given?
+            reduce_audits_if_needed if attrs[:action] != 'create'
             audit
           }
         end
@@ -259,6 +254,14 @@ module Audited
           return true
         else
           errors.add(:audit_comment, "can't be blank.")
+        end
+      end
+
+      def reduce_audits_if_needed
+        if max_audits && audits.count > max_audits
+          first_audit, second_audit = audits.limit(2)
+          second_audit.merge!(first_audit)
+          first_audit.destroy!
         end
       end
 
@@ -366,6 +369,7 @@ module Audited
         audited_options[:on] = [:create, :update, :destroy] if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
+        audited_options[:max_audits] = Integer(audited_options[:max_audits]).abs if audited_options[:max_audits].present?
       end
     end
   end

@@ -142,6 +142,33 @@ class User < ActiveRecord::Base
 end
 ```
 
+### Limiting stored audits
+
+You can limit the number of audits stored for your model. To configure limiting for all audited models, put the following in an initializer:
+
+```ruby
+Audited.max_audits = 10 # keep only 10 latest audits
+```
+
+or customize per model:
+
+```ruby
+class User < ActiveRecord::Base
+  audited max_audits: 2
+end
+```
+
+Whenever a user is updated or destroyed, extra audits are merged into newer ones and destroyed.
+
+```ruby
+user = User.create!(name: "Steve")
+user.audits.count # => 1
+user.update_attributes!(name: "Ryan")
+user.audits.count # => 2
+user.destroy
+user.audits.count # => 2
+```
+
 ### Current User Tracking
 
 If you're using Audited in a Rails application, all audited changes made within a request will automatically be attributed to the current user. By default, Audited uses the `current_user` method in your controller.
