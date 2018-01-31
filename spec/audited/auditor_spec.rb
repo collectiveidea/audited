@@ -84,11 +84,11 @@ describe Audited::Auditor do
         let(:migrations_path) { SPEC_ROOT.join("support/active_record/postgres") }
 
         after do
-          ActiveRecord::Migrator.rollback([migrations_path])
+          run_migrations(:down, migrations_path)
         end
 
         it "should work if column type is 'json'" do
-          ActiveRecord::Migrator.up([migrations_path], 1)
+          run_migrations(:up, migrations_path, 1)
           Audited::Audit.reset_column_information
           expect(Audited::Audit.columns_hash["audited_changes"].sql_type).to eq("json")
 
@@ -99,7 +99,7 @@ describe Audited::Auditor do
         end
 
         it "should work if column type is 'jsonb'" do
-          ActiveRecord::Migrator.up([migrations_path], 2)
+          run_migrations(:up, migrations_path, 2)
           Audited::Audit.reset_column_information
           expect(Audited::Audit.columns_hash["audited_changes"].sql_type).to eq("jsonb")
 
