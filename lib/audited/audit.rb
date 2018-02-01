@@ -105,10 +105,11 @@ module Audited
       end
     end
 
-    def merge!(other)
+    def merge(other)
       raise ArgumentError, "#{other.inspect} should belong to the same auditable" \
         if other.auditable_type != auditable_type || other.auditable_id != auditable_id
-      update_column(:audited_changes, other.audited_changes.merge(audited_changes))
+      audited_changes.reverse_merge!(other.audited_changes)
+      self
     end
 
     # Allows user to be set to either a string or an ActiveRecord object

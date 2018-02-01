@@ -233,7 +233,7 @@ module Audited
 
         if auditing_enabled
           run_callbacks(:audit) {
-            audit = audits.create(attrs)
+            audit = audits.create!(attrs)
             reduce_audits_if_needed if attrs[:action] != 'create'
             audit
           }
@@ -258,10 +258,12 @@ module Audited
       end
 
       def reduce_audits_if_needed
-        if max_audits && audits.count > max_audits
-          first_audit, second_audit = audits.limit(2)
-          second_audit.merge!(first_audit)
-          first_audit.destroy!
+        if max_audits && (extra_count = audits.count - max_audits) > 0
+          first, *extra, merge_target = audits.limit(extra_count + 1)
+          (extra + [merge_target]).inject(first) { |memo, audit| audit.merge(memo) }
+
+          merge_target.save!
+          audits.where(id: ([first] + extra).map(&:id)).delete_all
         end
       end
 

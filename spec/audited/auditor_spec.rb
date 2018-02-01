@@ -144,9 +144,14 @@ describe Audited::Auditor do
     end
 
     it "should not save non-audited columns" do
-      Models::ActiveRecord::User.non_audited_columns = (Models::ActiveRecord::User.non_audited_columns << :favourite_device)
+      previous = Models::ActiveRecord::User.non_audited_columns
+      begin
+        Models::ActiveRecord::User.non_audited_columns += [:favourite_device]
 
-      expect(create_user.audits.first.audited_changes.keys.any? { |col| ['favourite_device', 'created_at', 'updated_at', 'password'].include?( col ) }).to eq(false)
+        expect(create_user.audits.first.audited_changes.keys.any? { |col| ['favourite_device', 'created_at', 'updated_at', 'password'].include?( col ) }).to eq(false)
+      ensure
+        Models::ActiveRecord::User.non_audited_columns = previous
+      end
     end
 
     it "should not save other columns than specified in 'only' option" do
@@ -451,7 +456,7 @@ describe Audited::Auditor do
       begin
         Models::ActiveRecord::User.max_audits = 2
         user = create_versions(2)
-        user.update(name: "John")
+        user.update(name: 'John')
         expect(user.audits.pluck(:version)).to eq([2, 3])
       ensure
         Models::ActiveRecord::User.max_audits = previous_max_audits
@@ -463,8 +468,29 @@ describe Audited::Auditor do
       begin
         Models::ActiveRecord::User.max_audits = 3
         user = create_versions(2)
-        user.update(name: "John")
+        user.update(name: 'John')
         expect(user.audits.pluck(:version)).to eq([1, 2, 3])
+      ensure
+        Models::ActiveRecord::User.max_audits = previous_max_audits
+      end
+    end
+
+    it "should delete old extra audits after introducing limit" do
+      previous_max_audits = Models::ActiveRecord::User.max_audits
+      begin
+        u = Models::ActiveRecord::User.create!(name: 'Brandon', username: 'brandon')
+        u.update_attributes(name: 'Foobar')
+        u.update_attributes(name: 'Awesome', username: 'keepers')
+        u.update_attributes(activated: true)
+
+        Models::ActiveRecord::User.max_audits = 3
+        u.update_attributes(favourite_device: 'Android Phone')
+        audits = u.audits
+
+        expect(audits.count).to eq(3)
+        expect(audits[0].audited_changes).to include({'name' => ['Foobar', 'Awesome'], 'username' => ['brandon', 'keepers']})
+        expect(audits[1].audited_changes).to eq({'activated' => [nil, true]})
+        expect(audits[2].audited_changes).to eq({'favourite_device' => [nil, 'Android Phone']})
       ensure
         Models::ActiveRecord::User.max_audits = previous_max_audits
       end
