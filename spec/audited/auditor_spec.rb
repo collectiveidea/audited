@@ -443,13 +443,7 @@ describe Audited::Auditor do
     end
 
     it "should respect per model setting" do
-      previous_max_audits = Models::ActiveRecord::User.max_audits
-      begin
-        Models::ActiveRecord::User.max_audits = 5
-        expect(Models::ActiveRecord::User.max_audits).to eq(5)
-      ensure
-        Models::ActiveRecord::User.max_audits = previous_max_audits
-      end
+      expect(Models::ActiveRecord::MaxAuditsUser.max_audits).to eq(5)
     end
 
     it "should delete old audits when keeped amount exceeded" do

@@ -72,6 +72,11 @@ module Models
       end
     end
 
+    class MaxAuditsUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited max_audits: 5
+    end
+
     class Company < ::ActiveRecord::Base
       audited
     end
