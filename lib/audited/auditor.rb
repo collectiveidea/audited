@@ -214,9 +214,26 @@ module Audited
       end
 
       def write_audit(attrs)
+        return unless should_audit?(attrs)
         attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
         run_callbacks(:audit)  { audits.create(attrs) } if auditing_enabled
+      end
+
+      def should_audit?(attrs)
+        if audited_options[:if]
+          case audited_options[:if]
+          when Proc
+            audited_options[:if].call(self, attrs)
+          when Symbol
+            send(audited_options[:if], attrs)
+          else
+            errors.add(:audit, "Unsupported conditional argument of type #{audited_options[:if].class}")
+            false
+          end
+        else
+          true
+        end
       end
 
       def require_comment
@@ -277,6 +294,7 @@ module Audited
       ensure
         enable_auditing if auditing_was_enabled
       end
+
 
       def disable_auditing
         self.auditing_enabled = false
