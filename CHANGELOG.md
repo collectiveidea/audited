@@ -8,7 +8,8 @@ Breaking changes
 
 Added
 
-- None
+- Add `inverse_of: auditable` definition to audit relation
+  [#413](https://github.com/collectiveidea/audited/pull/413)
 
 Changed
 
