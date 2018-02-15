@@ -55,7 +55,7 @@ module Audited
           before_destroy :require_comment
         end
 
-        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name
+        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name, inverse_of: :auditable
         Audited.audit_class.audited_class_names << to_s
 
         after_create :audit_create    if audited_options[:on].include?(:create)
