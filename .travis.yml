@@ -2,9 +2,9 @@ language: ruby
 cache: bundler
 rvm:
   - 2.1
-  - 2.2.8
-  - 2.3.5
-  - 2.4.2
+  - 2.2.9
+  - 2.3.6
+  - 2.4.3
   - 2.5.0
   - ruby-head
 env:
@@ -34,9 +34,9 @@ matrix:
       gemfile: gemfiles/rails51.gemfile
     - rvm: 2.1
       gemfile: gemfiles/rails52.gemfile
-    - rvm: 2.4.2
+    - rvm: 2.4.3
       gemfile: gemfiles/rails40.gemfile
-    - rvm: 2.4.2
+    - rvm: 2.4.3
       gemfile: gemfiles/rails41.gemfile
     - rvm: 2.5.0
       gemfile: gemfiles/rails40.gemfile
