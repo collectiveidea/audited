@@ -52,8 +52,8 @@ module Audited
         extend Audited::Auditor::AuditedClassMethods
         include Audited::Auditor::AuditedInstanceMethods
 
-        class_attribute :audit_associated_with,      instance_writer: false
-        class_attribute :audited_options,            instance_writer: false
+        class_attribute :audit_associated_with, instance_writer: false
+        class_attribute :audited_options,       instance_writer: false
         attr_accessor :version, :audit_comment
 
         self.audited_options = options
@@ -256,7 +256,7 @@ module Audited
         return true if condition.respond_to?(:blank?) && condition.blank?
         return true if !condition.respond_to?(:call) and !respond_to?(condition.to_sym)
 
-        return condition.call == matching if condition.respond_to?(:call)
+        return condition.call(self) == matching if condition.respond_to?(:call)
         return send(condition) == matching if respond_to?(condition)
 
         true

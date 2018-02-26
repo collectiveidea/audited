@@ -25,7 +25,7 @@ describe Audited::Auditor do
           class ConditionalCompany < ::ActiveRecord::Base
             self.table_name = 'companies'
 
-            audited :if => :public?
+            audited if: :public?
 
             def public?; end
           end
@@ -99,7 +99,11 @@ describe Audited::Auditor do
           before do
             class ExclusionaryCompany < ::ActiveRecord::Base
               self.table_name = 'companies'
-              audited unless: Proc.new { true }
+              audited unless: Proc.new { |c| c.exclusive? }
+
+              def exclusive?
+                true
+              end
             end
           end
 
