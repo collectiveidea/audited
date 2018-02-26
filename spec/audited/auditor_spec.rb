@@ -18,50 +18,106 @@ describe Audited::Auditor do
     end
 
     context "should be configurable which conditions are audited" do
-      before do
-        class ConditionalCompany < ::ActiveRecord::Base
-          self.table_name = 'companies'
+      subject { ConditionalCompany.new.send(:auditing_enabled) }
 
-          audited :if => :public?
+      context "when passing a method name" do
+        before do
+          class ConditionalCompany < ::ActiveRecord::Base
+            self.table_name = 'companies'
 
-          def public?; end
+            audited :if => :public?
+
+            def public?; end
+          end
+        end
+
+        context "when conditions are true" do
+          before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(true) }
+          it     { is_expected.to be_truthy }
+        end
+
+        context "when conditions are false" do
+          before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(false) }
+          it     { is_expected.to be_falsey }
         end
       end
 
-      subject { ConditionalCompany.new.send(:auditing_enabled) }
+      context "when passing a Proc" do
+        context "when conditions are true" do
+          before do
+            class InclusiveCompany < ::ActiveRecord::Base
+              self.table_name = 'companies'
+              audited if: Proc.new { true }
+            end
+          end
 
-      context "when conditions are true" do
-        before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(true) }
-        it     { is_expected.to be_truthy }
-      end
+          subject { InclusiveCompany.new.send(:auditing_enabled) }
 
-      context "when conditions are false" do
-        before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(false) }
-        it     { is_expected.to be_falsey }
+          it { is_expected.to be_truthy }
+        end
+
+        context "when conditions are false" do
+          before do
+            class ExclusiveCompany < ::ActiveRecord::Base
+              self.table_name = 'companies'
+              audited if: Proc.new { false }
+            end
+          end
+          subject { ExclusiveCompany.new.send(:auditing_enabled) }
+          it { is_expected.to be_falsey }
+        end
       end
     end
 
     context "should be configurable which conditions aren't audited" do
-      before do
-        class ExclusionaryCompany < ::ActiveRecord::Base
-          self.table_name = 'companies'
+      context "when using a method name" do
+        before do
+          class ExclusionaryCompany < ::ActiveRecord::Base
+            self.table_name = 'companies'
 
-          audited :unless => :non_profit?
+            audited unless: :non_profit?
 
-          def non_profit?; end
+            def non_profit?; end
+          end
+        end
+
+        subject { ExclusionaryCompany.new.send(:auditing_enabled) }
+
+        context "when conditions are true" do
+          before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(true) }
+          it     { is_expected.to be_falsey }
+        end
+
+        context "when conditions are false" do
+          before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(false) }
+          it     { is_expected.to be_truthy }
         end
       end
 
-      subject { ExclusionaryCompany.new.send(:auditing_enabled) }
+      context "when using a proc" do
+        context "when conditions are true" do
+          before do
+            class ExclusionaryCompany < ::ActiveRecord::Base
+              self.table_name = 'companies'
+              audited unless: Proc.new { true }
+            end
+          end
 
-      context "when conditions are true" do
-        before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(true) }
-        it     { is_expected.to be_falsey }
-      end
+          subject { ExclusionaryCompany.new.send(:auditing_enabled) }
+          it      { is_expected.to be_falsey }
+        end
 
-      context "when conditions are false" do
-        before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(false) }
-        it     { is_expected.to be_truthy }
+        context "when conditions are false" do
+          before do
+            class InclusiveCompany < ::ActiveRecord::Base
+              self.table_name = 'companies'
+              audited unless: Proc.new { false }
+            end
+          end
+
+          subject { InclusiveCompany.new.send(:auditing_enabled) }
+          it      { is_expected.to be_truthy }
+        end
       end
     end
 

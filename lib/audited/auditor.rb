@@ -54,8 +54,6 @@ module Audited
 
         class_attribute :audit_associated_with,      instance_writer: false
         class_attribute :audited_options,            instance_writer: false
-        class_attribute :conditional_auditing_with,  :instance_writer => false
-        class_attribute :exclusionary_auditing_with, :instance_writer => false
         attr_accessor :version, :audit_comment
 
         self.audited_options = options
@@ -81,12 +79,6 @@ module Audited
         define_callbacks :audit
         set_callback :audit, :after, :after_audit, if: lambda { respond_to?(:after_audit, true) }
         set_callback :audit, :around, :around_audit, if: lambda { respond_to?(:around_audit, true) }
-
-        if audited_options[:if]
-          self.conditional_auditing_with = audited_options[:if]
-        elsif audited_options[:unless]
-          self.exclusionary_auditing_with = audited_options[:unless]
-        end
 
         enable_auditing
       end
@@ -251,13 +243,23 @@ module Audited
       end
 
       def auditing_enabled
-        if conditional_auditing_with and self.respond_to?(conditional_auditing_with)
-          send(conditional_auditing_with)
-        elsif exclusionary_auditing_with and self.respond_to?(exclusionary_auditing_with)
-          !send(exclusionary_auditing_with)
-        else
+        if_condition = audited_options[:if]
+        unless_condition = audited_options[:unless]
+        return self.class.auditing_enabled unless if_condition.present? || unless_condition.present?
+
+        return run_conditional_check(audited_options[:if]) &&
+          run_conditional_check(audited_options[:unless], matching: false) &&
           self.class.auditing_enabled
-        end
+      end
+
+      def run_conditional_check(condition, matching: true)
+        return true if condition.respond_to?(:blank?) && condition.blank?
+        return true if !condition.respond_to?(:call) and !respond_to?(condition.to_sym)
+
+        return condition.call == matching if condition.respond_to?(:call)
+        return send(condition) == matching if respond_to?(condition)
+
+        true
       end
 
       def auditing_enabled=(val)
