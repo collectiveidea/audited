@@ -51,7 +51,7 @@ module Audited
         self.audit_associated_with = audited_options[:associated_with]
 
         if audited_options[:comment_required]
-          validates_presence_of :audit_comment, if: :auditing_enabled
+          validate :presence_of_audit_comment
           before_destroy :require_comment
         end
 
@@ -219,11 +219,28 @@ module Audited
         run_callbacks(:audit)  { audits.create(attrs) } if auditing_enabled
       end
 
+      def presence_of_audit_comment
+        case
+        when !auditing_enabled
+          return true
+        when audit_comment.present?
+          return true
+        when audited_options[:on].present? && audited_options[:on].exclude?(:create) && self.new_record?
+          return true
+        when audited_options[:on].present? && audited_options[:on].exclude?(:update) && self.persisted?
+          return true
+        else
+          errors.add(:audit_comment, "can't be blank.")
+        end
+      end
+
       def require_comment
         if auditing_enabled && audit_comment.blank?
-          errors.add(:audit_comment, "Comment required before destruction")
-          return false if Rails.version.start_with?('4.')
-          throw :abort
+          unless audited_options[:on].present? && audited_options[:on].exclude?(:destroy)
+            errors.add(:audit_comment, "Comment required before destruction")
+            return false if Rails.version.start_with?('4.')
+            throw :abort
+          end
         end
       end
 
