@@ -229,7 +229,7 @@ module Audited
           return true
         when audited_options[:on].present? && audited_options[:on].exclude?(:update) && self.persisted?
           return true
-        when audited_changes.empty?
+        when audited_changes.empty? && self.persisted?
           return true
         else
           errors.add(:audit_comment, "can't be blank.")
