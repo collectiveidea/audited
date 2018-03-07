@@ -52,7 +52,7 @@ module Audited
 
         if audited_options[:comment_required]
           validate :presence_of_audit_comment
-          before_destroy :require_comment
+          before_destroy :require_comment if audited_options[:on].include?(:destroy)
         end
 
         has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name, inverse_of: :auditable
@@ -238,11 +238,9 @@ module Audited
 
       def require_comment
         if auditing_enabled && audit_comment.blank?
-          unless audited_options[:on].present? && audited_options[:on].exclude?(:destroy)
-            errors.add(:audit_comment, "Comment required before destruction")
-            return false if Rails.version.start_with?('4.')
-            throw :abort
-          end
+          errors.add(:audit_comment, "Comment required before destruction")
+          return false if Rails.version.start_with?('4.')
+          throw :abort
         end
       end
 
