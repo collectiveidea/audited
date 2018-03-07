@@ -245,7 +245,6 @@ module Audited
       def auditing_enabled
         if_condition = audited_options[:if]
         unless_condition = audited_options[:unless]
-        return self.class.auditing_enabled unless if_condition.present? || unless_condition.present?
 
         return run_conditional_check(audited_options[:if]) &&
           run_conditional_check(audited_options[:unless], matching: false) &&
@@ -253,11 +252,10 @@ module Audited
       end
 
       def run_conditional_check(condition, matching: true)
-        return true if condition.respond_to?(:blank?) && condition.blank?
-        return true if !condition.respond_to?(:call) and !respond_to?(condition.to_sym)
+        return true if condition.blank?
 
         return condition.call(self) == matching if condition.respond_to?(:call)
-        return send(condition) == matching if respond_to?(condition)
+        return send(condition) == matching if respond_to?(condition.to_sym)
 
         true
       end
