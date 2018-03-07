@@ -225,9 +225,9 @@ module Audited
           return true
         when audit_comment.present?
           return true
-        when audited_options[:on].present? && audited_options[:on].exclude?(:create) && self.new_record?
+        when audited_options[:on].exclude?(:create) && self.new_record?
           return true
-        when audited_options[:on].present? && audited_options[:on].exclude?(:update) && self.persisted?
+        when audited_options[:on].exclude?(:update) && self.persisted?
           return true
         when audited_changes.empty? && self.persisted?
           return true
