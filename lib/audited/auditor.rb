@@ -243,9 +243,6 @@ module Audited
       end
 
       def auditing_enabled
-        if_condition = audited_options[:if]
-        unless_condition = audited_options[:unless]
-
         return run_conditional_check(audited_options[:if]) &&
           run_conditional_check(audited_options[:unless], matching: false) &&
           self.class.auditing_enabled
