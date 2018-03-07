@@ -552,6 +552,11 @@ describe Audited::Auditor do
         expect(Models::ActiveRecord::CommentRequiredUser.new( audit_comment: 'Create')).to be_valid
       end
 
+      it "should validate when audit_comment is not supplied, and creating is not being audited" do
+        expect(Models::ActiveRecord::OnUpdateCommentRequiredUser.new).to be_valid
+        expect(Models::ActiveRecord::OnDestroyCommentRequiredUser.new).to be_valid
+      end
+
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
         Models::ActiveRecord::CommentRequiredUser.disable_auditing
         expect(Models::ActiveRecord::CommentRequiredUser.new).to be_valid
@@ -561,9 +566,16 @@ describe Audited::Auditor do
 
     describe "on update" do
       let( :user ) { Models::ActiveRecord::CommentRequiredUser.create!( audit_comment: 'Create' ) }
+      let( :on_create_user ) { Models::ActiveRecord::OnDestroyCommentRequiredUser.create }
+      let( :on_destroy_user ) { Models::ActiveRecord::OnDestroyCommentRequiredUser.create }
 
       it "should not validate when audit_comment is not supplied" do
         expect(user.update_attributes(name: 'Test')).to eq(false)
+      end
+
+      it "should validate when audit_comment is not supplied, and updating is not being audited" do
+        expect(on_create_user.update_attributes(name: 'Test')).to eq(true)
+        expect(on_destroy_user.update_attributes(name: 'Test')).to eq(true)
       end
 
       it "should validate when audit_comment is supplied" do
@@ -579,6 +591,8 @@ describe Audited::Auditor do
 
     describe "on destroy" do
       let( :user ) { Models::ActiveRecord::CommentRequiredUser.create!( audit_comment: 'Create' )}
+      let( :on_create_user ) { Models::ActiveRecord::OnCreateCommentRequiredUser.create!( audit_comment: 'Create' ) }
+      let( :on_update_user ) { Models::ActiveRecord::OnUpdateCommentRequiredUser.create }
 
       it "should not validate when audit_comment is not supplied" do
         expect(user.destroy).to eq(false)
@@ -587,6 +601,11 @@ describe Audited::Auditor do
       it "should validate when audit_comment is supplied" do
         user.audit_comment = "Destroy"
         expect(user.destroy).to eq(user)
+      end
+
+      it "should validate when audit_comment is not supplied, and destroying is not being audited" do
+        expect(on_create_user.destroy).to eq(on_create_user)
+        expect(on_update_user.destroy).to eq(on_update_user)
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do

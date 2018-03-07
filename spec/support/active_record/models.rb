@@ -24,6 +24,21 @@ module Models
       audited comment_required: true
     end
 
+    class OnCreateCommentRequiredUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited comment_required: true, on: :create
+    end
+
+    class OnUpdateCommentRequiredUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited comment_required: true, on: :update
+    end
+
+    class OnDestroyCommentRequiredUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited comment_required: true, on: :destroy
+    end
+
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
       audited
