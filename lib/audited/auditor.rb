@@ -51,8 +51,8 @@ module Audited
         self.audit_associated_with = audited_options[:associated_with]
 
         if audited_options[:comment_required]
-          validates_presence_of :audit_comment, if: :auditing_enabled
-          before_destroy :require_comment
+          validate :presence_of_audit_comment
+          before_destroy :require_comment if audited_options[:on].include?(:destroy)
         end
 
         has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name, inverse_of: :auditable
@@ -217,6 +217,23 @@ module Audited
         attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
         run_callbacks(:audit)  { audits.create(attrs) } if auditing_enabled
+      end
+
+      def presence_of_audit_comment
+        case
+        when !auditing_enabled
+          return true
+        when audit_comment.present?
+          return true
+        when audited_options[:on].exclude?(:create) && self.new_record?
+          return true
+        when audited_options[:on].exclude?(:update) && self.persisted?
+          return true
+        when audited_changes.empty? && self.persisted?
+          return true
+        else
+          errors.add(:audit_comment, "can't be blank.")
+        end
       end
 
       def require_comment

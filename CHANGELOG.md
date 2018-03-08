@@ -19,7 +19,8 @@ Changed
 
 Fixed
 
-- None
+- Ensure that `on` and `except` options jive with `comment_required: true`
+  [#419](https://github.com/collectiveidea/audited/pull/419)
 
 
 ## 4.6.0 (2018-01-10)
