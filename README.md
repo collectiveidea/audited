@@ -228,6 +228,32 @@ user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
 
+### Conditional auditing
+
+If you want to audit only under specific conditions, you can provide conditional options (similar to ActiveModel callbacks) that will ensure your model is only audited for these conditions.
+
+```ruby
+class User < ActiveRecord::Base
+  audited if: :active?
+
+  private
+
+  def active?
+    last_login > 6.months.ago
+  end
+end
+```
+
+Just like in ActiveModel, you can use an inline Proc in your conditions:
+
+```ruby
+class User < ActiveRecord::Base
+  audited unless: Proc.new { |u| u.ninja? }
+end
+```
+
+In the above case, the user will only be audited when `User#ninja` is `false`.
+
 ### Disabling auditing
 
 If you want to disable auditing temporarily doing certain tasks, there are a few

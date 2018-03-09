@@ -34,6 +34,17 @@ module Audited
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
       #
+      # * +if+ - Only audit the model when the given function returns true
+      # * +unless+ - Only audit the model when the given function returns false
+      #
+      #     class User < ActiveRecord::Base
+      #       audited :if => :active?
+      #
+      #       def active?
+      #         self.status == 'active'
+      #       end
+      #     end
+      #
       def audited(options = {})
         # don't allow multiple calls
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
@@ -41,7 +52,7 @@ module Audited
         extend Audited::Auditor::AuditedClassMethods
         include Audited::Auditor::AuditedInstanceMethods
 
-        class_attribute :audit_associated_with,   instance_writer: false
+        class_attribute :audit_associated_with, instance_writer: false
         class_attribute :audited_options,       instance_writer: false
         attr_accessor :version, :audit_comment
 
@@ -249,7 +260,18 @@ module Audited
       end
 
       def auditing_enabled
-        self.class.auditing_enabled
+        return run_conditional_check(audited_options[:if]) &&
+          run_conditional_check(audited_options[:unless], matching: false) &&
+          self.class.auditing_enabled
+      end
+
+      def run_conditional_check(condition, matching: true)
+        return true if condition.blank?
+
+        return condition.call(self) == matching if condition.respond_to?(:call)
+        return send(condition) == matching if respond_to?(condition.to_sym)
+
+        true
       end
 
       def auditing_enabled=(val)
