@@ -8,7 +8,8 @@ Breaking changes
 
 Added
 
-- None
+- Add functionality to conditionally audit models
+  [#414](https://github.com/collectiveidea/audited/pull/414)
 
 Changed
 
