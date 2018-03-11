@@ -729,21 +729,21 @@ describe Audited::Auditor do
 
     describe "on create" do
       it "should not validate when audit_comment is not supplied" do
-        expect(Models::ActiveRecord::CommentRequiredUser.new).not_to be_valid
+        expect(Models::ActiveRecord::CommentRequiredUser.create(name: 'Foo')).not_to be_valid
       end
 
       it "should validate when audit_comment is supplied" do
-        expect(Models::ActiveRecord::CommentRequiredUser.new( audit_comment: 'Create')).to be_valid
+        expect(Models::ActiveRecord::CommentRequiredUser.create(name: 'Foo', audit_comment: 'Create')).to be_valid
       end
 
       it "should validate when audit_comment is not supplied, and creating is not being audited" do
-        expect(Models::ActiveRecord::OnUpdateCommentRequiredUser.new).to be_valid
-        expect(Models::ActiveRecord::OnDestroyCommentRequiredUser.new).to be_valid
+        expect(Models::ActiveRecord::OnUpdateCommentRequiredUser.create(name: 'Foo')).to be_valid
+        expect(Models::ActiveRecord::OnDestroyCommentRequiredUser.create(name: 'Foo')).to be_valid
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
         Models::ActiveRecord::CommentRequiredUser.disable_auditing
-        expect(Models::ActiveRecord::CommentRequiredUser.new).to be_valid
+        expect(Models::ActiveRecord::CommentRequiredUser.create(name: 'Foo')).to be_valid
         Models::ActiveRecord::CommentRequiredUser.enable_auditing
       end
     end
