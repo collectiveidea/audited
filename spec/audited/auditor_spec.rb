@@ -444,55 +444,71 @@ describe Audited::Auditor do
 
   describe "max_audits" do
     it "should respect global setting" do
-      expect(Models::ActiveRecord::User.max_audits).to eq(10)
+      stub_global_max_audits(10) do
+        expect(Models::ActiveRecord::User.audited_options[:max_audits]).to eq(10)
+      end
     end
 
     it "should respect per model setting" do
-      expect(Models::ActiveRecord::MaxAuditsUser.max_audits).to eq(5)
+      stub_global_max_audits(10) do
+        expect(Models::ActiveRecord::MaxAuditsUser.audited_options[:max_audits]).to eq(5)
+      end
     end
 
     it "should delete old audits when keeped amount exceeded" do
-      previous_max_audits = Models::ActiveRecord::User.max_audits
-      begin
-        Models::ActiveRecord::User.max_audits = 2
+      stub_global_max_audits(2) do
         user = create_versions(2)
         user.update(name: 'John')
         expect(user.audits.pluck(:version)).to eq([2, 3])
-      ensure
-        Models::ActiveRecord::User.max_audits = previous_max_audits
       end
     end
 
     it "should not delete old audits when keeped amount not exceeded" do
-      previous_max_audits = Models::ActiveRecord::User.max_audits
-      begin
-        Models::ActiveRecord::User.max_audits = 3
+      stub_global_max_audits(3) do
         user = create_versions(2)
         user.update(name: 'John')
         expect(user.audits.pluck(:version)).to eq([1, 2, 3])
-      ensure
-        Models::ActiveRecord::User.max_audits = previous_max_audits
       end
     end
 
     it "should delete old extra audits after introducing limit" do
-      previous_max_audits = Models::ActiveRecord::User.max_audits
-      begin
-        u = Models::ActiveRecord::User.create!(name: 'Brandon', username: 'brandon')
-        u.update_attributes(name: 'Foobar')
-        u.update_attributes(name: 'Awesome', username: 'keepers')
-        u.update_attributes(activated: true)
+      stub_global_max_audits(nil) do
+        user = Models::ActiveRecord::User.create!(name: 'Brandon', username: 'brandon')
+        user.update_attributes(name: 'Foobar')
+        user.update_attributes(name: 'Awesome', username: 'keepers')
+        user.update_attributes(activated: true)
 
-        Models::ActiveRecord::User.max_audits = 3
-        u.update_attributes(favourite_device: 'Android Phone')
-        audits = u.audits
+        Audited.max_audits = 3
+        Models::ActiveRecord::User.send(:normalize_audited_options)
+        user.update_attributes(favourite_device: 'Android Phone')
+        audits = user.audits
 
         expect(audits.count).to eq(3)
         expect(audits[0].audited_changes).to include({'name' => ['Foobar', 'Awesome'], 'username' => ['brandon', 'keepers']})
         expect(audits[1].audited_changes).to eq({'activated' => [nil, true]})
         expect(audits[2].audited_changes).to eq({'favourite_device' => [nil, 'Android Phone']})
+      end
+    end
+
+    it "should add comment line for combined audit" do
+      stub_global_max_audits(2) do
+        user = Models::ActiveRecord::User.create!(name: 'Foobar 1')
+        user.update(name: 'Foobar 2', audit_comment: 'First audit comment')
+        user.update(name: 'Foobar 3', audit_comment: 'Second audit comment')
+        expect(user.audits.first.comment).to match(/First audit comment.+is the result of multiple/m)
+      end
+    end
+
+    def stub_global_max_audits(max_audits)
+      previous_max_audits = Audited.max_audits
+      previous_user_audited_options = Models::ActiveRecord::User.audited_options.dup
+      begin
+        Audited.max_audits = max_audits
+        Models::ActiveRecord::User.send(:normalize_audited_options) # reloads audited_options
+        yield
       ensure
-        Models::ActiveRecord::User.max_audits = previous_max_audits
+        Audited.max_audits = previous_max_audits
+        Models::ActiveRecord::User.audited_options = previous_user_audited_options
       end
     end
   end

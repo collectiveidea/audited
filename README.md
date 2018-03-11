@@ -158,7 +158,7 @@ class User < ActiveRecord::Base
 end
 ```
 
-Whenever a user is updated or destroyed, extra audits are merged into newer ones and destroyed.
+Whenever an object is updated or destroyed, extra audits are combined with newer ones and the old ones are destroyed.
 
 ```ruby
 user = User.create!(name: "Steve")

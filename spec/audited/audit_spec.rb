@@ -200,28 +200,6 @@ describe Audited::Audit do
     end
   end
 
-  describe "merge!" do
-    it "should merge two audits" do
-      user = Models::ActiveRecord::User.create!(name: "John")
-      user.update(username: "john")
-      user.update(name: "John Doe")
-      expect(user.audits.count).to eq(3)
-
-      second, third = user.audits.offset(1)
-      third.merge(second)
-      expect(third.audited_changes).to eq({ "name" => ["John", "John Doe"], "username" => [nil, "john"] })
-    end
-
-    it "should raise when audit belongs to other auditable" do
-      audit = Audited::Audit.new(auditable_type: "User", auditable_id: 1)
-      for_other = Audited::Audit.new(auditable_type: "User", auditable_id: 2)
-
-      assert_raises(ArgumentError) do
-        audit.merge(for_other)
-      end
-    end
-  end
-
   describe "as_user" do
     it "should record user objects" do
       Audited::Audit.as_user(user) do

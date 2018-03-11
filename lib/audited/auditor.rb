@@ -55,14 +55,12 @@ module Audited
 
         class_attribute :audit_associated_with, instance_writer: false
         class_attribute :audited_options,       instance_writer: false
-        class_attribute :max_audits,              instance_writer: false
         attr_accessor :version, :audit_comment
 
         self.audited_options = options
         normalize_audited_options
 
         self.audit_associated_with = audited_options[:associated_with]
-        self.max_audits = audited_options[:max_audits] || Audited.max_audits
 
         if audited_options[:comment_required]
           validate :presence_of_audit_comment
@@ -145,6 +143,18 @@ module Audited
       # List of attributes that are audited.
       def audited_attributes
         attributes.except(*non_audited_columns)
+      end
+
+      # Combine multiple audits into one.
+      def combine_audits(audits_to_combine)
+        combine_target = audits_to_combine.last
+        combine_target.audited_changes = audits_to_combine.pluck(:audited_changes).reduce(&:merge)
+        combine_target.comment = "#{combine_target.comment}\nThis audit is the result of multiple audits being combined."
+
+        transaction do
+          combine_target.save!
+          audits_to_combine.unscope(:limit).where("version < ?", combine_target.version).delete_all
+        end
       end
 
       protected
@@ -233,8 +243,8 @@ module Audited
 
         if auditing_enabled
           run_callbacks(:audit) {
-            audit = audits.create!(attrs)
-            reduce_audits_if_needed if attrs[:action] != 'create'
+            audit = audits.create(attrs)
+            combine_audits_if_needed if attrs[:action] != 'create'
             audit
           }
         end
@@ -257,13 +267,11 @@ module Audited
         end
       end
 
-      def reduce_audits_if_needed
+      def combine_audits_if_needed
+        max_audits = audited_options[:max_audits]
         if max_audits && (extra_count = audits.count - max_audits) > 0
-          first, *extra, merge_target = audits.limit(extra_count + 1)
-          (extra + [merge_target]).inject(first) { |memo, audit| audit.merge(memo) }
-
-          merge_target.save!
-          audits.where(id: ([first] + extra).map(&:id)).delete_all
+          audits_to_combine = audits.limit(extra_count + 1)
+          combine_audits(audits_to_combine)
         end
       end
 
@@ -371,7 +379,8 @@ module Audited
         audited_options[:on] = [:create, :update, :destroy] if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
-        audited_options[:max_audits] = Integer(audited_options[:max_audits]).abs if audited_options[:max_audits].present?
+        max_audits = audited_options[:max_audits] || Audited.max_audits
+        audited_options[:max_audits] = Integer(max_audits).abs if max_audits
       end
     end
   end

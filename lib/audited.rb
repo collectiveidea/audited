@@ -2,9 +2,8 @@ require 'active_record'
 
 module Audited
   class << self
-    attr_accessor :ignored_attributes, :current_user_method
+    attr_accessor :ignored_attributes, :current_user_method, :max_audits
     attr_writer :audit_class
-    attr_reader :max_audits
 
     def audit_class
       @audit_class ||= Audit
@@ -12,10 +11,6 @@ module Audited
 
     def store
       Thread.current[:audited_store] ||= {}
-    end
-
-    def max_audits=(value)
-      @max_audits = Integer(value).abs
     end
 
     def config
