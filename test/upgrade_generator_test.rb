@@ -79,6 +79,26 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
     end
   end
 
+  test "should create audited_audit_associates table" do
+    load_schema 7
+
+    run_generator %w(upgrade)
+
+    assert_migration "db/migrate/create_audit_associates.rb" do |content|
+      assert_match(/create_table :audited_audit_associates/, content)
+      assert_match(/t.column :audit_id, :integer/, content)
+      assert_match(/t.column :associated_id, :integer/, content)
+      assert_match(/t.column :associated_type, :string/, content)
+
+      assert_match(/add_index :audited_audit_associates, :audit_id/, content)
+      assert_match(/add_index :audited_audit_associates, \[:associated_type, :associated_id\]/, content)
+
+      assert_match(/remove_index :audits, name: 'associated_index'/, content)
+      assert_match(/remove_column :audits, :associated_id/, content)
+      assert_match(/remove_column :audits, :associated_type/, content)
+    end
+  end
+
   test "generate migration with correct AR migration parent" do
     load_schema 1
 
