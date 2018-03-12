@@ -12,6 +12,8 @@ Added
   [#413](https://github.com/collectiveidea/audited/pull/413)
 - Add functionality to conditionally audit models
   [#414](https://github.com/collectiveidea/audited/pull/414)
+- Limit number of audits stored
+  [#405](https://github.com/collectiveidea/audited/pull/405)
 
 Changed
 

@@ -33,6 +33,7 @@ module Audited
       #
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
+      # * +max_audits+ - Limits the number of stored audits.
       #
       # * +if+ - Only audit the model when the given function returns true
       # * +unless+ - Only audit the model when the given function returns false
@@ -144,6 +145,18 @@ module Audited
         attributes.except(*non_audited_columns)
       end
 
+      # Combine multiple audits into one.
+      def combine_audits(audits_to_combine)
+        combine_target = audits_to_combine.last
+        combine_target.audited_changes = audits_to_combine.pluck(:audited_changes).reduce(&:merge)
+        combine_target.comment = "#{combine_target.comment}\nThis audit is the result of multiple audits being combined."
+
+        transaction do
+          combine_target.save!
+          audits_to_combine.unscope(:limit).where("version < ?", combine_target.version).delete_all
+        end
+      end
+
       protected
 
       def non_audited_columns
@@ -227,7 +240,14 @@ module Audited
       def write_audit(attrs)
         attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        run_callbacks(:audit)  { audits.create(attrs) } if auditing_enabled
+
+        if auditing_enabled
+          run_callbacks(:audit) {
+            audit = audits.create(attrs)
+            combine_audits_if_needed if attrs[:action] != 'create'
+            audit
+          }
+        end
       end
 
       def presence_of_audit_comment
@@ -244,6 +264,14 @@ module Audited
           return true
         else
           errors.add(:audit_comment, "can't be blank.")
+        end
+      end
+
+      def combine_audits_if_needed
+        max_audits = audited_options[:max_audits]
+        if max_audits && (extra_count = audits.count - max_audits) > 0
+          audits_to_combine = audits.limit(extra_count + 1)
+          combine_audits(audits_to_combine)
         end
       end
 
@@ -351,6 +379,8 @@ module Audited
         audited_options[:on] = [:create, :update, :destroy] if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
+        max_audits = audited_options[:max_audits] || Audited.max_audits
+        audited_options[:max_audits] = Integer(max_audits).abs if max_audits
       end
     end
   end

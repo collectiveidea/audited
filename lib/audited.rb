@@ -2,7 +2,7 @@ require 'active_record'
 
 module Audited
   class << self
-    attr_accessor :ignored_attributes, :current_user_method
+    attr_accessor :ignored_attributes, :current_user_method, :max_audits
     attr_writer :audit_class
 
     def audit_class
