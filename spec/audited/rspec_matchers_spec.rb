@@ -7,6 +7,8 @@ describe Models::ActiveRecord::UserExceptPassword do
   it { should be_audited.except(:password) }
   it { should_not be_audited.requires_comment }
   it { should be_audited.on(:create, :update, :destroy) }
+  # test chaining
+  it { should be_audited.except(:password).on(:create, :update, :destroy) }
 end
 
 describe Models::ActiveRecord::UserOnlyPassword do
@@ -16,6 +18,7 @@ describe Models::ActiveRecord::UserOnlyPassword do
   it { should_not be_audited.except(audited_columns) }
   it { should_not be_audited.requires_comment }
   it { should be_audited.on(:create, :update, :destroy) }
+  it { should be_audited.only(:password).on(:create, :update, :destroy) }
 end
 
 describe Models::ActiveRecord::CommentRequiredUser do
@@ -26,6 +29,7 @@ describe Models::ActiveRecord::CommentRequiredUser do
   it { should_not be_audited.except(audited_columns) }
   it { should be_audited.requires_comment }
   it { should be_audited.on(:create, :update, :destroy) }
+  it { should be_audited.requires_comment.on(:create, :update, :destroy) }
 end
 
 describe Models::ActiveRecord::OnCreateCommentRequiredUser do
@@ -37,6 +41,7 @@ describe Models::ActiveRecord::OnCreateCommentRequiredUser do
   it { should be_audited.requires_comment }
   it { should be_audited.on(:create) }
   it { should_not be_audited.on(:update, :destroy) }
+  it { should be_audited.requires_comment.on(:create) }
 end
 
 describe Models::ActiveRecord::OnUpdateCommentRequiredUser do
@@ -48,6 +53,7 @@ describe Models::ActiveRecord::OnUpdateCommentRequiredUser do
   it { should be_audited.requires_comment }
   it { should be_audited.on(:update) }
   it { should_not be_audited.on(:create, :destroy) }
+  it { should be_audited.requires_comment.on(:update) }
 end
 
 describe Models::ActiveRecord::OnDestroyCommentRequiredUser do
@@ -59,4 +65,5 @@ describe Models::ActiveRecord::OnDestroyCommentRequiredUser do
   it { should be_audited.requires_comment }
   it { should be_audited.on(:destroy) }
   it { should_not be_audited.on(:create, :update) }
+  it { should be_audited.requires_comment.on(:destroy) }
 end
