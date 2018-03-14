@@ -8,24 +8,48 @@ Breaking changes
 
 Added
 
+- None
+
+Changed
+
+- None
+
+Fixed
+
+- None
+
+## 4.7.0 (2018-03-14)
+
+Breaking changes
+
+- None
+
+Added
+
 - Add `inverse_of: auditable` definition to audit relation
   [#413](https://github.com/collectiveidea/audited/pull/413)
 - Add functionality to conditionally audit models
   [#414](https://github.com/collectiveidea/audited/pull/414)
-- Limit number of audits stored
+- Allow limiting number of audits stored
   [#405](https://github.com/collectiveidea/audited/pull/405)
 
 Changed
 
-- Reduced db calls in #revisions method
+- Reduced db calls in `#revisions` method
   [#402](https://github.com/collectiveidea/audited/pull/402)
   [#403](https://github.com/collectiveidea/audited/pull/403)
+- Update supported Ruby and Rails versions
+  [#404](https://github.com/collectiveidea/audited/pull/404)
+  [#409](https://github.com/collectiveidea/audited/pull/409)
+  [#415](https://github.com/collectiveidea/audited/pull/415)
+  [#416](https://github.com/collectiveidea/audited/pull/416)
 
 Fixed
 
 - Ensure that `on` and `except` options jive with `comment_required: true`
   [#419](https://github.com/collectiveidea/audited/pull/419)
-
+- Fix RSpec matchers
+  [#420](https://github.com/collectiveidea/audited/pull/420)
 
 ## 4.6.0 (2018-01-10)
 
