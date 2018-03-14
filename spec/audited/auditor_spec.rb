@@ -728,7 +728,11 @@ describe Audited::Auditor do
   describe "comment required" do
 
     describe "on create" do
-      it "should not validate when audit_comment is not supplied" do
+      it "should not validate when audit_comment is not supplied when initialized" do
+        expect(Models::ActiveRecord::CommentRequiredUser.new(name: 'Foo')).not_to be_valid
+      end
+
+      it "should not validate when audit_comment is not supplied trying to create" do
         expect(Models::ActiveRecord::CommentRequiredUser.create(name: 'Foo')).not_to be_valid
       end
 

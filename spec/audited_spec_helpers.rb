@@ -1,13 +1,5 @@
 module AuditedSpecHelpers
 
-  def reset_audited_ignored_attributes
-    Audited.ignored_attributes = %w(lock_version created_at updated_at created_on updated_on)
-  end
-
-  def reset_user_non_audited_fields
-    Models::ActiveRecord::User.non_audited_columns = [:password]
-  end
-
   def create_user(attrs = {})
     Models::ActiveRecord::User.create({name: 'Brandon', username: 'brandon', password: 'password', favourite_device: 'Android Phone'}.merge(attrs))
   end

@@ -64,8 +64,6 @@ module Audited
 
         if audited_options[:comment_required]
           validate :presence_of_audit_comment
-          before_create :require_comment if audited_options[:on].include?(:create)
-          before_update :require_comment if audited_options[:on].include?(:update)
           before_destroy :require_comment if audited_options[:on].include?(:destroy)
         end
 
@@ -253,7 +251,15 @@ module Audited
       end
 
       def presence_of_audit_comment
-        require_comment if comment_required_state?
+        if comment_required_state?
+          errors.add(:audit_comment, "Comment can't be blank!") unless audit_comment.present?
+        end
+      end
+
+      def comment_required_state?
+        auditing_enabled &&
+          ((audited_options[:on].include?(:create) && self.new_record?) ||
+          (audited_options[:on].include?(:update) && self.persisted? && self.changed?))
       end
 
       def combine_audits_if_needed
@@ -270,11 +276,6 @@ module Audited
           return false if Rails.version.start_with?('4.')
           throw(:abort)
         end
-      end
-
-      def comment_required_state?
-        (audited_options[:on].include?(:create) && self.new_record?) ||
-          (audited_options[:on].include?(:update) && self.persisted? && self.changed?)
       end
 
       CALLBACKS.each do |attr_name|
