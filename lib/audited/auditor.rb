@@ -251,20 +251,15 @@ module Audited
       end
 
       def presence_of_audit_comment
-        case
-        when !auditing_enabled
-          return true
-        when audit_comment.present?
-          return true
-        when audited_options[:on].exclude?(:create) && self.new_record?
-          return true
-        when audited_options[:on].exclude?(:update) && self.persisted?
-          return true
-        when audited_changes.empty? && self.persisted?
-          return true
-        else
-          errors.add(:audit_comment, "can't be blank.")
+        if comment_required_state?
+          errors.add(:audit_comment, "Comment can't be blank!") unless audit_comment.present?
         end
+      end
+
+      def comment_required_state?
+        auditing_enabled &&
+          ((audited_options[:on].include?(:create) && self.new_record?) ||
+          (audited_options[:on].include?(:update) && self.persisted? && self.changed?))
       end
 
       def combine_audits_if_needed
@@ -277,9 +272,9 @@ module Audited
 
       def require_comment
         if auditing_enabled && audit_comment.blank?
-          errors.add(:audit_comment, "Comment required before destruction")
+          errors.add(:audit_comment, "Comment can't be blank!")
           return false if Rails.version.start_with?('4.')
-          throw :abort
+          throw(:abort)
         end
       end
 
@@ -321,9 +316,7 @@ module Audited
 
       # We have to calculate this here since column_names may not be available when `audited` is called
       def non_audited_columns
-        @non_audited_columns ||= audited_options[:only].present? ?
-                                 column_names - audited_options[:only] :
-                                 default_ignored_attributes | audited_options[:except]
+        @non_audited_columns ||= calculate_non_audited_columns
       end
 
       def non_audited_columns=(columns)
@@ -369,10 +362,11 @@ module Audited
         Audited.store["#{table_name}_auditing_enabled"] = val
       end
 
-      protected
       def default_ignored_attributes
-        [primary_key, inheritance_column] + Audited.ignored_attributes
+        [primary_key, inheritance_column] | Audited.ignored_attributes
       end
+
+      protected
 
       def normalize_audited_options
         audited_options[:on] = Array.wrap(audited_options[:on])
@@ -381,6 +375,16 @@ module Audited
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
         max_audits = audited_options[:max_audits] || Audited.max_audits
         audited_options[:max_audits] = Integer(max_audits).abs if max_audits
+      end
+
+      def calculate_non_audited_columns
+        if audited_options[:only].present?
+          (column_names | default_ignored_attributes) - audited_options[:only]
+        elsif audited_options[:except].present?
+          default_ignored_attributes | audited_options[:except]
+        else
+          default_ignored_attributes
+        end
       end
     end
   end

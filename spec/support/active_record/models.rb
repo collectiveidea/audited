@@ -13,6 +13,11 @@ module Models
       end
     end
 
+    class UserExceptPassword < ::ActiveRecord::Base
+      self.table_name = :users
+      audited except: :password
+    end
+
     class UserOnlyPassword < ::ActiveRecord::Base
       self.table_name = :users
       attribute :non_column_attr if Rails.version >= '5.1'
