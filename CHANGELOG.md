@@ -4,7 +4,9 @@
 
 Breaking changes
 
-- None
+- removed `audited_columns`, `non_audited_columns`, `auditing_enabled=` instance methods, 
+  use class methods instead
+  [#424](https://github.com/collectiveidea/audited/pull/424)
 
 Added
 

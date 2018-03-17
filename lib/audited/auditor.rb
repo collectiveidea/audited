@@ -142,7 +142,7 @@ module Audited
 
       # List of attributes that are audited.
       def audited_attributes
-        attributes.except(*non_audited_columns)
+        attributes.except(*self.class.non_audited_columns)
       end
 
       # Combine multiple audits into one.
@@ -158,14 +158,6 @@ module Audited
       end
 
       protected
-
-      def non_audited_columns
-        self.class.non_audited_columns
-      end
-
-      def audited_columns
-        self.class.audited_columns
-      end
 
       def revision_with(attributes)
         dup.tap do |revision|
@@ -202,9 +194,9 @@ module Audited
       def audited_changes
         all_changes = respond_to?(:changes_to_save) ? changes_to_save : changes
         if audited_options[:only].present?
-          all_changes.slice(*audited_columns)
+          all_changes.slice(*self.class.audited_columns)
         else
-          all_changes.except(*non_audited_columns)
+          all_changes.except(*self.class.non_audited_columns)
         end
       end
 
@@ -295,10 +287,6 @@ module Audited
         return send(condition) == matching if respond_to?(condition.to_sym)
 
         true
-      end
-
-      def auditing_enabled=(val)
-        self.class.auditing_enabled = val
       end
 
       def reconstruct_attributes(audits)
