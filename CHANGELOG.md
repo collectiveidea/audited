@@ -8,7 +8,8 @@ Breaking changes
 
 Added
 
-- None
+- Add ability to globally disable auditing
+  [#426](https://github.com/collectiveidea/audited/pull/426)
 
 Changed
 

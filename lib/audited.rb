@@ -9,6 +9,18 @@ module Audited
       @audit_class ||= Audit
     end
 
+    def enable_auditing
+      store[:auditing_enabled] = nil
+    end
+
+    def disable_auditing
+      store[:auditing_enabled] = false
+    end
+
+    def auditing_enabled?
+      store[:auditing_enabled].nil? || store[:auditing_enabled]
+    end
+
     def store
       Thread.current[:audited_store] ||= {}
     end
