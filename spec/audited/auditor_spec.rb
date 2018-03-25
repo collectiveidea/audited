@@ -723,6 +723,21 @@ describe Audited::Auditor do
         STDERR.puts "Thread safety tests cannot be run with SQLite"
       end
     end
+
+    it "should not save an audit when auditing is globally disabled" do
+      expect(Audited.auditing_enabled).to eq(true)
+      Audited.auditing_enabled = false
+      expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+
+      user = create_user
+      expect(user.audits.count).to eq(0)
+
+      Audited.auditing_enabled = true
+      expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
+
+      user.update_attributes(name: 'Test')
+      expect(user.audits.count).to eq(1)
+    end
   end
 
   describe "comment required" do

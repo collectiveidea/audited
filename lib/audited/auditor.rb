@@ -355,7 +355,7 @@ module Audited
       end
 
       def auditing_enabled
-        Audited.store.fetch("#{table_name}_auditing_enabled", true)
+        Audited.store.fetch("#{table_name}_auditing_enabled", true) && Audited.auditing_enabled
       end
 
       def auditing_enabled=(val)
