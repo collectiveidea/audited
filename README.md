@@ -315,7 +315,7 @@ User.auditing_enabled = false
 To disable auditing on all models:
 
 ```ruby
-Audited.disable_auditing
+Audited.auditing_enabled = false
 ```
 
 ### Custom `Audit` model

@@ -285,8 +285,7 @@ module Audited
       def auditing_enabled
         return run_conditional_check(audited_options[:if]) &&
           run_conditional_check(audited_options[:unless], matching: false) &&
-          self.class.auditing_enabled &&
-          Audited.auditing_enabled?
+          self.class.auditing_enabled
       end
 
       def run_conditional_check(condition, matching: true)
@@ -356,7 +355,7 @@ module Audited
       end
 
       def auditing_enabled
-        Audited.store.fetch("#{table_name}_auditing_enabled", true) && Audited.auditing_enabled?
+        Audited.store.fetch("#{table_name}_auditing_enabled", true) && Audited.auditing_enabled
       end
 
       def auditing_enabled=(val)

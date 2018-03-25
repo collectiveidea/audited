@@ -725,16 +725,14 @@ describe Audited::Auditor do
     end
 
     it "should not save an audit when auditing is globally disabled" do
-      expect(Audited.auditing_enabled?).to eq(true)
-      Audited.disable_auditing
-      expect(Audited.auditing_enabled?).to eq(false)
+      expect(Audited.auditing_enabled).to eq(true)
+      Audited.auditing_enabled = false
       expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
 
       user = create_user
       expect(user.audits.count).to eq(0)
 
-      Audited.enable_auditing
-      expect(Audited.auditing_enabled?).to eq(true)
+      Audited.auditing_enabled = true
       expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
 
       user.update_attributes(name: 'Test')
