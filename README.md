@@ -255,6 +255,11 @@ user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
 
+You can access records' own audits and associated audits in one go:
+```ruby
+company.all_audits
+```
+
 ### Conditional auditing
 
 If you want to audit only under specific conditions, you can provide conditional options (similar to ActiveModel callbacks) that will ensure your model is only audited for these conditions.

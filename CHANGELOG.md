@@ -12,6 +12,8 @@ Added
 
 - Add ability to globally disable auditing
   [#426](https://github.com/collectiveidea/audited/pull/426)
+- Add `all_audits` method to auditable models
+  [#428](https://github.com/collectiveidea/audited/pull/428)
 
 Changed
 
