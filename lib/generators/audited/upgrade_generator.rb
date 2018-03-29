@@ -58,6 +58,10 @@ module Audited
         if indexes.any? { |i| i.columns == %w[associated_id associated_type] }
           yield :revert_polymorphic_indexes_order
         end
+
+        if indexes.any? { |i| i.columns == %w[auditable_type auditable_id] }
+          yield :add_version_to_auditable_index
+        end
       end
     end
   end
