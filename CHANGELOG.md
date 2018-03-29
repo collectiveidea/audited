@@ -13,7 +13,8 @@ Added
 
 Changed
 
-- None
+- Add version to auditable_index
+  [#427](https://github.com/collectiveidea/audited/pull/427)
 
 Fixed
 
