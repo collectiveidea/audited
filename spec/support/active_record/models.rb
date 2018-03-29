@@ -91,6 +91,7 @@ module Models
 
     class Owner < ::ActiveRecord::Base
       self.table_name = 'users'
+      audited
       has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
     end
