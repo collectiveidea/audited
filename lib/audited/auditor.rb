@@ -145,6 +145,14 @@ module Audited
         attributes.except(*non_audited_columns)
       end
 
+      # Returns a list combined of record audits and associated audits.
+      def all_audits
+        Audited.audit_class.unscoped
+        .where('(auditable_type = :type AND auditable_id = :id) OR (associated_type = :type AND associated_id = :id)',
+          type: self.class.name, id: id)
+        .order(created_at: :desc)
+      end
+
       # Combine multiple audits into one.
       def combine_audits(audits_to_combine)
         combine_target = audits_to_combine.last
