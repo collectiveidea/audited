@@ -17,7 +17,7 @@ class <%= migration_class_name %> < <%= migration_parent %>
       t.column :created_at, :datetime
     end
 
-    add_index :audits, [:auditable_type, :auditable_id], :name => 'auditable_index'
+    add_index :audits, [:auditable_type, :auditable_id, :version], :name => 'auditable_index'
     add_index :audits, [:associated_type, :associated_id], :name => 'associated_index'
     add_index :audits, [:user_id, :user_type], :name => 'user_index'
     add_index :audits, :request_uuid
