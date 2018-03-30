@@ -32,6 +32,8 @@ Fixed
 
 - Ensure that `except` option jibes with `comment_required: true`
   [#425](https://github.com/collectiveidea/audited/pull/425)
+- Ensure enum changes are stored consistently
+  [#429](https://github.com/collectiveidea/audited/pull/429)
 
 ## 4.7.1 (2018-04-10)
 
