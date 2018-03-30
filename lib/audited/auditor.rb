@@ -142,7 +142,8 @@ module Audited
 
       # List of attributes that are audited.
       def audited_attributes
-        attributes.except(*self.class.non_audited_columns)
+        audited_attributes = attributes.except(*self.class.non_audited_columns)
+        normalize_enum_changes(audited_attributes)
       end
 
       # Returns a list combined of record audits and associated audits.
@@ -196,11 +197,35 @@ module Audited
 
       def audited_changes
         all_changes = respond_to?(:changes_to_save) ? changes_to_save : changes
-        if audited_options[:only].present?
-          all_changes.slice(*self.class.audited_columns)
-        else
-          all_changes.except(*self.class.non_audited_columns)
+        filtered_changes = \
+          if audited_options[:only].present?
+            all_changes.slice(*self.class.audited_columns)
+          else
+            all_changes.except(*self.class.non_audited_columns)
+          end
+
+        filtered_changes = normalize_enum_changes(filtered_changes)
+        filtered_changes.to_hash
+      end
+
+      def normalize_enum_changes(changes)
+        self.class.defined_enums.each do |name, values|
+          if changes.has_key?(name)
+            changes[name] = \
+              if changes[name].is_a?(Array)
+                changes[name].map { |v| values[v] }
+              elsif rails_below?('5.0')
+                changes[name]
+              else
+                values[changes[name]]
+              end
+          end
         end
+        changes
+      end
+
+      def rails_below?(rails_version)
+        Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
       end
 
       def audits_to(version = nil)

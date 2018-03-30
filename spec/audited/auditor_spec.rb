@@ -248,7 +248,7 @@ describe Audited::Auditor do
   end
 
   describe "on create" do
-    let( :user ) { create_user audit_comment: "Create" }
+    let( :user ) { create_user status: :reliable, audit_comment: "Create" }
 
     it "should change the audit count" do
       expect {
@@ -272,6 +272,10 @@ describe Audited::Auditor do
       expect(user.audits.first.audited_changes).to eq(user.audited_attributes)
     end
 
+    it "should store enum value" do
+      expect(user.audits.first.audited_changes["status"]).to eq(1)
+    end
+
     it "should store comment" do
       expect(user.audits.first.comment).to eq('Create')
     end
@@ -290,7 +294,7 @@ describe Audited::Auditor do
 
   describe "on update" do
     before do
-      @user = create_user( name: 'Brandon', audit_comment: 'Update' )
+      @user = create_user( name: 'Brandon', status: :active, audit_comment: 'Update' )
     end
 
     it "should save an audit" do
@@ -312,6 +316,11 @@ describe Audited::Auditor do
     it "should store the changed attributes" do
       @user.update_attributes name: 'Changed'
       expect(@user.audits.last.audited_changes).to eq({ 'name' => ['Brandon', 'Changed'] })
+    end
+
+    it "should store changed enum values" do
+      @user.update_attributes status: 1
+      expect(@user.audits.last.audited_changes["status"]).to eq([0, 1])
     end
 
     it "should store audit comment" do
@@ -350,7 +359,7 @@ describe Audited::Auditor do
 
   describe "on destroy" do
     before do
-      @user = create_user
+      @user = create_user(status: :active)
     end
 
     it "should save an audit" do
@@ -373,6 +382,11 @@ describe Audited::Auditor do
       @user.destroy
 
       expect(@user.audits.last.audited_changes).to eq(@user.audited_attributes)
+    end
+
+    it "should store enum value" do
+      @user.destroy
+      expect(@user.audits.last.audited_changes["status"]).to eq(0)
     end
 
     it "should be able to reconstruct a destroyed record without history" do
@@ -628,6 +642,16 @@ describe Audited::Auditor do
 
       expect(u.revision(1).name).to eq('Brandon')
       expect(u.revision(1).username).to eq('brandon')
+    end
+
+    it "should correctly restore revision with enum" do
+      u = Models::ActiveRecord::User.create(status: :active)
+      u.update_attribute(:status, :reliable)
+      u.update_attribute(:status, :banned)
+
+      expect(u.revision(3)).to be_banned
+      expect(u.revision(2)).to be_reliable
+      expect(u.revision(1)).to be_active
     end
 
     it "should be able to get time for first revision" do
