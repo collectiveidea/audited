@@ -30,7 +30,8 @@ Changed
 
 Fixed
 
-- None
+- Ensure enum changes are stored consistently
+  [#429](https://github.com/collectiveidea/audited/pull/429)
 
 ## 4.7.1 (2018-04-10)
 
