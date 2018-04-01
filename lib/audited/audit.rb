@@ -130,7 +130,7 @@ module Audited
     # All audits made during the block called will be recorded as made
     # by +user+. This method is hopefully threadsafe, making it ideal
     # for background operations that require audit information.
-    def self.as_user(user, &block)
+    def self.as_user(user)
       last_audited_user = ::Audited.store[:audited_user] 
       ::Audited.store[:audited_user] = user
       yield
