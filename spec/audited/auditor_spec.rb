@@ -728,7 +728,7 @@ describe Audited::Auditor do
       company.update!(name: "Collective Idea")
 
       other_owner = Models::ActiveRecord::Owner.create!
-      other_company = other_owner.companies.create!
+      other_owner.companies.create!
 
       expect(owner.own_and_associated_audits).to match_array(owner.audits + company.audits)
     end
@@ -933,7 +933,7 @@ describe Audited::Auditor do
   end
 
   describe "after_audit" do
-    let( :user ) { user = Models::ActiveRecord::UserWithAfterAudit.new }
+    let( :user ) { Models::ActiveRecord::UserWithAfterAudit.new }
 
     it "should invoke after_audit callback on create" do
       expect(user.bogus_attr).to be_nil
@@ -943,7 +943,7 @@ describe Audited::Auditor do
   end
 
   describe "around_audit" do
-    let( :user ) { user = Models::ActiveRecord::UserWithAfterAudit.new }
+    let( :user ) { Models::ActiveRecord::UserWithAfterAudit.new }
 
     it "should invoke around_audit callback on create" do
       expect(user.around_attr).to be_nil

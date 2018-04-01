@@ -18,7 +18,7 @@ begin
     adapter.recreate_database db_name
     adapter.disconnect!
   end
-rescue Exception => e
+rescue => e
   Kernel.warn e
 end
 
