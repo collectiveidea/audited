@@ -192,7 +192,7 @@ describe Audited::Auditor do
       expect(user.audits.last.audited_changes.keys).to eq(%w{non_column_attr})
     end
 
-    if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL' && Rails.version >= "4.2.0.0" # Postgres json and jsonb support was added in Rails 4.2
+    if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
       describe "'json' and 'jsonb' audited_changes column type" do
         let(:migrations_path) { SPEC_ROOT.join("support/active_record/postgres") }
 
