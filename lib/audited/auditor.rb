@@ -162,7 +162,6 @@ module Audited
       def revision_with(attributes)
         dup.tap do |revision|
           revision.id = id
-          revision.send :instance_variable_set, '@attributes', self.attributes if rails_below?('4.2.0')
           revision.send :instance_variable_set, '@new_record', destroyed?
           revision.send :instance_variable_set, '@persisted', !destroyed?
           revision.send :instance_variable_set, '@readonly', false
@@ -183,10 +182,6 @@ module Audited
             end
           end
         end
-      end
-
-      def rails_below?(rails_version)
-        Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
       end
 
       private
