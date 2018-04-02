@@ -5,7 +5,6 @@ require "audited/version"
 Gem::Specification.new do |gem|
   gem.name        = 'audited'
   gem.version     = Audited::VERSION
-  gem.platform    = Gem::Platform::RUBY
 
   gem.authors     = ['Brandon Keepers', 'Kenneth Kalmer', 'Daniel Morrison', 'Brian Ryckbost', 'Steve Richert', 'Ryan Glover']
   gem.email       = 'info@collectiveidea.com'
@@ -15,6 +14,8 @@ Gem::Specification.new do |gem|
   gem.license     = 'MIT'
 
   gem.files         = `git ls-files`.split($\).reject{|f| f =~ /(\.gemspec)/ }
+
+  gem.required_ruby_version = '>= 2.3.0'
 
   gem.add_dependency 'activerecord', '>= 4.2', '< 5.2'
 
