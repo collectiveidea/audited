@@ -11,11 +11,9 @@ For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.c
 
 Audited supports and is [tested against](http://travis-ci.org/collectiveidea/audited) the following Ruby versions:
 
-* 2.1.10
-* 2.2.9
-* 2.3.6
-* 2.4.3
-* 2.5.0
+* 2.3.7
+* 2.4.4
+* 2.5.1
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
