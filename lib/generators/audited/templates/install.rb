@@ -5,11 +5,11 @@ class <%= migration_class_name %> < <%= migration_parent %>
       t.column :auditable_type, :string
       t.column :associated_id, :integer
       t.column :associated_type, :string
-      t.column :user_id, :<%= options[:audited_user_id_column_type] %>
+      t.column :user_id, :integer
       t.column :user_type, :string
       t.column :username, :string
       t.column :action, :string
-      t.column :audited_changes, :<%= options[:audited_changes_column_type] %>
+      t.column :audited_changes, :text
       t.column :version, :integer, :default => 0
       t.column :comment, :string
       t.column :remote_address, :string
