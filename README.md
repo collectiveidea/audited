@@ -257,7 +257,7 @@ company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 
 You can access records' own audits and associated audits in one go:
 ```ruby
-company.all_audits
+company.own_and_associated_audits
 ```
 
 ### Conditional auditing

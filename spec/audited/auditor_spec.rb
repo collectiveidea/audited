@@ -677,7 +677,7 @@ describe Audited::Auditor do
     end
   end
 
-  describe "all_audits" do
+  describe "own_and_associated_audits" do
     it "should return audits for self and associated audits" do
       owner = Models::ActiveRecord::Owner.create!
       company = owner.companies.create!
@@ -686,7 +686,7 @@ describe Audited::Auditor do
       other_owner = Models::ActiveRecord::Owner.create!
       other_company = other_owner.companies.create!
 
-      expect(owner.all_audits).to match_array(owner.audits + company.audits)
+      expect(owner.own_and_associated_audits).to match_array(owner.audits + company.audits)
     end
 
     it "should order audits by creation time" do
@@ -700,7 +700,7 @@ describe Audited::Auditor do
 
       company.update!(name: "Collective Idea")
       third_audit = company.audits.last
-      expect(owner.all_audits.to_a).to eq([third_audit, second_audit, first_audit])
+      expect(owner.own_and_associated_audits.to_a).to eq([third_audit, second_audit, first_audit])
     end
   end
 
