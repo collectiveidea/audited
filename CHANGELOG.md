@@ -4,7 +4,7 @@
 
 Breaking changes
 
-- removed `audited_columns`, `non_audited_columns`, `auditing_enabled=` instance methods, 
+- removed `audited_columns`, `non_audited_columns`, `auditing_enabled=` instance methods,
   use class methods instead
   [#424](https://github.com/collectiveidea/audited/pull/424)
 
@@ -12,7 +12,7 @@ Added
 
 - Add ability to globally disable auditing
   [#426](https://github.com/collectiveidea/audited/pull/426)
-- Add `all_audits` method to auditable models
+- Add `own_and_associated_audits` method to auditable models
   [#428](https://github.com/collectiveidea/audited/pull/428)
 
 Changed
