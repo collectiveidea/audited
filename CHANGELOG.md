@@ -13,6 +13,9 @@ Added
 - Add ability to globally disable auditing
   [#426](https://github.com/collectiveidea/audited/pull/426)
 
+- Add ability to set all id column types with the install generator
+  [#432](https://github.com/collectiveidea/audited/pull/432)
+
 Changed
 
 - Add version to auditable_index
