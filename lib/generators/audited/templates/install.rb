@@ -1,30 +1,25 @@
 class <%= migration_class_name %> < <%= migration_parent %>
-  def self.up
-    create_table :audits, :force => true do |t|
-      t.column :auditable_id, :integer
-      t.column :auditable_type, :string
-      t.column :associated_id, :integer
-      t.column :associated_type, :string
-      t.column :user_id, :<%= options[:audited_user_id_column_type] %>
-      t.column :user_type, :string
-      t.column :username, :string
-      t.column :action, :string
-      t.column :audited_changes, :<%= options[:audited_changes_column_type] %>
-      t.column :version, :integer, :default => 0
-      t.column :comment, :string
-      t.column :remote_address, :string
-      t.column :request_uuid, :string
-      t.column :created_at, :datetime
+  def change
+    create_table :audits do |t|
+      t.belongs_to :auditable, polymorphic: true, index: false
+      t.index [:auditable_type, :auditable_id, :version],
+              name: :index_audits_on_auditable_and_version
+
+      t.references :associated, polymorphic: true,
+                                index: { name: :index_audits_on_associated }
+
+      t.references :user, type: :<%= options[:audited_user_id_column_type] %>,
+                          polymorphic: true,
+                          index: { name: :index_audits_on_user }
+
+      t.string :username
+      t.string :action
+      t.<%= options[:audited_changes_column_type] %> :audited_changes
+      t.integer :version, default: 0
+      t.string :comment
+      t.string :remote_address
+      t.string :request_uuid, index: true
+      t.datetime :created_at, index: true
     end
-
-    add_index :audits, [:auditable_type, :auditable_id, :version], :name => 'auditable_index'
-    add_index :audits, [:associated_type, :associated_id], :name => 'associated_index'
-    add_index :audits, [:user_id, :user_type], :name => 'user_index'
-    add_index :audits, :request_uuid
-    add_index :audits, :created_at
-  end
-
-  def self.down
-    drop_table :audits
   end
 end
