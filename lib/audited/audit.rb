@@ -88,15 +88,18 @@ module Audited
 
     # Allows user to undo changes
     def undo
-      if action == 'create'
+      case action
+      when 'create'
         # destroys a newly created record
         auditable.destroy!
-      elsif action == 'destroy'
+      when 'destroy'
         # creates a new record with the destroyed record attributes
-        auditable_type.constantize.create(differences)
-      else
+        auditable_type.constantize.create!(differences)
+      when 'update'
         # changes back attributes
-        auditable.update_attributes(differences.transform_values(&:first))
+        auditable.update_attributes!(differences.transform_values(&:first))
+      else
+        raise StandardError, "invalid action given #{action}"
       end
     end
 
