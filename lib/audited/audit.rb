@@ -88,20 +88,15 @@ module Audited
 
     # Allows user to undo changes
     def undo
-      model = self.auditable_type.constantize
       if action == 'create'
         # destroys a newly created record
-        model.find(auditable_id).destroy!
+        auditable.destroy!
       elsif action == 'destroy'
         # creates a new record with the destroyed record attributes
-        model.create(audited_changes)
+        auditable_type.constantize.create(differences)
       else
         # changes back attributes
-        audited_object = model.find(auditable_id)
-        self.audited_changes.each do |k, v|
-          audited_object[k] = v[0]
-        end
-        audited_object.save
+        auditable.update_attributes(differences.transform_values(&:first))
       end
     end
 
