@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 7 # not testing json object and collection_cache_key
+SingleCov.covered!
 
 describe Audited::Audit do
   let(:user) { Models::ActiveRecord::User.new name: "Testing" }
@@ -40,28 +40,6 @@ describe Audited::Audit do
       end
     end
 
-    it "should undo changes" do
-      user = Models::ActiveRecord::User.create(name: "John")
-      user.update_attribute(:name, 'Joe')
-      user.audits.last.undo
-      user.reload
-
-      expect(user.name).to eq("John")
-    end
-
-    it "should undo destroyed model" do
-      user = Models::ActiveRecord::User.create(name: "John")
-      user.destroy
-      user.audits.last.undo
-      user = Models::ActiveRecord::User.find_by(name: "John")
-      expect(user.name).to eq("John")
-    end
-
-    it "should undo created model" do
-      user = Models::ActiveRecord::User.create(name: "John")
-      expect {user.audits.last.undo}.to change(Models::ActiveRecord::User, :count).by(-1)
-    end
-
     context "when a custom audit class is not configured" do
       it "should default to #{described_class}" do
         TempModel.audited
@@ -75,8 +53,51 @@ describe Audited::Audit do
     end
   end
 
-  describe "user=" do
+  describe "#audited_changes" do
+    let(:audit) { Audited.audit_class.new }
 
+    it "can unserialize yaml from text columns" do
+      audit.audited_changes = {foo: "bar"}
+      expect(audit.audited_changes).to eq foo: "bar"
+    end
+
+    it "does not unserialize from binary columns" do
+      allow(Audited.audit_class.columns_hash["audited_changes"]).to receive(:type).and_return("foo")
+      audit.audited_changes = {foo: "bar"}
+      expect(audit.audited_changes).to eq "{:foo=>\"bar\"}"
+    end
+  end
+
+  describe "#undo" do
+    let(:user) { Models::ActiveRecord::User.create(name: "John") }
+
+    it "undos changes" do
+      user.update_attribute(:name, 'Joe')
+      user.audits.last.undo
+      user.reload
+      expect(user.name).to eq("John")
+    end
+
+    it "undos destroy" do
+      user.destroy
+      user.audits.last.undo
+      user = Models::ActiveRecord::User.find_by(name: "John")
+      expect(user.name).to eq("John")
+    end
+
+    it "undos creation" do
+      user # trigger create
+      expect {user.audits.last.undo}.to change(Models::ActiveRecord::User, :count).by(-1)
+    end
+
+    it "fails when trying to undo unknown" do
+      audit = user.audits.last
+      audit.action = 'oops'
+      expect { audit.undo }.to raise_error("invalid action given oops")
+    end
+  end
+
+  describe "user=" do
     it "should be able to set the user to a model object" do
       subject.user = user
       expect(subject.user).to eq(user)
@@ -112,11 +133,9 @@ describe Audited::Audit do
       subject.user = user
       expect(subject.username).to be_nil
     end
-
   end
 
   describe "revision" do
-
     it "should recreate attributes" do
       user = Models::ActiveRecord::User.create name: "1"
       5.times {|i| user.update_attribute :name, (i + 2).to_s }
@@ -147,6 +166,34 @@ describe Audited::Audit do
       revision = user.audits.last.revision
       expect(revision.name).to eq(user.name)
       expect(revision).to be_a_new_record
+    end
+  end
+
+  describe ".collection_cache_key" do
+    if ActiveRecord::VERSION::MAJOR >= 5
+      it "uses created at" do
+        Audited::Audit.delete_all
+        audit = Models::ActiveRecord::User.create(name: "John").audits.last
+        audit.update_columns(created_at: Time.parse('2018-01-01'))
+        expect(Audited::Audit.collection_cache_key).to match(/-20180101\d+$/)
+      end
+    else
+      it "is not defined" do
+        expect { Audited::Audit.collection_cache_key }.to raise_error(NoMethodError)
+      end
+    end
+  end
+
+  describe ".assign_revision_attributes" do
+    it "dups when frozen" do
+      user.freeze
+      assigned = Audited::Audit.assign_revision_attributes(user, name: "Bar")
+      expect(assigned.name).to eq "Bar"
+    end
+
+    it "ignores unassignable attributes" do
+      assigned = Audited::Audit.assign_revision_attributes(user, oops: "Bar")
+      expect(assigned.name).to eq "Testing"
     end
   end
 
@@ -265,6 +312,5 @@ describe Audited::Audit do
       }.to raise_exception('expected')
       expect(Audited.store[:audited_user]).to be_nil
     end
-
   end
 end

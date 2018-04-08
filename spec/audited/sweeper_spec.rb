@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 3
+SingleCov.covered! uncovered: 2 # 2 conditional on_load conditions
 
 class AuditsController < ActionController::Base
   before_action :populate_user
@@ -29,14 +29,13 @@ describe AuditsController do
   include RSpec::Rails::ControllerExampleGroup
   render_views
 
-  before(:each) do
+  before do
     Audited.current_user_method = :current_user
   end
 
   let(:user) { create_user }
 
   describe "POST audit" do
-
     it "should audit user" do
       controller.send(:current_user=, user)
       expect {
@@ -44,6 +43,15 @@ describe AuditsController do
       }.to change( Audited::Audit, :count )
 
       expect(controller.company.audits.last.user).to eq(user)
+    end
+
+    it "does not audit when method is not found" do
+      controller.send(:current_user=, user)
+      Audited.current_user_method = :nope
+      expect {
+        post :create
+      }.to change( Audited::Audit, :count )
+      expect(controller.company.audits.last.user).to eq(nil)
     end
 
     it "should support custom users for sweepers" do
@@ -86,7 +94,6 @@ describe AuditsController do
 
       expect(controller.company.audits.last.user).to eq(user)
     end
-
   end
 
   describe "PUT update" do
@@ -99,7 +106,6 @@ describe AuditsController do
     end
   end
 end
-
 
 describe Audited::Sweeper do
 
