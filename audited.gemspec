@@ -22,6 +22,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'appraisal'
   gem.add_development_dependency 'rails', '>= 4.2', '< 5.2'
   gem.add_development_dependency 'rspec-rails', '~> 3.5'
+  gem.add_development_dependency 'single_cov'
 
   # JRuby support for the test ENV
   if defined?(JRUBY_VERSION)
