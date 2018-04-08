@@ -140,12 +140,10 @@ module Audited
 
     # @private
     def self.reconstruct_attributes(audits)
-      attributes = {}
-      result = audits.collect do |audit|
-        attributes.merge!(audit.new_attributes)[:version] = audit.version
-        yield attributes if block_given?
+      audits.each_with_object({}) do |audit, all|
+        all.merge!(audit.new_attributes)
+        all[:version] = audit.version
       end
-      block_given? ? result : attributes
     end
 
     # @private
@@ -163,7 +161,7 @@ module Audited
     end
 
     # use created_at as timestamp cache key
-    def self.collection_cache_key(collection = all, timestamp_column = :created_at)
+    def self.collection_cache_key(collection = all, *)
       super(collection, :created_at)
     end
 
