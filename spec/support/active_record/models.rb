@@ -44,6 +44,11 @@ module Models
       audited comment_required: true, on: :destroy
     end
 
+    class OnUpdateCommentRequiredExceptNameUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited comment_required: true, except: :name, on: :update
+    end
+
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
       audited
