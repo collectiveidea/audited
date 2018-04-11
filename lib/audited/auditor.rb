@@ -92,9 +92,10 @@ module Audited
     module AuditedInstanceMethods
       # Deprecate version attribute in favor of audit_version attribute – preparing for eventual removal.
       def version
+        ActiveSupport::Deprecation.warn("`version` attribute has been changed to `audit_version`. This attribute will be removed.")
+
         audit_version
       end
-      ActiveSupport::Deprecation.warn("`version` attribute has been changed to `audit_version`. This attribute will be removed.")
 
       # Temporarily turns off auditing while saving.
       def save_without_auditing
