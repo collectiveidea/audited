@@ -16,7 +16,25 @@ Changed
 
 Fixed
 
+- None 
+
+## 4.7.1 (2018-04-10)
+
+Breaking changes
+
 - None
+
+Added
+
+- None
+
+Changed
+
+- None
+
+Fixed
+
+- Allow use with Rails 5.2 final
 
 ## 4.7.0 (2018-03-14)
 
