@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 9 # not testing proxy_respond_to? hack / 2 methods
+SingleCov.covered! uncovered: 10 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
 
 describe Audited::Auditor do
 
