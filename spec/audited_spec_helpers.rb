@@ -1,7 +1,12 @@
 module AuditedSpecHelpers
 
   def create_user(attrs = {})
-    Models::ActiveRecord::User.create({name: 'Brandon', username: 'brandon', password: 'password', favourite_device: 'Android Phone'}.merge(attrs))
+    attrs = {name: 'Brandon', username: 'brandon', password: 'password', favourite_device: 'Android Phone'}.merge(attrs)
+    if ENV['DB'] == 'POSTGRES'
+      attrs = attrs.merge({favourite_colours: ['sarcoline', 'coquelicot']})
+    end
+
+    Models::ActiveRecord::User.create(attrs)
   end
 
   def build_user(attrs = {})

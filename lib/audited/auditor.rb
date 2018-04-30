@@ -115,7 +115,7 @@ module Audited
       def revisions(from_version = 1)
         return [] unless audits.from_version(from_version).exists?
 
-        all_audits = audits.select([:audited_changes, :version]).to_a
+        all_audits = audits.select([:audited_changes, :version, :action]).to_a
         targeted_audits = all_audits.select { |audit| audit.version >= from_version }
 
         previous_attributes = reconstruct_attributes(all_audits - targeted_audits)

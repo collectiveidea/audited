@@ -190,15 +190,20 @@ describe Audited::Audit do
 
   describe "new_attributes" do
     it "should return a hash of the new values" do
-      new_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).new_attributes
+      new_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}, action: 'update').new_attributes
       expect(new_attributes).to eq({"a" => 2, "b" => 4})
     end
   end
 
   describe "old_attributes" do
     it "should return a hash of the old values" do
-      old_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).old_attributes
-      expect(old_attributes).to eq({"a" => 1, "b" => 3})
+      old_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [[3, 4], [4, 5]] }, action: 'update').old_attributes
+      expect(old_attributes).to eq({"a" => 1, "b" => [3, 4]})
+    end
+
+    it "should return a hash with original (current) values" do
+      old_attributes = Audited::Audit.new(audited_changes: {a: 1, b: [3, 4] }, action: 'create').old_attributes
+      expect(old_attributes).to eq({"a" => 1, "b" => [3, 4]})
     end
   end
 
