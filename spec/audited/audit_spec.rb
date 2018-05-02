@@ -215,6 +215,25 @@ describe Audited::Audit do
       end
     end
 
+    it "should support nested as_user" do
+      Audited::Audit.as_user("sidekiq") do
+        company = Models::ActiveRecord::Company.create name: "The auditors"
+        company.name = "The Auditors, Inc"
+        company.save
+        expect(company.audits[-1].user).to eq("sidekiq")
+
+        Audited::Audit.as_user(user) do
+          company.name = "NEW Auditors, Inc"
+          company.save
+          expect(company.audits[-1].user).to eq(user)
+        end
+
+        company.name = "LAST Auditors, Inc"
+        company.save
+        expect(company.audits[-1].user).to eq("sidekiq")
+      end
+    end
+
     it "should record usernames" do
       Audited::Audit.as_user(user.name) do
         company = Models::ActiveRecord::Company.create name: "The auditors"
