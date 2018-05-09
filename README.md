@@ -191,7 +191,7 @@ Outside of a request, Audited can still record the user with the `as_user` metho
 
 ```ruby
 Audited.audit_class.as_user(User.find(1)) do
-  post.update_attribute!(title: "Hello, world!")
+  post.update_attributes!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
 ```
