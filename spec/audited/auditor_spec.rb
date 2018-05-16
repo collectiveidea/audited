@@ -20,6 +20,24 @@ describe Audited::Auditor do
     context "should be configurable which conditions are audited" do
       subject { ConditionalCompany.new.send(:auditing_enabled) }
 
+      context "when condition method is private" do
+        subject { ConditionalPrivateCompany.new.send(:auditing_enabled) }
+
+        before do
+          class ConditionalPrivateCompany < ::ActiveRecord::Base
+            self.table_name = 'companies'
+
+            audited if: :foo?
+
+            private def foo?
+              true
+            end
+          end
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
       context "when passing a method name" do
         before do
           class ConditionalCompany < ::ActiveRecord::Base

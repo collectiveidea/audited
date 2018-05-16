@@ -298,9 +298,8 @@ module Audited
 
       def run_conditional_check(condition, matching: true)
         return true if condition.blank?
-
         return condition.call(self) == matching if condition.respond_to?(:call)
-        return send(condition) == matching if respond_to?(condition.to_sym)
+        return send(condition) == matching if respond_to?(condition.to_sym, true)
 
         true
       end
