@@ -27,6 +27,24 @@ Fixed
 - Ensure that `except` option jibes with `comment_required: true`
   [#425](https://github.com/collectiveidea/audited/pull/425)
 
+## 4.7.1 (2018-04-10)
+
+Breaking changes
+
+- None
+
+Added
+
+- None
+
+Changed
+
+- None
+
+Fixed
+
+- Allow use with Rails 5.2 final
+
 ## 4.7.0 (2018-03-14)
 
 Breaking changes
