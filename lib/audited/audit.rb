@@ -131,10 +131,11 @@ module Audited
     # by +user+. This method is hopefully threadsafe, making it ideal
     # for background operations that require audit information.
     def self.as_user(user, &block)
+      last_audited_user = ::Audited.store[:audited_user] 
       ::Audited.store[:audited_user] = user
       yield
     ensure
-      ::Audited.store[:audited_user] = nil
+      ::Audited.store[:audited_user] = last_audited_user
     end
 
     # @private

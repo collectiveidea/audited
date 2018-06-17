@@ -12,6 +12,8 @@ Added
   [#426](https://github.com/collectiveidea/audited/pull/426)
 - Add `own_and_associated_audits` method to auditable models
   [#428](https://github.com/collectiveidea/audited/pull/428)
+- Ability to nest `as_user` within itself
+  [#450](https://github.com/collectiveidea/audited/pull/450)
 
 Changed
 
