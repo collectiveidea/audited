@@ -14,10 +14,12 @@ Added
   [#428](https://github.com/collectiveidea/audited/pull/428)
 - Ability to nest `as_user` within itself
   [#450](https://github.com/collectiveidea/audited/pull/450)
+- Private methods can now be used for conditional auditing
+  [#454](https://github.com/collectiveidea/audited/pull/454)
 
 Changed
 
-- Add version to auditable_index
+- Add version to `auditable_index`
   [#427](https://github.com/collectiveidea/audited/pull/427)
 
 Fixed
