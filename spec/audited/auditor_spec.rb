@@ -742,31 +742,29 @@ describe Audited::Auditor do
     end
 
     it "should be thread safe using a #without_auditing block" do
-      begin
-        t1 = Thread.new do
-          expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
-          Models::ActiveRecord::User.without_auditing do
-            expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
-            Models::ActiveRecord::User.create!( name: 'Bart' )
-            sleep 1
-            expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
-          end
-          expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
-        end
+      skip if Models::ActiveRecord::User.connection.class.name.include?("SQLite")
 
-        t2 = Thread.new do
-          sleep 0.5
-          expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
-          Models::ActiveRecord::User.create!( name: 'Lisa' )
+      t1 = Thread.new do
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
+        Models::ActiveRecord::User.without_auditing do
+          expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+          Models::ActiveRecord::User.create!( name: 'Bart' )
+          sleep 1
+          expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
         end
-        t1.join
-        t2.join
-
-        expect(Models::ActiveRecord::User.find_by_name('Bart').audits.count).to eq(0)
-        expect(Models::ActiveRecord::User.find_by_name('Lisa').audits.count).to eq(1)
-      rescue ActiveRecord::StatementInvalid
-        STDERR.puts "Thread safety tests cannot be run with SQLite"
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
       end
+
+      t2 = Thread.new do
+        sleep 0.5
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
+        Models::ActiveRecord::User.create!( name: 'Lisa' )
+      end
+      t1.join
+      t2.join
+
+      expect(Models::ActiveRecord::User.find_by_name('Bart').audits.count).to eq(0)
+      expect(Models::ActiveRecord::User.find_by_name('Lisa').audits.count).to eq(1)
     end
 
     it "should not save an audit when auditing is globally disabled" do
