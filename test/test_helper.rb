@@ -1,8 +1,9 @@
+# frozen_string_literal: true
 ENV['RAILS_ENV'] = 'test'
 
 $:.unshift File.dirname(__FILE__)
 
-require File.expand_path('../../spec/rails_app/config/environment', __FILE__)
+require File.expand_path('../spec/rails_app/config/environment', __dir__)
 require 'rails/test_help'
 
 require 'audited'

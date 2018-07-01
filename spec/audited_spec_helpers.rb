@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module AuditedSpecHelpers
 
   def create_user(attrs = {})

@@ -1,9 +1,10 @@
+# frozen_string_literal: true
 require 'test_helper'
 
 require 'generators/audited/install_generator'
 
 class InstallGeneratorTest < Rails::Generators::TestCase
-  destination File.expand_path('../../tmp', __FILE__)
+  destination File.expand_path('../tmp', __dir__)
   setup :prepare_destination
   tests Audited::Generators::InstallGenerator
 

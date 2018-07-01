@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'rails/generators'
 require 'rails/generators/migration'
 require 'active_record'
@@ -12,7 +13,7 @@ module Audited
       include Audited::Generators::MigrationHelper
       extend Audited::Generators::Migration
 
-      source_root File.expand_path("../templates", __FILE__)
+      source_root File.expand_path('templates', __dir__)
 
       def copy_templates
         migrations_to_be_applied do |m|
@@ -57,11 +58,11 @@ module Audited
           yield :rename_association_to_associated
         end
 
-        if indexes.any? { |i| i.columns == %w[associated_id associated_type] }
+        if indexes.any? { |i| i.columns == ['associated_id', 'associated_type'] }
           yield :revert_polymorphic_indexes_order
         end
 
-        if indexes.any? { |i| i.columns == %w[auditable_type auditable_id] }
+        if indexes.any? { |i| i.columns == ['auditable_type', 'auditable_id'] }
           yield :add_version_to_auditable_index
         end
       end

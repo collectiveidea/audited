@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 ActiveRecord::Schema.define do
   create_table :audits, force: true do |t|
     t.column :auditable_id, :integer

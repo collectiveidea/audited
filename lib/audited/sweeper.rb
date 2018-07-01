@@ -1,10 +1,11 @@
+# frozen_string_literal: true
 module Audited
   class Sweeper
     STORED_DATA = {
       current_remote_address: :remote_ip,
       current_request_uuid: :request_uuid,
       current_user: :current_user
-    }
+    }.freeze
 
     delegate :store, to: ::Audited
 
@@ -18,7 +19,7 @@ module Audited
     end
 
     def current_user
-      lambda { controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true) }
+      -> { controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true) }
     end
 
     def remote_ip

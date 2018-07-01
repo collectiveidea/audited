@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Audited
   module RspecMatchers
     # Ensure that the model is audited.
@@ -73,7 +74,7 @@ module Audited
         "Did not expect #{@expectation}"
       end
 
-      alias_method :failure_message_when_negated, :negative_failure_message
+      alias failure_message_when_negated negative_failure_message
 
       def description
         description = "audited"
@@ -200,7 +201,7 @@ module Audited
         "Expected #{model_class} to not have associated audits"
       end
 
-      alias_method :failure_message_when_negated, :negative_failure_message
+      alias failure_message_when_negated negative_failure_message
 
       def description
         "has associated audits"

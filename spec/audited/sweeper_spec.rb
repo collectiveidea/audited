@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "spec_helper"
 
 SingleCov.covered! uncovered: 2 # 2 conditional on_load conditions
