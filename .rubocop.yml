@@ -5,6 +5,7 @@ AllCops:
     - lib/generators/audited/templates/**/*
     - vendor/bundle/**/*
     - gemfiles/vendor/bundle/**/*
+    - tmp/**/*
 
 Bundler/OrderedGems:
   Enabled: false
@@ -21,5 +22,53 @@ Metrics:
 Naming:
   Enabled: false
 
-Style:
+# [:foo] is easier to understand than %i[foo]
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+# ["foo"] is easier to understand than %w[foo]
+Style/WordArray:
+  EnforcedStyle: brackets
+
+# we do not care if you use single or double quotes
+Style/StringLiterals:
   Enabled: false
+
+# allow multine {} blocks for nicer call chaining in tests
+Style/BlockDelimiters:
+  Enabled: false
+
+# can use format or %
+Style/FormatString:
+  Enabled: false
+
+# who needs docs anyway ...
+Style/Documentation:
+  Enabled: false
+
+# prefer simpler `> 0` over `.positive?`
+Style/NumericPredicate:
+  EnforcedStyle: comparison
+
+# sometimes `if` is more expressive
+Style/Next:
+  Enabled: false
+
+# sometimes `if` is more expressive
+Style/GuardClause:
+  Enabled: false
+
+# allow placing if/unless wherever the user wants
+Style/IfUnlessModifier:
+  Enabled: false
+
+# accidentally not adding require 'English' will break some of them
+# see https://github.com/rubocop-hq/rubocop/issues/5891
+Style/SpecialGlobalVars:
+  EnforcedStyle: use_perl_names
+
+# makes defining nested classes more compact
+Style/ClassAndModuleChildren:
+  Exclude:
+    - test/**/*
+    - spec/**/*

@@ -431,7 +431,7 @@ describe Audited::Auditor do
         owner.destroy
       }.to change( Audited::Audit, :count )
 
-      expect(company.audits.map { |a| a.action }).to eq(['create', 'destroy'])
+      expect(company.audits.map(&:action)).to eq(['create', 'destroy'])
     end
   end
 
@@ -763,7 +763,9 @@ describe Audited::Auditor do
     end
 
     it "should reset auditing status even it raises an exception" do
-      Models::ActiveRecord::User.without_auditing { raise } rescue nil
+      expect {
+        Models::ActiveRecord::User.without_auditing { raise }
+      }.to raise_error(RuntimeError)
       expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
     end
 
@@ -952,8 +954,8 @@ describe Audited::Auditor do
 
   describe "STI auditing" do
     it "should correctly disable auditing when using STI" do
-      company = Models::ActiveRecord::Company::STICompany.create name: 'The auditors'
-      expect(company.type).to eq("Models::ActiveRecord::Company::STICompany")
+      company = Models::ActiveRecord::STICompany.create name: 'The auditors'
+      expect(company.type).to eq("Models::ActiveRecord::STICompany")
       expect {
         Models::ActiveRecord::Company.auditing_enabled = false
         company.update_attributes name: 'STI auditors'

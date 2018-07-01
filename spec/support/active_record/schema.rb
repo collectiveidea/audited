@@ -5,7 +5,7 @@ begin
   db_config = ActiveRecord::Base.configurations[Rails.env].clone
   db_type = db_config['adapter']
   db_name = db_config.delete('database')
-  raise Exception.new('No database name specified.') if db_name.blank?
+  raise 'No database name specified.' if db_name.blank?
   if db_type == 'sqlite3'
     db_file = Pathname.new(__FILE__).dirname.join(db_name)
     db_file.unlink if db_file.file?
@@ -18,7 +18,7 @@ begin
     adapter.recreate_database db_name
     adapter.disconnect!
   end
-rescue => e
+rescue StandardError => e
   Kernel.warn e
 end
 

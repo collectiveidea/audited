@@ -108,9 +108,11 @@ module Audited
     def user_as_string=(user)
       # reset both either way
       self.user_as_model = self.username = nil
-      user.is_a?(::ActiveRecord::Base) ?
-        self.user_as_model = user :
+      if user.is_a?(::ActiveRecord::Base)
+        self.user_as_model = user
+      else
         self.username = user
+      end
     end
     alias_method :user_as_model=, :user=
     alias_method :user=, :user_as_string=
@@ -152,9 +154,11 @@ module Audited
         record = record.dup if record.frozen?
 
         if record.respond_to?("#{attr}=")
-          record.attributes.key?(attr.to_s) ?
-            record[attr] = val :
+          if record.attributes.key?(attr.to_s)
+            record[attr] = val
+          else
             record.send("#{attr}=", val)
+          end
         end
       end
       record

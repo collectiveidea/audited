@@ -27,7 +27,9 @@ module Audited
         columns = Audited::Audit.columns.map(&:name)
         indexes = Audited::Audit.connection.indexes(Audited::Audit.table_name)
 
-        yield :add_comment_to_audits unless columns.include?('comment')
+        unless columns.include?('comment')
+          yield :add_comment_to_audits
+        end
 
         if columns.include?('changes')
           yield :rename_changes_to_audited_changes

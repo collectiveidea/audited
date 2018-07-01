@@ -87,7 +87,7 @@ module Models
       audited
     end
 
-    class Company::STICompany < Company
+    class STICompany < Company
     end
 
     class Owner < ::ActiveRecord::Base

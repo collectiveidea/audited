@@ -82,7 +82,7 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
   test "should add 'version' to auditable_index" do
     load_schema 6
 
-    run_generator %w(upgrade)
+    run_generator ["upgrade"]
 
     assert_migration "db/migrate/add_version_to_auditable_index.rb" do |content|
       assert_match(/add_index :audits, \[:auditable_type, :auditable_id, :version\]/, content)

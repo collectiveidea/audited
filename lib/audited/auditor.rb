@@ -321,7 +321,7 @@ module Audited
         audits.each { |audit| attributes.merge!(audit.new_attributes) }
         attributes
       end
-    end # InstanceMethods
+    end
 
     module AuditedClassMethods
       # Returns an array of columns that are audited. See non_audited_columns
