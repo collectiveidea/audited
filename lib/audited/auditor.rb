@@ -271,15 +271,10 @@ module Audited
       end
 
       def eligible_for_comment_validation?
-        if !auditing_enabled ||
-          (audited_options[:on].exclude?(:create) && self.new_record?) ||
-          (audited_options[:on].exclude?(:update) && self.persisted?) ||
-          (audited_changes.empty? && self.persisted?)
-        then
-          false
-        else
-          true
-        end
+        auditing_enabled &&
+        ((audited_options[:on].include?(:create) && self.new_record?) ||
+        (audited_options[:on].include?(:update) && self.persisted?)) &&
+        !(audited_changes.empty? && self.persisted?)
       end
 
       def combine_audits_if_needed
