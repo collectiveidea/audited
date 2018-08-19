@@ -47,8 +47,7 @@ Added
 
 Changed
 
-- Change/deprecate `version` attribute to `audit_version` attribute
-  [#443](https://github.com/collectiveidea/audited/pull/443)
+- None
 
 Fixed
 
