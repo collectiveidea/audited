@@ -55,7 +55,7 @@ module Audited
 
         class_attribute :audit_associated_with, instance_writer: false
         class_attribute :audited_options,       instance_writer: false
-        attr_accessor :version, :audit_comment
+        attr_accessor :audit_version, :audit_comment
 
         self.audited_options = options
         normalize_audited_options
@@ -90,6 +90,16 @@ module Audited
     end
 
     module AuditedInstanceMethods
+      # Deprecate version attribute in favor of audit_version attribute – preparing for eventual removal.
+      def method_missing(method_name, *args, &block)
+        if method_name == :version
+          ActiveSupport::Deprecation.warn("`version` attribute has been changed to `audit_version`. This attribute will be removed.")
+          audit_version
+        else
+          super
+        end
+      end
+
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
@@ -218,8 +228,8 @@ module Audited
 
       def audits_to(version = nil)
         if version == :previous
-          version = if self.version
-                      self.version - 1
+          version = if self.audit_version
+                      self.audit_version - 1
                     else
                       previous = audits.descending.offset(1).first
                       previous ? previous.version : 1

@@ -65,7 +65,7 @@ module Audited
     def revision
       clazz = auditable_type.constantize
       (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(version: version))
+        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(audit_version: version))
       end
     end
 
@@ -142,11 +142,11 @@ module Audited
     def self.reconstruct_attributes(audits)
       attributes = {}
       result = audits.collect do |audit|
-        attributes.merge!(audit.new_attributes)[:version] = audit.version
+        attributes.merge!(audit.new_attributes)[:audit_version] = audit.version
         yield attributes if block_given?
       end
       block_given? ? result : attributes
-    end
+   end
 
     # @private
     def self.assign_revision_attributes(record, attributes)
