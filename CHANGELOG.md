@@ -1,6 +1,6 @@
 # Audited ChangeLog
 
-## Unreleased
+## 4.8.0 (2018-08-19)
 
 Breaking changes
 
