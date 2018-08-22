@@ -32,6 +32,8 @@ Changed
 
 Fixed
 
+- Ensure that `except` option jibes with `comment_required: true`
+  [#425](https://github.com/collectiveidea/audited/pull/425)
 - Ensure enum changes are stored consistently
   [#429](https://github.com/collectiveidea/audited/pull/429)
 
@@ -81,7 +83,7 @@ Changed
 
 Fixed
 
-- Ensure that `on` and `except` options jive with `comment_required: true`
+- Ensure that `on` and `except` options jibe with `comment_required: true`
   [#419](https://github.com/collectiveidea/audited/pull/419)
 - Fix RSpec matchers
   [#420](https://github.com/collectiveidea/audited/pull/420)

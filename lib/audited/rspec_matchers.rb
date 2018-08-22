@@ -114,7 +114,7 @@ module Audited
 
       def comment_required_valid?
         expects "to require audit_comment before #{model_class.audited_options[:on]} when comment required"
-        validate_callbacks_include_presence_of_comment? && destroy_callbacks_include_comment_required?
+        validations_include_presence_of_comment? && destroy_callbacks_include_comment_required?
       end
 
       def only_audit_on_designated_callbacks?
@@ -128,9 +128,9 @@ module Audited
         end.compact.all?
       end
 
-      def validate_callbacks_include_presence_of_comment?
+      def validations_include_presence_of_comment?
         if @options[:comment_required] && audited_on_create_or_update?
-          callbacks_for(:validate).include?(:presence_of_audit_comment)
+          model_class.validators_on(:audit_comment).present?
         else
           true
         end

@@ -840,6 +840,7 @@ describe Audited::Auditor do
       let( :user ) { Models::ActiveRecord::CommentRequiredUser.create!( audit_comment: 'Create' ) }
       let( :on_create_user ) { Models::ActiveRecord::OnDestroyCommentRequiredUser.create }
       let( :on_destroy_user ) { Models::ActiveRecord::OnDestroyCommentRequiredUser.create }
+      let( :on_update_except_name_user ) { Models::ActiveRecord::OnUpdateCommentRequiredExceptNameUser.create }
 
       it "should not validate when audit_comment is not supplied" do
         expect(user.update_attributes(name: 'Test')).to eq(false)
@@ -848,6 +849,10 @@ describe Audited::Auditor do
       it "should validate when audit_comment is not supplied, and updating is not being audited" do
         expect(on_create_user.update_attributes(name: 'Test')).to eq(true)
         expect(on_destroy_user.update_attributes(name: 'Test')).to eq(true)
+      end
+
+      it "should validate when audit_comment is not supplied, and only excepted attributes have been updated" do
+        expect(on_update_except_name_user.update_attributes(name: 'Test')).to eq(true)
       end
 
       it "should validate when audit_comment is supplied" do

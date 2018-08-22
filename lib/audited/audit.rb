@@ -131,7 +131,7 @@ module Audited
     # by +user+. This method is hopefully threadsafe, making it ideal
     # for background operations that require audit information.
     def self.as_user(user)
-      last_audited_user = ::Audited.store[:audited_user] 
+      last_audited_user = ::Audited.store[:audited_user]
       ::Audited.store[:audited_user] = user
       yield
     ensure
@@ -143,7 +143,7 @@ module Audited
       audits.each_with_object({}) do |audit, all|
         all.merge!(audit.new_attributes)
         all[:audit_version] = audit.version
-     end
+      end
     end
 
     # @private
