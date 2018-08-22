@@ -65,7 +65,7 @@ module Audited
     def revision
       clazz = auditable_type.constantize
       (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(version: version))
+        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(audit_version: version))
       end
     end
 
@@ -131,7 +131,7 @@ module Audited
     # by +user+. This method is hopefully threadsafe, making it ideal
     # for background operations that require audit information.
     def self.as_user(user)
-      last_audited_user = ::Audited.store[:audited_user] 
+      last_audited_user = ::Audited.store[:audited_user]
       ::Audited.store[:audited_user] = user
       yield
     ensure
@@ -142,7 +142,7 @@ module Audited
     def self.reconstruct_attributes(audits)
       audits.each_with_object({}) do |audit, all|
         all.merge!(audit.new_attributes)
-        all[:version] = audit.version
+        all[:audit_version] = audit.version
       end
     end
 
