@@ -347,6 +347,27 @@ You can find documentation at: http://rdoc.info/github/collectiveidea/audited
 
 Or join the [mailing list](http://groups.google.com/group/audited) to get help or offer suggestions.
 
+## Running tests
+
+To run tests on SQlite3:
+
+    $ rake test
+
+The same for MySQL, an example with docker/podman:
+
+    $ cat spec/rails_app/config/database.yml
+    ...
+    mysql: &MYSQL
+      adapter: mysql2
+      host: 127.0.0.1
+      username: root
+      password: redhat
+      database: audited_test
+    ...
+    $ sudo docker run --name audited-mysql -e MYSQL_ROOT_PASSWORD=redhat -p 3306:3306 mariadb
+    $ export DB=MYSQL
+    $ rake test
+
 ## Contributing
 
 In the spirit of [free software](http://www.fsf.org/licensing/essays/free-sw.html), **everyone** is encouraged to help improve this project. Here are a few ways _you_ can pitch in:

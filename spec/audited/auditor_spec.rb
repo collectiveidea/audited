@@ -807,6 +807,38 @@ describe Audited::Auditor do
       user.update_attributes(name: 'Test')
       expect(user.audits.count).to eq(1)
     end
+
+    it "should be globally thread safe using a #without_auditing block" do
+      skip if Models::ActiveRecord::User.connection.class.name.include?("SQLite")
+
+      begin
+        Audited.auditing_enabled = true
+        t1 = Thread.new do
+          expect(Audited.auditing_enabled).to eq(true)
+          Audited.without_auditing do
+            expect(Audited.auditing_enabled).to eq(false)
+            Models::ActiveRecord::User.create!( name: 'Bart' )
+            sleep 1
+            expect(Audited.auditing_enabled).to eq(false)
+          end
+          expect(Audited.auditing_enabled).to eq(true)
+        end
+
+        t2 = Thread.new do
+          sleep 0.5
+          expect(Audited.auditing_enabled).to eq(true)
+          Models::ActiveRecord::User.create!( name: 'Lisa' )
+        end
+        t1.join
+        t2.join
+
+        expect(Models::ActiveRecord::User.find_by_name('Bart').audits.count).to eq(0)
+        expect(Models::ActiveRecord::User.find_by_name('Lisa').audits.count).to eq(1)
+      ensure
+        Audited.auditing_enabled = true
+      end
+    end
+
   end
 
   describe "comment required" do
