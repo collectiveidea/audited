@@ -4,20 +4,19 @@ require 'activerecord-import'
 module Audited
   class AuditBatch
 
-    def initialize(relation, updates, comment = '')
-      @relation = relation
-      @updates = updates
-      @audited_updates = @updates.except(*calculate_non_audited_columns)
-      @comment = comment
+    def initialize(resource, updates, comment = '')
+      @resource = resource
+      @updates =  updates
+      @comment =  comment
     end
 
     def create
-      if @relation.update_all(@updates)
-        serialized_updates = Audited::YAMLIfTextColumnType.load(@audited_updates)
+      if @resource.update_all(@updates)
+        serialized_updates = Audited::YAMLIfTextColumnType.load(audited_updates)
         audits = old_attributes.map do |value|
           {
             auditable_id: value['id'],
-            auditable_type: @relation.name,
+            auditable_type: @resource.name,
             audited_changes: serialized_updates,
             comment: @comment,
           }
@@ -38,7 +37,7 @@ module Audited
     # Returns a hash of the changed attributes with the old values
     def old_attributes
       @old_attributes ||= begin
-        query = @relation.select(:id, *@audited_updates.keys).to_sql
+        query = @resource.select(:id, *audited_updates.keys).to_sql
         result = ActiveRecord::Base.connection.exec_query(query)
         result.to_hash
       end
@@ -73,27 +72,21 @@ module Audited
     #   self.remote_address ||= ::Audited.store[:current_remote_address]
     # end
 
+    def audited_updates
+      @updates.except(*calculate_non_audited_columns)
+    end
+
     def default_ignored_attributes
-      [@relation.primary_key, @relation.inheritance_column] | Audited.ignored_attributes
+      [@resource.primary_key, @resource.inheritance_column] | Audited.ignored_attributes
     end
 
     protected
 
-    def normalize_audited_options
-      options = @relation.audited_options
-      options[:on] = Array.wrap(options[:on])
-      options[:on] = [:create, :update, :destroy] if options[:on].empty?
-      options[:only] = Array.wrap(options[:only]).map(&:to_s)
-      options[:except] = Array.wrap(options[:except]).map(&:to_s)
-      max_audits = options[:max_audits] || Audited.max_audits
-      options[:max_audits] = Integer(max_audits).abs if max_audits
-    end
-
     def calculate_non_audited_columns
-      if @relation.audited_options[:only].present?
-        (column_names | default_ignored_attributes) - @relation.audited_options[:only]
-      elsif @relation.audited_options[:except].present?
-        default_ignored_attributes | @relation.audited_options[:except]
+      if @resource.audited_options[:only].present?
+        (@resource.column_names | default_ignored_attributes) - @resource.audited_options[:only]
+      elsif @resource.audited_options[:except].present?
+        default_ignored_attributes | @resource.audited_options[:except]
       else
         default_ignored_attributes
       end
