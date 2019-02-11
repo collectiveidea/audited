@@ -14,7 +14,13 @@ addons:
 before_install:
   # https://github.com/travis-ci/travis-ci/issues/8978
   - "travis_retry gem update --system"
-  - "travis_retry gem install bundler"
+  # Rails 4.2 has a bundler 1.x requirement
+  - if [ $BUNDLE_GEMFILE = $PWD/gemfiles/rails42.gemfile ]; then
+      rvm @global do gem uninstall bundler -a -x;
+      travis_retry gem install -v '< 2.0.0' bundler;
+    else
+      travis_retry gem install bundler;
+    fi
 gemfile:
   - gemfiles/rails42.gemfile
   - gemfiles/rails50.gemfile
