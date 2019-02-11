@@ -31,7 +31,7 @@ Gem::Specification.new do |gem|
     gem.add_development_dependency 'activerecord-jdbcpostgresql-adapter', '~> 1.3'
     gem.add_development_dependency 'activerecord-jdbcmysql-adapter', '~> 1.3'
   else
-    gem.add_development_dependency 'sqlite3', '~> 1.3'
+    gem.add_development_dependency 'sqlite3', '~> 1.3.6'
     gem.add_development_dependency 'mysql2', '~> 0.3.20'
     gem.add_development_dependency 'pg', '~> 0.18'
   end
