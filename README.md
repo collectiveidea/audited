@@ -140,6 +140,14 @@ class User < ActiveRecord::Base
 end
 ```
 
+You can update an audit if only audit_comment is present. You can optionally add the `:update_with_comment_only` option set to `false` to your `audited` call to turn this behavior off for all audits.
+
+```ruby
+class User < ActiveRecord::Base
+  audited :update_with_comment_only => false
+end
+```
+
 ### Limiting stored audits
 
 You can limit the number of audits stored for your model. To configure limiting for all audited models, put the following in an initializer:
