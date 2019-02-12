@@ -14,6 +14,25 @@ Breaking changes
 
 Added
 
+- None
+
+Changed
+
+- None
+
+Fixed
+
+- Ensure enum changes are stored consistently
+  [#429](https://github.com/collectiveidea/audited/pull/429)
+
+## 4.8.0 (2018-08-19)
+
+Breaking changes
+
+- None
+
+Added
+
 - Add ability to globally disable auditing
   [#426](https://github.com/collectiveidea/audited/pull/426)
 - Add `own_and_associated_audits` method to auditable models
@@ -32,8 +51,7 @@ Changed
 
 Fixed
 
-- Ensure enum changes are stored consistently
-  [#429](https://github.com/collectiveidea/audited/pull/429)
+- None
 
 ## 4.7.1 (2018-04-10)
 
