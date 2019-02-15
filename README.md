@@ -65,7 +65,7 @@ By default, whenever a user is created, updated or destroyed, a new audit is cre
 ```ruby
 user = User.create!(name: "Steve")
 user.audits.count # => 1
-user.update_attributes!(name: "Ryan")
+user.update!(name: "Ryan")
 user.audits.count # => 2
 user.destroy
 user.audits.count # => 3
@@ -74,7 +74,7 @@ user.audits.count # => 3
 Audits contain information regarding what action was taken on the model and what changes were made.
 
 ```ruby
-user.update_attributes!(name: "Ryan")
+user.update!(name: "Ryan")
 audit = user.audits.last
 audit.action # => "update"
 audit.audited_changes # => {"name"=>["Steve", "Ryan"]}
@@ -128,7 +128,7 @@ end
 You can attach comments to each audit using an `audit_comment` attribute on your model.
 
 ```ruby
-user.update_attributes!(name: "Ryan", audit_comment: "Changing name, just because")
+user.update!(name: "Ryan", audit_comment: "Changing name, just because")
 user.audits.last.comment # => "Changing name, just because"
 ```
 
@@ -169,7 +169,7 @@ Whenever an object is updated or destroyed, extra audits are combined with newer
 ```ruby
 user = User.create!(name: "Steve")
 user.audits.count # => 1
-user.update_attributes!(name: "Ryan")
+user.update!(name: "Ryan")
 user.audits.count # => 2
 user.destroy
 user.audits.count # => 2
@@ -199,7 +199,7 @@ Outside of a request, Audited can still record the user with the `as_user` metho
 
 ```ruby
 Audited.audit_class.as_user(User.find(1)) do
-  post.update_attributes!(title: "Hello, world!")
+  post.update!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
 ```
@@ -256,7 +256,7 @@ Now, when an audit is created for a user, that user's company is also saved alon
 ```ruby
 company = Company.create!(name: "Collective Idea")
 user = company.users.create!(name: "Steve")
-user.update_attribute!(name: "Steve Richert")
+user.update!(name: "Steve Richert")
 user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
