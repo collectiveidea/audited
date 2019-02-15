@@ -34,6 +34,16 @@ module Audited
       # * +require_comment+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
       # * +max_audits+ - Limits the number of stored audits.
+
+      # * +redacted+ - Changes to these fields will be logged, but the values
+      #   will not. This is useful, for example, if you wish to audit when a
+      #   password is changed, without saving the actual password in the log.
+      #   To store values as something other than '[REDACTED]', pass an argument
+      #   to the redaction_value option.
+      #
+      #     class User < ActiveRecord::Base
+      #       audited redacted: :password, redaction_value: SecureRandom.uuid
+      #     end
       #
       # * +if+ - Only audit the model when the given function returns true
       # * +unless+ - Only audit the model when the given function returns false
@@ -90,6 +100,7 @@ module Audited
     end
 
     module AuditedInstanceMethods
+      REDACTED = '[REDACTED]'
       # Deprecate version attribute in favor of audit_version attribute – preparing for eventual removal.
       def method_missing(method_name, *args, &block)
         if method_name == :version
@@ -214,6 +225,7 @@ module Audited
             all_changes.except(*self.class.non_audited_columns)
           end
 
+        filtered_changes = redact_values(filtered_changes)
         filtered_changes = normalize_enum_changes(filtered_changes)
         filtered_changes.to_hash
       end
@@ -232,6 +244,22 @@ module Audited
           end
         end
         changes
+      end
+
+      def redact_values(filtered_changes)
+        [audited_options[:redacted]].flatten.compact.each do |option|
+          changes = filtered_changes[option.to_s]
+          new_value = audited_options[:redaction_value] || REDACTED
+          if changes.is_a? Array
+            values = changes.map { new_value }
+          else
+            values = new_value
+          end
+          hash = Hash[option.to_s, values]
+          filtered_changes.merge!(hash)
+        end
+
+        filtered_changes
       end
 
       def rails_below?(rails_version)

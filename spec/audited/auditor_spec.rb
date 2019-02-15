@@ -212,6 +212,39 @@ describe Audited::Auditor do
       expect(user.audits.last.audited_changes.keys).to eq(%w{non_column_attr})
     end
 
+    it "should redact columns specified in 'redacted' option" do
+      redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
+      user = Models::ActiveRecord::UserRedactedPassword.create(password: "password")
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq(redacted)
+      user.password = "new_password"
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq([redacted, redacted])
+    end
+
+    it "should redact columns specified in 'redacted' option when there are multiple specified" do
+      redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
+      user =
+        Models::ActiveRecord::UserMultipleRedactedAttributes.create(
+          password: "password",
+          ssn: 123456789
+        )
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq(redacted)
+      expect(user.audits.last.audited_changes['ssn']).to eq(redacted)
+      user.password = "new_password"
+      user.ssn = 987654321
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq([redacted, redacted])
+      expect(user.audits.last.audited_changes['ssn']).to eq([redacted, redacted])
+    end
+
+    it "should redact columns in 'redacted' column with custom option" do
+      user = Models::ActiveRecord::UserRedactedPasswordCustomRedaction.create(password: "password")
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq(["My", "Custom", "Value", 7])
+    end
+
     if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
       describe "'json' and 'jsonb' audited_changes column type" do
         let(:migrations_path) { SPEC_ROOT.join("support/active_record/postgres") }
