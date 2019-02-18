@@ -256,7 +256,7 @@ module Audited
       end
 
       def audit_update
-        unless (changes = audited_changes).empty? && audit_comment.blank?
+        unless (changes = audited_changes).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
           write_audit(action: 'update', audited_changes: changes,
                       comment: audit_comment)
         end

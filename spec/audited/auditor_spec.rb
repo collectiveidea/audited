@@ -889,6 +889,16 @@ describe Audited::Auditor do
 
   end
 
+  describe "no update with comment only" do
+    let( :user ) { Models::ActiveRecord::NoUpdateWithCommentOnlyUser.create }
+
+    it "does not create an audit when only an audit_comment is present" do
+      user.audit_comment = "Comment"
+      expect { user.save! }.to_not change( Audited::Audit, :count )
+    end
+
+  end
+
   describe "attr_protected and attr_accessible" do
 
     it "should not raise error when attr_accessible is set and protected is false" do
