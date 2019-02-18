@@ -14,7 +14,8 @@ Breaking changes
 
 Added
 
-- None
+- Add `update_with_comment_only` option to control audit creation with only comments
+  [#327](https://github.com/collectiveidea/audited/pull/327)
 
 Changed
 
