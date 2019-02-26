@@ -206,9 +206,9 @@ post.audits.last.user # => #<User id: 1>
 
 The standard Audited install assumes your User model has an integer primary key type. If this isn't true (e.g. you're using UUID primary keys), you'll need to create a migration to update the `audits` table `user_id` column type. (See Installation above for generator flags if you'd like to regenerate the install migration.)
 
-#### Custom Auditor
+#### Custom Audit User
 
-You might need to use a custom auditor from time to time. It can be done by simply passing in a string:
+You might need to use a custom auditor from time to time. This can be done by simply passing in a string:
 
 ```ruby
 class ApplicationController < ActionController::Base
@@ -220,6 +220,15 @@ class ApplicationController < ActionController::Base
     end
   end
 end
+```
+
+`as_user` also accepts a string, which can be useful for auditing updates made in a CLI environment:
+
+```rb
+Audited.audit_class.as_user("console-user-#{ENV['SSH_USER']}") do
+  post.update_attributes!(title: "Hello, world!")
+end
+post.audits.last.user # => 'console-user-username'
 ```
 
 ### Associated Audits
