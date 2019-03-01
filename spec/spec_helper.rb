@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 ENV['RAILS_ENV'] = 'test'
 require 'bundler/setup'
 require 'single_cov'
@@ -13,7 +14,7 @@ require 'audited-rspec'
 require 'audited_spec_helpers'
 require 'support/active_record/models'
 
-SPEC_ROOT = Pathname.new(File.expand_path('../', __FILE__))
+SPEC_ROOT = Pathname.new(File.expand_path(__dir__))
 
 Dir[SPEC_ROOT.join('support/*.rb')].each{|f| require f }
 

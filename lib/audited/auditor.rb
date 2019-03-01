@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Audited
   # Specify this act if you want changes to your model to be saved in an
   # audit table.  This assumes there is an audits table ready.
@@ -14,7 +15,7 @@ module Audited
   module Auditor #:nodoc:
     extend ActiveSupport::Concern
 
-    CALLBACKS = [:audit_create, :audit_update, :audit_destroy]
+    CALLBACKS = [:audit_create, :audit_update, :audit_destroy].freeze
 
     module ClassMethods
       # == Configuration options
@@ -78,8 +79,8 @@ module Audited
         # to notify a party after the audit has been created or if you want to access the newly-created
         # audit.
         define_callbacks :audit
-        set_callback :audit, :after, :after_audit, if: lambda { respond_to?(:after_audit, true) }
-        set_callback :audit, :around, :around_audit, if: lambda { respond_to?(:around_audit, true) }
+        set_callback :audit, :after, :after_audit, if: -> { respond_to?(:after_audit, true) }
+        set_callback :audit, :around, :around_audit, if: -> { respond_to?(:around_audit, true) }
 
         enable_auditing
       end
@@ -139,7 +140,7 @@ module Audited
       # Get a specific revision specified by the version number, or +:previous+
       # Returns nil for versions greater than revisions count
       def revision(version)
-        if version == :previous || self.audits.last.version >= version
+        if version == :previous || audits.last.version >= version
           revision_with Audited.audit_class.reconstruct_attributes(audits_to(version))
         end
       end
@@ -220,7 +221,7 @@ module Audited
 
       def normalize_enum_changes(changes)
         self.class.defined_enums.each do |name, values|
-          if changes.has_key?(name)
+          if changes.key?(name)
             changes[name] = \
               if changes[name].is_a?(Array)
                 changes[name].map { |v| values[v] }
@@ -263,8 +264,10 @@ module Audited
       end
 
       def audit_destroy
-        write_audit(action: 'destroy', audited_changes: audited_attributes,
-                    comment: audit_comment) unless new_record?
+        unless new_record?
+          write_audit(action: 'destroy', audited_changes: audited_attributes,
+                      comment: audit_comment)
+        end
       end
 
       def write_audit(attrs)
@@ -288,8 +291,8 @@ module Audited
 
       def comment_required_state?
         auditing_enabled &&
-          ((audited_options[:on].include?(:create) && self.new_record?) ||
-          (audited_options[:on].include?(:update) && self.persisted? && self.changed?))
+          ((audited_options[:on].include?(:create) && new_record?) ||
+          (audited_options[:on].include?(:update) && persisted? && changed?))
       end
 
       def combine_audits_if_needed
@@ -313,7 +316,7 @@ module Audited
       end
 
       def auditing_enabled
-        return run_conditional_check(audited_options[:if]) &&
+        run_conditional_check(audited_options[:if]) &&
           run_conditional_check(audited_options[:unless], matching: false) &&
           self.class.auditing_enabled
       end
@@ -331,7 +334,7 @@ module Audited
         audits.each { |audit| attributes.merge!(audit.new_attributes) }
         attributes
       end
-    end # InstanceMethods
+    end
 
     module AuditedClassMethods
       # Returns an array of columns that are audited. See non_audited_columns

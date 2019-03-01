@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "spec_helper"
 
 SingleCov.covered!
@@ -238,14 +239,14 @@ describe Audited::Audit do
   describe "new_attributes" do
     it "should return a hash of the new values" do
       new_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).new_attributes
-      expect(new_attributes).to eq({"a" => 2, "b" => 4})
+      expect(new_attributes).to eq("a" => 2, "b" => 4)
     end
   end
 
   describe "old_attributes" do
     it "should return a hash of the old values" do
       old_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).old_attributes
-      expect(old_attributes).to eq({"a" => 1, "b" => 3})
+      expect(old_attributes).to eq("a" => 1, "b" => 3)
     end
   end
 
@@ -293,28 +294,30 @@ describe Audited::Audit do
       end
     end
 
-    it "should be thread safe" do
-      begin
-        expect(user.save).to eq(true)
+    if ActiveRecord::Base.connection.adapter_name != 'SQLite'
+      it "should be thread safe" do
+        begin
+          expect(user.save).to eq(true)
 
-        t1 = Thread.new do
-          Audited::Audit.as_user(user) do
-            sleep 1
-            expect(Models::ActiveRecord::Company.create(name: "The Auditors, Inc").audits.first.user).to eq(user)
+          t1 = Thread.new do
+            Audited::Audit.as_user(user) do
+              sleep 1
+              expect(Models::ActiveRecord::Company.create(name: "The Auditors, Inc").audits.first.user).to eq(user)
+            end
           end
-        end
 
-        t2 = Thread.new do
-          Audited::Audit.as_user(user.name) do
-            expect(Models::ActiveRecord::Company.create(name: "The Competing Auditors, LLC").audits.first.username).to eq(user.name)
-            sleep 0.5
+          t2 = Thread.new do
+            Audited::Audit.as_user(user.name) do
+              expect(Models::ActiveRecord::Company.create(name: "The Competing Auditors, LLC").audits.first.username).to eq(user.name)
+              sleep 0.5
+            end
           end
-        end
 
-        t1.join
-        t2.join
+          t1.join
+          t2.join
+        end
       end
-    end if ActiveRecord::Base.connection.adapter_name != 'SQLite'
+    end
 
     it "should return the value from the yield block" do
       result = Audited::Audit.as_user('foo') do
@@ -326,7 +329,7 @@ describe Audited::Audit do
     it "should reset audited_user when the yield block raises an exception" do
       expect {
         Audited::Audit.as_user('foo') do
-          raise StandardError.new('expected')
+          raise StandardError, 'expected'
         end
       }.to raise_exception('expected')
       expect(Audited.store[:audited_user]).to be_nil

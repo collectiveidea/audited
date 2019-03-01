@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 parent = Rails::VERSION::MAJOR == 4 ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
 class ChangeAuditedChangesTypeToJsonb < parent
   def self.up

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'set'
 
 module Audited
@@ -71,18 +72,16 @@ module Audited
 
     # Returns a hash of the changed attributes with the new values
     def new_attributes
-      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs, (attr, values)|
+      (audited_changes || {}).each_with_object({}.with_indifferent_access) do |(attr, values), attrs|
         attrs[attr] = values.is_a?(Array) ? values.last : values
-        attrs
       end
     end
 
     # Returns a hash of the changed attributes with the old values
     def old_attributes
-      (audited_changes || {}).inject({}.with_indifferent_access) do |attrs, (attr, values)|
+      (audited_changes || {}).each_with_object({}.with_indifferent_access) do |(attr, values), attrs|
         attrs[attr] = Array(values).first
 
-        attrs
       end
     end
 
@@ -108,19 +107,21 @@ module Audited
     def user_as_string=(user)
       # reset both either way
       self.user_as_model = self.username = nil
-      user.is_a?(::ActiveRecord::Base) ?
-        self.user_as_model = user :
+      if user.is_a?(::ActiveRecord::Base)
+        self.user_as_model = user
+      else
         self.username = user
+      end
     end
-    alias_method :user_as_model=, :user=
-    alias_method :user=, :user_as_string=
+    alias user_as_model= user=
+    alias user= user_as_string=
 
     # @private
     def user_as_string
       user_as_model || username
     end
-    alias_method :user_as_model, :user
-    alias_method :user, :user_as_string
+    alias user_as_model user
+    alias user user_as_string
 
     # Returns the list of classes that are being audited
     def self.audited_classes
@@ -152,9 +153,11 @@ module Audited
         record = record.dup if record.frozen?
 
         if record.respond_to?("#{attr}=")
-          record.attributes.key?(attr.to_s) ?
-            record[attr] = val :
+          if record.attributes.key?(attr.to_s)
+            record[attr] = val
+          else
             record.send("#{attr}=", val)
+          end
         end
       end
       record

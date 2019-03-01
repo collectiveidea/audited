@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "spec_helper"
 
 SingleCov.covered! uncovered: 12 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
@@ -67,7 +68,7 @@ describe Audited::Auditor do
           before do
             class InclusiveCompany < ::ActiveRecord::Base
               self.table_name = 'companies'
-              audited if: Proc.new { true }
+              audited if: proc { true }
             end
           end
 
@@ -80,7 +81,7 @@ describe Audited::Auditor do
           before do
             class ExclusiveCompany < ::ActiveRecord::Base
               self.table_name = 'companies'
-              audited if: Proc.new { false }
+              audited if: proc { false }
             end
           end
           subject { ExclusiveCompany.new.send(:auditing_enabled) }
@@ -119,7 +120,7 @@ describe Audited::Auditor do
           before do
             class ExclusionaryCompany < ::ActiveRecord::Base
               self.table_name = 'companies'
-              audited unless: Proc.new { |c| c.exclusive? }
+              audited unless: proc { |c| c.exclusive? }
 
               def exclusive?
                 true
@@ -135,7 +136,7 @@ describe Audited::Auditor do
           before do
             class InclusiveCompany < ::ActiveRecord::Base
               self.table_name = 'companies'
-              audited unless: Proc.new { false }
+              audited unless: proc { false }
             end
           end
 
@@ -190,7 +191,7 @@ describe Audited::Auditor do
       user.password = "password"
       user.non_column_attr = "some value"
       user.save!
-      expect(user.audits.last.audited_changes.keys).to eq(%w{password})
+      expect(user.audits.last.audited_changes.keys).to eq(['password'])
     end
 
     it "should save attributes not specified in 'except' option" do
@@ -209,7 +210,7 @@ describe Audited::Auditor do
       user.password = "password"
       user.non_column_attr = "some value"
       user.save!
-      expect(user.audits.last.audited_changes.keys).to eq(%w{non_column_attr})
+      expect(user.audits.last.audited_changes.keys).to eq(['non_column_attr'])
     end
 
     if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
@@ -228,7 +229,7 @@ describe Audited::Auditor do
           user = Models::ActiveRecord::User.create
           user.name = "new name"
           user.save!
-          expect(user.audits.last.audited_changes).to eq({"name" => [nil, "new name"]})
+          expect(user.audits.last.audited_changes).to eq("name" => [nil, "new name"])
         end
 
         it "should work if column type is 'jsonb'" do
@@ -239,7 +240,7 @@ describe Audited::Auditor do
           user = Models::ActiveRecord::User.create
           user.name = "new name"
           user.save!
-          expect(user.audits.last.audited_changes).to eq({"name" => [nil, "new name"]})
+          expect(user.audits.last.audited_changes).to eq("name" => [nil, "new name"])
         end
       end
     end
@@ -333,7 +334,7 @@ describe Audited::Auditor do
 
     it "should store the changed attributes" do
       @user.update_attributes name: 'Changed'
-      expect(@user.audits.last.audited_changes).to eq({ 'name' => ['Brandon', 'Changed'] })
+      expect(@user.audits.last.audited_changes).to eq('name' => ['Brandon', 'Changed'])
     end
 
     it "should store changed enum values" do
@@ -431,7 +432,7 @@ describe Audited::Auditor do
         owner.destroy
       }.to change( Audited::Audit, :count )
 
-      expect(company.audits.map { |a| a.action }).to eq(['create', 'destroy'])
+      expect(company.audits.map(&:action)).to eq(['create', 'destroy'])
     end
   end
 
@@ -518,9 +519,9 @@ describe Audited::Auditor do
         audits = user.audits
 
         expect(audits.count).to eq(3)
-        expect(audits[0].audited_changes).to include({'name' => ['Foobar', 'Awesome'], 'username' => ['brandon', 'keepers']})
-        expect(audits[1].audited_changes).to eq({'activated' => [nil, true]})
-        expect(audits[2].audited_changes).to eq({'favourite_device' => [nil, 'Android Phone']})
+        expect(audits[0].audited_changes).to include('name' => ['Foobar', 'Awesome'], 'username' => ['brandon', 'keepers'])
+        expect(audits[1].audited_changes).to eq('activated' => [nil, true])
+        expect(audits[2].audited_changes).to eq('favourite_device' => [nil, 'Android Phone'])
       end
     end
 
@@ -763,7 +764,9 @@ describe Audited::Auditor do
     end
 
     it "should reset auditing status even it raises an exception" do
-      Models::ActiveRecord::User.without_auditing { raise } rescue nil
+      expect {
+        Models::ActiveRecord::User.without_auditing { raise }
+      }.to raise_error(RuntimeError)
       expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
     end
 
@@ -962,8 +965,8 @@ describe Audited::Auditor do
 
   describe "STI auditing" do
     it "should correctly disable auditing when using STI" do
-      company = Models::ActiveRecord::Company::STICompany.create name: 'The auditors'
-      expect(company.type).to eq("Models::ActiveRecord::Company::STICompany")
+      company = Models::ActiveRecord::STICompany.create name: 'The auditors'
+      expect(company.type).to eq("Models::ActiveRecord::STICompany")
       expect {
         Models::ActiveRecord::Company.auditing_enabled = false
         company.update_attributes name: 'STI auditors'

@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 require 'cgi'
-require File.expand_path('../schema', __FILE__)
+require File.expand_path('schema', __dir__)
 
 module Models
   module ActiveRecord
@@ -92,7 +93,7 @@ module Models
       audited
     end
 
-    class Company::STICompany < Company
+    class STICompany < Company
     end
 
     class Owner < ::ActiveRecord::Base

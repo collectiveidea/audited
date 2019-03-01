@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'active_record'
 
 module Audited
@@ -18,7 +19,7 @@ module Audited
     end
   end
 
-  @ignored_attributes = %w(lock_version created_at updated_at created_on updated_on)
+  @ignored_attributes = ['lock_version', 'created_at', 'updated_at', 'created_on', 'updated_on']
 
   @current_user_method = :current_user
   @auditing_enabled = true
