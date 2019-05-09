@@ -97,7 +97,7 @@ module Audited
         auditable_type.constantize.create!(audited_changes)
       when 'update'
         # changes back attributes
-        auditable.update_attributes!(audited_changes.transform_values(&:first))
+        auditable.update!(audited_changes.transform_values(&:first))
       else
         raise StandardError, "invalid action given #{action}"
       end

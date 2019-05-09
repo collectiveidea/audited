@@ -16,6 +16,8 @@ Added
 
 - Add `update_with_comment_only` option to control audit creation with only comments
   [#327](https://github.com/collectiveidea/audited/pull/327)
+- Support for Rails 6.0 and Ruby 2.6
+  [#494](https://github.com/collectiveidea/audited/pull/494)
 
 Changed
 
