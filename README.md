@@ -29,14 +29,22 @@ Add the gem to your Gemfile:
 gem "audited", "~> 4.7"
 ```
 
-Then, from your Rails app directory, create the `audits` table:
+Then, from your Rails app directory, create a migration that will add an `audits` table:
 
 ```bash
 $ rails generate audited:install
-$ rake db:migrate
 ```
 
-If you're using PostgreSQL, then you can use `rails generate audited:install --audited-changes-column-type jsonb` (or `json`) to store audit changes natively with its JSON column types. If you're using something other than integer primary keys (e.g. UUID) for your User model, then you can use `rails generate audited:install --audited-user-id-column-type uuid` to customize the `audits` table `user_id` column type.
+You can edit the generated migration and change some column types to better suit your database:
+
+* **id** columns (`auditable_id`, `associated_id`, `user_id`): their types must match those in the models you are going to audit
+* `audited_changes`: the type can alternatively be set to `:json` or `:jsonb` (in PostgreSQL databases)
+
+After that, create the table by running the migration:
+
+```bash
+$ rake db:migrate
+```
 
 #### Upgrading
 
@@ -48,7 +56,6 @@ $ rake db:migrate
 ```
 
 Upgrading will only make changes if changes are needed.
-
 
 ## Usage
 

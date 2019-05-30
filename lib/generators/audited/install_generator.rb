@@ -12,9 +12,6 @@ module Audited
       include Audited::Generators::MigrationHelper
       extend Audited::Generators::Migration
 
-      class_option :audited_changes_column_type, type: :string, default: "text", required: false
-      class_option :audited_user_id_column_type, type: :string, default: "integer", required: false
-
       source_root File.expand_path("../templates", __FILE__)
 
       def copy_migration

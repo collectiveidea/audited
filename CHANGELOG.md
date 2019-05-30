@@ -4,6 +4,10 @@
 
 Breaking changes
 
+- removed `--audited-changes-column-type` and `--audited-user-id-column-type`
+  command-line options of `audited:install` generator
+  in favor of manual editing of the generated migration file
+  [#434](https://github.com/collectiveidea/audited/pull/434)
 - removed block support for `Audit.reconstruct_attributes`
   [#437](https://github.com/collectiveidea/audited/pull/437)
 - removed `audited_columns`, `non_audited_columns`, `auditing_enabled=` instance methods,
