@@ -49,7 +49,6 @@ branches:
   only:
   - master
   - /.*-stable$/
-sudo: false
 notifications:
   webhooks:
     urls:
