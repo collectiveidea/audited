@@ -12,6 +12,8 @@ env:
   - DB=MYSQL
 addons:
   postgresql: "9.4"
+services:
+  - mysql
 before_install:
   # https://github.com/travis-ci/travis-ci/issues/8978
   - "travis_retry gem update --system"
