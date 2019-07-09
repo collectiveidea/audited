@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 12 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+SingleCov.covered! uncovered: 13 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
 
 describe Audited::Auditor do
 
@@ -806,6 +806,65 @@ describe Audited::Auditor do
 
       user.update!(name: 'Test')
       expect(user.audits.count).to eq(1)
+      Models::ActiveRecord::User.enable_auditing
+    end
+  end
+
+  describe "with auditing" do
+    it "should save an audit when calling #save_with_auditing" do
+      expect {
+        u = Models::ActiveRecord::User.new(name: 'Brandon')
+        Models::ActiveRecord::User.auditing_enabled = false
+        expect(u.save_with_auditing).to eq(true)
+        Models::ActiveRecord::User.auditing_enabled = true
+      }.to change( Audited::Audit, :count ).by(1)
+    end
+
+    it "should save an audit inside of the #with_auditing block" do
+      expect {
+        Models::ActiveRecord::User.auditing_enabled = false
+        Models::ActiveRecord::User.with_auditing { Models::ActiveRecord::User.create!( name: 'Brandon' ) }
+        Models::ActiveRecord::User.auditing_enabled = true
+      }.to change( Audited::Audit, :count ).by(1)
+    end
+
+    it "should reset auditing status even it raises an exception" do
+      Models::ActiveRecord::User.disable_auditing
+      Models::ActiveRecord::User.with_auditing { raise } rescue nil
+      expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+      Models::ActiveRecord::User.enable_auditing
+    end
+
+    it "should be thread safe using a #with_auditing block" do
+      skip if Models::ActiveRecord::User.connection.class.name.include?("SQLite")
+
+      t1 = Thread.new do
+        Models::ActiveRecord::User.disable_auditing
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+        Models::ActiveRecord::User.with_auditing do
+          expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
+
+          Models::ActiveRecord::User.create!( name: 'Shaggy' )
+          sleep 1
+          expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
+        end
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+        Models::ActiveRecord::User.enable_auditing
+      end
+
+      t2 = Thread.new do
+        sleep 0.5
+        Models::ActiveRecord::User.disable_auditing
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+        Models::ActiveRecord::User.create!( name: 'Scooby' )
+        Models::ActiveRecord::User.enable_auditing
+      end
+      t1.join
+      t2.join
+
+      Models::ActiveRecord::User.enable_auditing
+      expect(Models::ActiveRecord::User.find_by_name('Shaggy').audits.count).to eq(1)
+      expect(Models::ActiveRecord::User.find_by_name('Scooby').audits.count).to eq(0)
     end
   end
 
