@@ -14,6 +14,8 @@ Breaking changes
 
 Added
 
+- Add `with_auditing` methods to enable temporarily
+  [#502](https://github.com/collectiveidea/audited/pull/502)
 - Add `update_with_comment_only` option to control audit creation with only comments
   [#327](https://github.com/collectiveidea/audited/pull/327)
 - Support for Rails 6.0 and Ruby 2.6

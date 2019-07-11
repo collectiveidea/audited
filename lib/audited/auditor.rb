@@ -115,6 +115,21 @@ module Audited
         self.class.without_auditing(&block)
       end
 
+      # Temporarily turns on auditing while saving.
+      def save_with_auditing
+        with_auditing { save }
+      end
+
+      # Executes the block with the auditing callbacks enabled.
+      #
+      #   @foo.with_auditing do
+      #     @foo.save
+      #   end
+      #
+      def with_auditing(&block)
+        self.class.with_auditing(&block)
+      end
+
       # Gets an array of the revisions available
       #
       #   user.revisions.each do |revision|
@@ -361,6 +376,20 @@ module Audited
         yield
       ensure
         enable_auditing if auditing_was_enabled
+      end
+
+      # Executes the block with auditing enabled.
+      #
+      #   Foo.with_auditing do
+      #     @foo.save
+      #   end
+      #
+      def with_auditing
+        auditing_was_enabled = auditing_enabled
+        enable_auditing
+        yield
+      ensure
+        disable_auditing unless auditing_was_enabled
       end
 
       def disable_auditing

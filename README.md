@@ -332,6 +332,23 @@ To disable auditing on all models:
 Audited.auditing_enabled = false
 ```
 
+If you have auditing disabled by default on your model you can enable auditing
+temporarily.
+
+```ruby
+User.auditing_enabled = false
+@user.save_with_auditing
+```
+
+or:
+
+```ruby
+User.auditing_enabled = false
+@user.with_auditing do
+  @user.save
+end
+```
+
 ### Custom `Audit` model
 
 If you want to extend or modify the audit model, create a new class that
