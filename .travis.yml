@@ -10,6 +10,8 @@ env:
   - DB=SQLITE
   - DB=POSTGRES
   - DB=MYSQL
+services:
+  - mysql
 addons:
   postgresql: "9.4"
 before_install:
