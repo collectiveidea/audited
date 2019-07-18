@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.9.0 (2019-07-17)
+
 Breaking changes
 
 - removed block support for `Audit.reconstruct_attributes`
