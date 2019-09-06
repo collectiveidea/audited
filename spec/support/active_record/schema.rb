@@ -15,7 +15,7 @@ begin
       db_config[:configure_connection] = false
     end
     adapter = ActiveRecord::Base.send("#{db_type}_connection", db_config)
-    adapter.recreate_database db_name
+    adapter.recreate_database db_name, db_config.slice('charset').symbolize_keys
     adapter.disconnect!
   end
 rescue => e
@@ -41,6 +41,7 @@ ActiveRecord::Schema.define do
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
     t.column :favourite_device, :string
+    t.column :ssn, :integer
   end
 
   create_table :companies do |t|

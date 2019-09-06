@@ -25,6 +25,21 @@ module Models
       audited only: :password
     end
 
+    class UserRedactedPassword < ::ActiveRecord::Base
+      self.table_name = :users
+      audited redacted: :password
+    end
+
+    class UserMultipleRedactedAttributes < ::ActiveRecord::Base
+      self.table_name = :users
+      audited redacted: [:password, :ssn]
+    end
+
+    class UserRedactedPasswordCustomRedaction < ::ActiveRecord::Base
+      self.table_name = :users
+      audited redacted: :password, redaction_value: ["My", "Custom", "Value", 7]
+    end
+
     class CommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
       audited comment_required: true
@@ -43,6 +58,11 @@ module Models
     class OnDestroyCommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
       audited comment_required: true, on: :destroy
+    end
+
+    class NoUpdateWithCommentOnlyUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited update_with_comment_only: false
     end
 
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base

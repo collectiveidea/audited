@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 12 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+SingleCov.covered! uncovered: 13 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
 
 describe Audited::Auditor do
 
@@ -212,6 +212,39 @@ describe Audited::Auditor do
       expect(user.audits.last.audited_changes.keys).to eq(%w{non_column_attr})
     end
 
+    it "should redact columns specified in 'redacted' option" do
+      redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
+      user = Models::ActiveRecord::UserRedactedPassword.create(password: "password")
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq(redacted)
+      user.password = "new_password"
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq([redacted, redacted])
+    end
+
+    it "should redact columns specified in 'redacted' option when there are multiple specified" do
+      redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
+      user =
+        Models::ActiveRecord::UserMultipleRedactedAttributes.create(
+          password: "password",
+          ssn: 123456789
+        )
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq(redacted)
+      expect(user.audits.last.audited_changes['ssn']).to eq(redacted)
+      user.password = "new_password"
+      user.ssn = 987654321
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq([redacted, redacted])
+      expect(user.audits.last.audited_changes['ssn']).to eq([redacted, redacted])
+    end
+
+    it "should redact columns in 'redacted' column with custom option" do
+      user = Models::ActiveRecord::UserRedactedPasswordCustomRedaction.create(password: "password")
+      user.save!
+      expect(user.audits.last.audited_changes['password']).to eq(["My", "Custom", "Value", 7])
+    end
+
     if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
       describe "'json' and 'jsonb' audited_changes column type" do
         let(:migrations_path) { SPEC_ROOT.join("support/active_record/postgres") }
@@ -325,19 +358,19 @@ describe Audited::Auditor do
     end
 
     it "should set the action to 'update'" do
-      @user.update_attributes name: 'Changed'
+      @user.update! name: 'Changed'
       expect(@user.audits.last.action).to eq('update')
       expect(Audited::Audit.updates.order(:id).last).to eq(@user.audits.last)
       expect(@user.audits.updates.last).to eq(@user.audits.last)
     end
 
     it "should store the changed attributes" do
-      @user.update_attributes name: 'Changed'
+      @user.update! name: 'Changed'
       expect(@user.audits.last.audited_changes).to eq({ 'name' => ['Brandon', 'Changed'] })
     end
 
     it "should store changed enum values" do
-      @user.update_attributes status: 1
+      @user.update! status: 1
       expect(@user.audits.last.audited_changes["status"]).to eq([0, 1])
     end
 
@@ -348,12 +381,12 @@ describe Audited::Auditor do
     it "should not save an audit if only specified on create/destroy" do
       on_create_destroy = Models::ActiveRecord::OnCreateDestroy.create( name: 'Bart' )
       expect {
-        on_create_destroy.update_attributes name: 'Changed'
+        on_create_destroy.update! name: 'Changed'
       }.to_not change( Audited::Audit, :count )
     end
 
     it "should not save an audit if the value doesn't change after type casting" do
-      @user.update_attributes! logins: 0, activated: true
+      @user.update! logins: 0, activated: true
       expect { @user.update_attribute :logins, '0' }.to_not change( Audited::Audit, :count )
       expect { @user.update_attribute :activated, 1 }.to_not change( Audited::Audit, :count )
       expect { @user.update_attribute :activated, '1' }.to_not change( Audited::Audit, :count )
@@ -508,13 +541,13 @@ describe Audited::Auditor do
     it "should delete old extra audits after introducing limit" do
       stub_global_max_audits(nil) do
         user = Models::ActiveRecord::User.create!(name: 'Brandon', username: 'brandon')
-        user.update_attributes(name: 'Foobar')
-        user.update_attributes(name: 'Awesome', username: 'keepers')
-        user.update_attributes(activated: true)
+        user.update!(name: 'Foobar')
+        user.update!(name: 'Awesome', username: 'keepers')
+        user.update!(activated: true)
 
         Audited.max_audits = 3
         Models::ActiveRecord::User.send(:normalize_audited_options)
-        user.update_attributes(favourite_device: 'Android Phone')
+        user.update!(favourite_device: 'Android Phone')
         audits = user.audits
 
         expect(audits.count).to eq(3)
@@ -565,8 +598,8 @@ describe Audited::Auditor do
 
     it "should set the attributes for each revision" do
       u = Models::ActiveRecord::User.create(name: 'Brandon', username: 'brandon')
-      u.update_attributes name: 'Foobar'
-      u.update_attributes name: 'Awesome', username: 'keepers'
+      u.update! name: 'Foobar'
+      u.update! name: 'Awesome', username: 'keepers'
 
       expect(u.revisions.size).to eql(3)
 
@@ -582,8 +615,8 @@ describe Audited::Auditor do
 
     it "access to only recent revisions" do
       u = Models::ActiveRecord::User.create(name: 'Brandon', username: 'brandon')
-      u.update_attributes name: 'Foobar'
-      u.update_attributes name: 'Awesome', username: 'keepers'
+      u.update! name: 'Foobar'
+      u.update! name: 'Awesome', username: 'keepers'
 
       expect(u.revisions(2).size).to eq(2)
 
@@ -600,7 +633,7 @@ describe Audited::Auditor do
     end
 
     it "should ignore attributes that have been deleted" do
-      user.audits.last.update_attributes audited_changes: {old_attribute: 'old value'}
+      user.audits.last.update! audited_changes: {old_attribute: 'old value'}
       expect { user.revisions }.to_not raise_error
     end
   end
@@ -649,8 +682,8 @@ describe Audited::Auditor do
 
     it "should set the attributes for each revision" do
       u = Models::ActiveRecord::User.create(name: 'Brandon', username: 'brandon')
-      u.update_attributes name: 'Foobar'
-      u.update_attributes name: 'Awesome', username: 'keepers'
+      u.update! name: 'Foobar'
+      u.update! name: 'Awesome', username: 'keepers'
 
       expect(u.revision(3).name).to eq('Awesome')
       expect(u.revision(3).username).to eq('keepers')
@@ -712,7 +745,7 @@ describe Audited::Auditor do
       audit = user.audits.first
       audit.created_at = 1.hour.ago
       audit.save!
-      user.update_attributes name: 'updated'
+      user.update! name: 'updated'
       expect(user.revision_at( 2.minutes.ago ).audit_version).to eq(1)
     end
 
@@ -804,8 +837,67 @@ describe Audited::Auditor do
       Audited.auditing_enabled = true
       expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
 
-      user.update_attributes(name: 'Test')
+      user.update!(name: 'Test')
       expect(user.audits.count).to eq(1)
+      Models::ActiveRecord::User.enable_auditing
+    end
+  end
+
+  describe "with auditing" do
+    it "should save an audit when calling #save_with_auditing" do
+      expect {
+        u = Models::ActiveRecord::User.new(name: 'Brandon')
+        Models::ActiveRecord::User.auditing_enabled = false
+        expect(u.save_with_auditing).to eq(true)
+        Models::ActiveRecord::User.auditing_enabled = true
+      }.to change( Audited::Audit, :count ).by(1)
+    end
+
+    it "should save an audit inside of the #with_auditing block" do
+      expect {
+        Models::ActiveRecord::User.auditing_enabled = false
+        Models::ActiveRecord::User.with_auditing { Models::ActiveRecord::User.create!( name: 'Brandon' ) }
+        Models::ActiveRecord::User.auditing_enabled = true
+      }.to change( Audited::Audit, :count ).by(1)
+    end
+
+    it "should reset auditing status even it raises an exception" do
+      Models::ActiveRecord::User.disable_auditing
+      Models::ActiveRecord::User.with_auditing { raise } rescue nil
+      expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+      Models::ActiveRecord::User.enable_auditing
+    end
+
+    it "should be thread safe using a #with_auditing block" do
+      skip if Models::ActiveRecord::User.connection.class.name.include?("SQLite")
+
+      t1 = Thread.new do
+        Models::ActiveRecord::User.disable_auditing
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+        Models::ActiveRecord::User.with_auditing do
+          expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
+
+          Models::ActiveRecord::User.create!( name: 'Shaggy' )
+          sleep 1
+          expect(Models::ActiveRecord::User.auditing_enabled).to eq(true)
+        end
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+        Models::ActiveRecord::User.enable_auditing
+      end
+
+      t2 = Thread.new do
+        sleep 0.5
+        Models::ActiveRecord::User.disable_auditing
+        expect(Models::ActiveRecord::User.auditing_enabled).to eq(false)
+        Models::ActiveRecord::User.create!( name: 'Scooby' )
+        Models::ActiveRecord::User.enable_auditing
+      end
+      t1.join
+      t2.join
+
+      Models::ActiveRecord::User.enable_auditing
+      expect(Models::ActiveRecord::User.find_by_name('Shaggy').audits.count).to eq(1)
+      expect(Models::ActiveRecord::User.find_by_name('Scooby').audits.count).to eq(0)
     end
   end
 
@@ -842,21 +934,21 @@ describe Audited::Auditor do
       let( :on_destroy_user ) { Models::ActiveRecord::OnDestroyCommentRequiredUser.create }
 
       it "should not validate when audit_comment is not supplied" do
-        expect(user.update_attributes(name: 'Test')).to eq(false)
+        expect(user.update(name: 'Test')).to eq(false)
       end
 
       it "should validate when audit_comment is not supplied, and updating is not being audited" do
-        expect(on_create_user.update_attributes(name: 'Test')).to eq(true)
-        expect(on_destroy_user.update_attributes(name: 'Test')).to eq(true)
+        expect(on_create_user.update(name: 'Test')).to eq(true)
+        expect(on_destroy_user.update(name: 'Test')).to eq(true)
       end
 
       it "should validate when audit_comment is supplied" do
-        expect(user.update_attributes(name: 'Test', audit_comment: 'Update')).to eq(true)
+        expect(user.update(name: 'Test', audit_comment: 'Update')).to eq(true)
       end
 
       it "should validate when audit_comment is not supplied, and auditing is disabled" do
         Models::ActiveRecord::CommentRequiredUser.disable_auditing
-        expect(user.update_attributes(name: 'Test')).to eq(true)
+        expect(user.update(name: 'Test')).to eq(true)
         Models::ActiveRecord::CommentRequiredUser.enable_auditing
       end
     end
@@ -889,6 +981,16 @@ describe Audited::Auditor do
 
   end
 
+  describe "no update with comment only" do
+    let( :user ) { Models::ActiveRecord::NoUpdateWithCommentOnlyUser.create }
+
+    it "does not create an audit when only an audit_comment is present" do
+      user.audit_comment = "Comment"
+      expect { user.save! }.to_not change( Audited::Audit, :count )
+    end
+
+  end
+
   describe "attr_protected and attr_accessible" do
 
     it "should not raise error when attr_accessible is set and protected is false" do
@@ -910,7 +1012,7 @@ describe Audited::Auditor do
     it "should record user objects" do
       Models::ActiveRecord::Company.audit_as( user ) do
         company = Models::ActiveRecord::Company.create name: 'The auditors'
-        company.update_attributes name: 'The Auditors'
+        company.update! name: 'The Auditors'
 
         company.audits.each do |audit|
           expect(audit.user).to eq(user)
@@ -921,7 +1023,7 @@ describe Audited::Auditor do
     it "should record usernames" do
       Models::ActiveRecord::Company.audit_as( user.name ) do
         company = Models::ActiveRecord::Company.create name: 'The auditors'
-        company.update_attributes name: 'The Auditors'
+        company.update! name: 'The Auditors'
 
         company.audits.each do |audit|
           expect(audit.user).to eq(user.name)
@@ -956,7 +1058,7 @@ describe Audited::Auditor do
       expect(company.type).to eq("Models::ActiveRecord::Company::STICompany")
       expect {
         Models::ActiveRecord::Company.auditing_enabled = false
-        company.update_attributes name: 'STI auditors'
+        company.update! name: 'STI auditors'
         Models::ActiveRecord::Company.auditing_enabled = true
       }.to_not change( Audited::Audit, :count )
     end

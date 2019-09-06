@@ -19,6 +19,7 @@ mysql: &MYSQL
   username: root
   password:
   database: audited_test
+  charset: utf8
 
 test:
   <<: *<%= ENV['DB'] || 'SQLITE3MEM' %>

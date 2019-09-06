@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.9.0 (2019-07-17)
+
 Breaking changes
 
 - removed block support for `Audit.reconstruct_attributes`
@@ -11,6 +13,30 @@ Breaking changes
   [#424](https://github.com/collectiveidea/audited/pull/424)
 - removed rails 4.1 and 4.0 support
   [#431](https://github.com/collectiveidea/audited/pull/431)
+
+Added
+
+- Add `with_auditing` methods to enable temporarily
+  [#502](https://github.com/collectiveidea/audited/pull/502)
+- Add `update_with_comment_only` option to control audit creation with only comments
+  [#327](https://github.com/collectiveidea/audited/pull/327)
+- Support for Rails 6.0 and Ruby 2.6
+  [#494](https://github.com/collectiveidea/audited/pull/494)
+
+Changed
+
+- None
+
+Fixed
+
+- Ensure enum changes are stored consistently
+  [#429](https://github.com/collectiveidea/audited/pull/429)
+
+## 4.8.0 (2018-08-19)
+
+Breaking changes
+
+- None
 
 Added
 
@@ -32,8 +58,7 @@ Changed
 
 Fixed
 
-- Ensure enum changes are stored consistently
-  [#429](https://github.com/collectiveidea/audited/pull/429)
+- None
 
 ## 4.7.1 (2018-04-10)
 

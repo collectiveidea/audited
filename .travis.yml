@@ -4,6 +4,7 @@ rvm:
   - 2.3.7
   - 2.4.4
   - 2.5.1
+  - 2.6.3
   - ruby-head
 env:
   - DB=SQLITE
@@ -11,20 +12,38 @@ env:
   - DB=MYSQL
 addons:
   postgresql: "9.4"
+services:
+  - mysql
 before_install:
   # https://github.com/travis-ci/travis-ci/issues/8978
   - "travis_retry gem update --system"
-  - "travis_retry gem install bundler"
+  # Rails 4.2 has a bundler 1.x requirement
+  - if [ $BUNDLE_GEMFILE = $PWD/gemfiles/rails42.gemfile ]; then
+      rvm @global do gem uninstall bundler -a -x;
+      travis_retry gem install -v '< 2.0.0' bundler;
+    else
+      travis_retry gem install bundler;
+    fi
 gemfile:
   - gemfiles/rails42.gemfile
   - gemfiles/rails50.gemfile
   - gemfiles/rails51.gemfile
   - gemfiles/rails52.gemfile
+  - gemfiles/rails60.gemfile
 matrix:
   include:
-    - rvm: 2.3.7
+    - rvm: 2.6.3
       script: bundle exec rubocop --parallel
       env: DB=rubocop # make travis build display nicer
+  exclude:
+    - rvm: 2.3.7
+      gemfile: gemfiles/rails60.gemfile
+    - rvm: 2.4.4
+      gemfile: gemfiles/rails60.gemfile
+    - rvm: 2.6.3
+      gemfile: gemfiles/rails42.gemfile
+    - rvm: ruby-head
+      gemfile: gemfiles/rails42.gemfile
   allow_failures:
     - rvm: ruby-head
   fast_finish: true
@@ -32,7 +51,6 @@ branches:
   only:
   - master
   - /.*-stable$/
-sudo: false
 notifications:
   webhooks:
     urls:

@@ -13,7 +13,7 @@ class AuditsController < ActionController::Base
   end
 
   def update
-    current_user.update_attributes(password: 'foo')
+    current_user.update!(password: 'foo')
     head :ok
   end
 
