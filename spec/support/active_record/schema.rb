@@ -41,6 +41,7 @@ ActiveRecord::Schema.define do
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
     t.column :favourite_device, :string
+    t.column :ssn, :integer
   end
 
   create_table :companies do |t|
