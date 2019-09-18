@@ -4,7 +4,10 @@ ActiveRecord::Schema.define do
     t.column :auditable_type, :string
     t.column :user_id, :integer
     t.column :user_type, :string
+    t.column :tenant_id, :integer
+    t.column :tenant_type, :string
     t.column :username, :string
+    t.column :subdomain, :string
     t.column :action, :string
     t.column :audited_changes, :text
     t.column :version, :integer, default: 0

@@ -3,7 +3,8 @@ module Audited
     STORED_DATA = {
       current_remote_address: :remote_ip,
       current_request_uuid: :request_uuid,
-      current_user: :current_user
+      current_user: :current_user,
+      current_tenant: :current_tenant
     }
 
     delegate :store, to: ::Audited
@@ -19,6 +20,10 @@ module Audited
 
     def current_user
       lambda { controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true) }
+    end
+
+    def current_tenant
+      lambda { controller.send(Audited.current_tenant_method) if controller.respond_to?(Audited.current_tenant_method, true) }
     end
 
     def remote_ip

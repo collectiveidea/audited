@@ -8,6 +8,14 @@ module AuditedSpecHelpers
     Models::ActiveRecord::User.new({name: 'darth', username: 'darth', password: 'noooooooo'}.merge(attrs))
   end
 
+  def create_tenant(attrs = {})
+    Models::ActiveRecord::Tenant.create({subdomain: 'some_tenant'}.merge(attrs))
+  end
+
+  def build_tenant(attrs = {})
+    Models::ActiveRecord::Tenant.new({subdomain: 'another_tenant'}.merge(attrs))
+  end
+
   def create_versions(n = 2, attrs = {})
     Models::ActiveRecord::User.create(name: 'Foobar 1', **attrs).tap do |u|
       (n - 1).times do |i|

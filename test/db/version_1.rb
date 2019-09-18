@@ -4,7 +4,10 @@ ActiveRecord::Schema.define do
     t.column :auditable_type, :string
     t.column :user_id, :integer
     t.column :user_type, :string
+    t.column :tenant_id, :integer
+    t.column :tenant_type, :string
     t.column :username, :string
+    t.column :subdomain, :string
     t.column :action, :string
     t.column :changes, :text
     t.column :version, :integer, default: 0
@@ -13,5 +16,6 @@ ActiveRecord::Schema.define do
 
   add_index :audits, [:auditable_id, :auditable_type], name: 'auditable_index'
   add_index :audits, [:user_id, :user_type], name: 'user_index'
+  add_index :audits, [:tenant_id, :tenant_type], name: 'tenant_index'
   add_index :audits, :created_at
 end

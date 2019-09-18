@@ -3,6 +3,27 @@ require File.expand_path('../schema', __FILE__)
 
 module Models
   module ActiveRecord
+    class Tenant < ::ActiveRecord::Base
+      audited
+      attribute :non_column_attr if Rails.version >= '5.1'
+
+      def subdomain=(val)
+        write_attribute(:subdomain, CGI.escapeHTML(val))
+      end
+    end
+
+    class AccessibleAfterDeclarationTenant < ::ActiveRecord::Base
+      self.table_name = :tenants
+      audited
+      attr_accessible :subdomain if respond_to?(:attr_accessible)
+    end
+
+    class AccessibleBeforeDeclarationTenant < ::ActiveRecord::Base
+      self.table_name = :tenants
+      attr_accessible :subdomain if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
+      audited
+    end
+
     class User < ::ActiveRecord::Base
       audited except: :password
       attribute :non_column_attr if Rails.version >= '5.1'

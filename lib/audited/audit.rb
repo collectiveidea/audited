@@ -5,6 +5,7 @@ module Audited
   #
   # * <tt>auditable</tt>: the ActiveRecord model that was changed
   # * <tt>user</tt>: the user that performed the change; a string or an ActiveRecord model
+  # * <tt>tenant</tt>: the tenant that the change was performed in; a string or an ActiveRecord model
   # * <tt>action</tt>: one of create, update, or delete
   # * <tt>audited_changes</tt>: a hash of all the changes
   # * <tt>comment</tt>: a comment set with the audit
@@ -36,9 +37,10 @@ module Audited
   class Audit < ::ActiveRecord::Base
     belongs_to :auditable,  polymorphic: true
     belongs_to :user,       polymorphic: true
+    belongs_to :tenant,     polymorphic: true
     belongs_to :associated, polymorphic: true
 
-    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
+    before_create :set_version_number, :set_audit_user, :set_audit_tenant, :set_request_uuid, :set_remote_address
 
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
@@ -122,6 +124,25 @@ module Audited
     alias_method :user_as_model, :user
     alias_method :user, :user_as_string
 
+    # Allows tenant to be set to either a string or an ActiveRecord object
+    # @private
+    def tenant_as_string=(tenant)
+      # reset both either way
+      self.tenant_as_model = self.subdomain = nil
+      tenant.is_a?(::ActiveRecord::Base) ?
+        self.tenant_as_model = tenant :
+        self.subdomain = tenant
+    end
+    alias_method :tenant_as_model=, :tenant=
+    alias_method :tenant=, :tenant_as_string=
+
+    # @private
+    def tenant_as_string
+      tenant_as_model || subdomain
+    end
+    alias_method :tenant_as_model, :tenant
+    alias_method :tenant, :tenant_as_string
+
     # Returns the list of classes that are being audited
     def self.audited_classes
       audited_class_names.map(&:constantize)
@@ -179,6 +200,11 @@ module Audited
     def set_audit_user
       self.user ||= ::Audited.store[:audited_user] # from .as_user
       self.user ||= ::Audited.store[:current_user].try!(:call) # from Sweeper
+      nil # prevent stopping callback chains
+    end
+
+    def set_audit_tenant
+      self.tenant ||= ::Audited.store[:current_tenant].try!(:call) # from Sweeper
       nil # prevent stopping callback chains
     end
 
