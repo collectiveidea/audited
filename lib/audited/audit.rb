@@ -33,28 +33,83 @@ module Audited
     end
   end
 
-  class Audit < ::ActiveRecord::Base
-    belongs_to :auditable,  polymorphic: true
-    belongs_to :user,       polymorphic: true
-    belongs_to :associated, polymorphic: true
+  module Auditable
+    extend ::ActiveSupport::Concern
 
-    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
+    included do
+      belongs_to :auditable,  polymorphic: true
+      belongs_to :user,       polymorphic: true
+      belongs_to :associated, polymorphic: true
 
-    cattr_accessor :audited_class_names
-    self.audited_class_names = Set.new
+      before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
 
-    serialize :audited_changes, YAMLIfTextColumnType
+      cattr_accessor :audited_class_names
+      self.audited_class_names = Set.new
 
-    scope :ascending,     ->{ reorder(version: :asc) }
-    scope :descending,    ->{ reorder(version: :desc)}
-    scope :creates,       ->{ where(action: 'create')}
-    scope :updates,       ->{ where(action: 'update')}
-    scope :destroys,      ->{ where(action: 'destroy')}
+      serialize :audited_changes, YAMLIfTextColumnType
 
-    scope :up_until,      ->(date_or_time){ where("created_at <= ?", date_or_time) }
-    scope :from_version,  ->(version){ where('version >= ?', version) }
-    scope :to_version,    ->(version){ where('version <= ?', version) }
-    scope :auditable_finder, ->(auditable_id, auditable_type){ where(auditable_id: auditable_id, auditable_type: auditable_type)}
+      scope :ascending,     ->{ reorder(version: :asc) }
+      scope :descending,    ->{ reorder(version: :desc)}
+      scope :creates,       ->{ where(action: 'create')}
+      scope :updates,       ->{ where(action: 'update')}
+      scope :destroys,      ->{ where(action: 'destroy')}
+
+      scope :up_until,      ->(date_or_time){ where("created_at <= ?", date_or_time) }
+      scope :from_version,  ->(version){ where('version >= ?', version) }
+      scope :to_version,    ->(version){ where('version <= ?', version) }
+      scope :auditable_finder, ->(auditable_id, auditable_type){ where(auditable_id: auditable_id, auditable_type: auditable_type)}
+
+      alias_method :user_as_model, :user
+      alias_method :user, :user_as_string
+      alias_method :user_as_model=, :user=
+      alias_method :user=, :user_as_string=
+    end
+
+    class_methods do
+      # Returns the list of classes that are being audited
+      def audited_classes
+        audited_class_names.map(&:constantize)
+      end
+
+      # All audits made during the block called will be recorded as made
+      # by +user+. This method is hopefully threadsafe, making it ideal
+      # for background operations that require audit information.
+      def as_user(user)
+        last_audited_user = ::Audited.store[:audited_user]
+        ::Audited.store[:audited_user] = user
+        yield
+      ensure
+        ::Audited.store[:audited_user] = last_audited_user
+      end
+
+      # @private
+      def reconstruct_attributes(audits)
+        audits.each_with_object({}) do |audit, all|
+          all.merge!(audit.new_attributes)
+          all[:audit_version] = audit.version
+        end
+      end
+
+      # @private
+      def assign_revision_attributes(record, attributes)
+        attributes.each do |attr, val|
+          record = record.dup if record.frozen?
+
+          if record.respond_to?("#{attr}=")
+            record.attributes.key?(attr.to_s) ?
+                record[attr] = val :
+                record.send("#{attr}=", val)
+          end
+        end
+        record
+      end
+
+      # use created_at as timestamp cache key
+      def collection_cache_key(collection = all, *)
+        super(collection, :created_at)
+      end
+    end
+
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
@@ -109,60 +164,13 @@ module Audited
       # reset both either way
       self.user_as_model = self.username = nil
       user.is_a?(::ActiveRecord::Base) ?
-        self.user_as_model = user :
-        self.username = user
+          self.user_as_model = user :
+          self.username = user
     end
-    alias_method :user_as_model=, :user=
-    alias_method :user=, :user_as_string=
 
     # @private
     def user_as_string
       user_as_model || username
-    end
-    alias_method :user_as_model, :user
-    alias_method :user, :user_as_string
-
-    # Returns the list of classes that are being audited
-    def self.audited_classes
-      audited_class_names.map(&:constantize)
-    end
-
-    # All audits made during the block called will be recorded as made
-    # by +user+. This method is hopefully threadsafe, making it ideal
-    # for background operations that require audit information.
-    def self.as_user(user)
-      last_audited_user = ::Audited.store[:audited_user]
-      ::Audited.store[:audited_user] = user
-      yield
-    ensure
-      ::Audited.store[:audited_user] = last_audited_user
-    end
-
-    # @private
-    def self.reconstruct_attributes(audits)
-      audits.each_with_object({}) do |audit, all|
-        all.merge!(audit.new_attributes)
-        all[:audit_version] = audit.version
-     end
-    end
-
-    # @private
-    def self.assign_revision_attributes(record, attributes)
-      attributes.each do |attr, val|
-        record = record.dup if record.frozen?
-
-        if record.respond_to?("#{attr}=")
-          record.attributes.key?(attr.to_s) ?
-            record[attr] = val :
-            record.send("#{attr}=", val)
-        end
-      end
-      record
-    end
-
-    # use created_at as timestamp cache key
-    def self.collection_cache_key(collection = all, *)
-      super(collection, :created_at)
     end
 
     private
@@ -190,5 +198,9 @@ module Audited
     def set_remote_address
       self.remote_address ||= ::Audited.store[:current_remote_address]
     end
+  end
+
+  class Audit < ::ActiveRecord::Base
+    include Auditable
   end
 end
