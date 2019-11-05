@@ -322,6 +322,7 @@ module Audited
 
       def comment_required_state?
         auditing_enabled &&
+        audited_changes.present? &&
           ((audited_options[:on].include?(:create) && self.new_record?) ||
           (audited_options[:on].include?(:update) && self.persisted? && self.changed?))
       end
