@@ -101,7 +101,7 @@ module Audited
 
     module AuditedInstanceMethods
       REDACTED = '[REDACTED]'
-      
+
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
@@ -237,6 +237,8 @@ module Audited
       end
 
       def normalize_enum_changes(changes)
+        return changes if Audited.store_synthesized_enums
+
         self.class.defined_enums.each do |name, values|
           if changes.has_key?(name)
             changes[name] = \

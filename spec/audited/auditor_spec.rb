@@ -327,6 +327,15 @@ describe Audited::Auditor do
       expect(user.audits.first.audited_changes["status"]).to eq(1)
     end
 
+    context "when store_synthesized_enums is set to true" do
+      before { Audited.store_synthesized_enums = true }
+      after { Audited.store_synthesized_enums = false }
+
+      it "should store enum value as Rails synthesized value" do
+        expect(user.audits.first.audited_changes["status"]).to eq("reliable")
+      end
+    end
+
     it "should store comment" do
       expect(user.audits.first.comment).to eq('Create')
     end
