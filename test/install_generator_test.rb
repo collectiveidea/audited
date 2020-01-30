@@ -56,8 +56,7 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     run_generator
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      parent = Rails::VERSION::MAJOR == 4 ? 'ActiveRecord::Migration' : "ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]"
-      assert_includes(content, "class InstallAudited < #{parent}\n")
+      assert_includes(content, "class InstallAudited < ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]\n")
     end
   end
 end
