@@ -56,6 +56,6 @@ end
 
 if defined?(ActionController) && defined?(ActionController::Base)
   ActionController::Base.class_eval do
-    around_filter Audited::Sweeper.instance
+    around_action Audited::Sweeper.instance
   end
 end
