@@ -30,3 +30,4 @@ require 'audited/audit'
 ::ActiveRecord::Base.send :include, Audited::Auditor
 
 require 'audited/sweeper'
+require 'audited/railtie'
