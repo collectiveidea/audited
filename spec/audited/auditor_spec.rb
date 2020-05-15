@@ -766,6 +766,19 @@ describe Audited::Auditor do
       expect(owner.own_and_associated_audits).to match_array(owner.audits + company.audits)
     end
 
+    it "should return audits for STI classes" do
+      # Where parent is STI
+      sti_company = Models::ActiveRecord::Company::STICompany.create!
+      sti_company.update!(name: "Collective Idea")
+      expect(sti_company.own_and_associated_audits).to match_array(sti_company.audits)
+
+      # Where associated is STI
+      owner = Models::ActiveRecord::Owner.create!
+      company = owner.companies.create! type: 'Models::ActiveRecord::OwnedCompany::STICompany'
+      company.update!(name: "Collective Idea")
+      expect(owner.own_and_associated_audits).to match_array(owner.audits + company.audits)
+    end
+
     it "should order audits by creation time" do
       owner = Models::ActiveRecord::Owner.create!
       first_audit = owner.audits.first
