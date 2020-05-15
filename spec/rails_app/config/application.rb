@@ -1,4 +1,4 @@
-require 'rails/all'
+require 'active_record/railtie'
 
 module RailsApp
   class Application < Rails::Application
