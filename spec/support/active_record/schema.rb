@@ -35,7 +35,6 @@ ActiveRecord::Schema.define do
     t.column :username, :string
     t.column :password, :string
     t.column :activated, :boolean
-    t.column :status, :integer, default: 0
     t.column :suspended_at, :datetime
     t.column :logins, :integer, default: 0
     t.column :created_at, :datetime
