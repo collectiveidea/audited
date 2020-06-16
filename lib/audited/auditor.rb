@@ -101,7 +101,7 @@ module Audited
 
     module AuditedInstanceMethods
       REDACTED = '[REDACTED]'
-      
+
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
@@ -169,8 +169,7 @@ module Audited
 
       # List of attributes that are audited.
       def audited_attributes
-        audited_attributes = attributes.except(*self.class.non_audited_columns)
-        normalize_enum_changes(audited_attributes)
+        attributes.except(*self.class.non_audited_columns)
       end
 
       # Returns a list combined of record audits and associated audits.
@@ -224,52 +223,11 @@ module Audited
 
       def audited_changes
         all_changes = respond_to?(:changes_to_save) ? changes_to_save : changes
-        filtered_changes = \
-          if audited_options[:only].present?
-            all_changes.slice(*self.class.audited_columns)
-          else
-            all_changes.except(*self.class.non_audited_columns)
-          end
-
-        filtered_changes = redact_values(filtered_changes)
-        filtered_changes = normalize_enum_changes(filtered_changes)
-        filtered_changes.to_hash
-      end
-
-      def normalize_enum_changes(changes)
-        self.class.defined_enums.each do |name, values|
-          if changes.has_key?(name)
-            changes[name] = \
-              if changes[name].is_a?(Array)
-                changes[name].map { |v| values[v] }
-              elsif rails_below?('5.0')
-                changes[name]
-              else
-                values[changes[name]]
-              end
-          end
+        if audited_options[:only].present?
+          all_changes.slice(*self.class.audited_columns)
+        else
+          all_changes.except(*self.class.non_audited_columns)
         end
-        changes
-      end
-
-      def redact_values(filtered_changes)
-        [audited_options[:redacted]].flatten.compact.each do |option|
-          changes = filtered_changes[option.to_s]
-          new_value = audited_options[:redaction_value] || REDACTED
-          if changes.is_a? Array
-            values = changes.map { new_value }
-          else
-            values = new_value
-          end
-          hash = Hash[option.to_s, values]
-          filtered_changes.merge!(hash)
-        end
-
-        filtered_changes
-      end
-
-      def rails_below?(rails_version)
-        Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
       end
 
       def audits_to(version = nil)
