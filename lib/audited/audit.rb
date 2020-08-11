@@ -171,7 +171,10 @@ module Audited
       if action == 'create'
         self.version = 1
       else
-        max = self.class.auditable_finder(auditable_id, auditable_type).maximum(:version) || 0
+        max = 0
+        if ::Audited.max_audits.present? && ::Audited.max_audits > 0  
+          max = self.class.auditable_finder(auditable_id, auditable_type).maximum(:version) || 0
+        end
         self.version = max + 1
       end
     end
