@@ -234,6 +234,16 @@ end
 post.audits.last.user # => 'console-user-username'
 ```
 
+If you want to set a specific user as the auditor of the commands in a CLI environment, whether that is a string or an ActiveRecord object, you can use the following command:
+
+```rb
+Audited.store[:audited_user] = "username"
+
+# or
+
+Audited.store[:audited_user] = User.find(1)
+```
+
 ### Associated Audits
 
 Sometimes it's useful to associate an audit with a model other than the one being changed. For instance, given the following models:
