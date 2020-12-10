@@ -30,12 +30,17 @@ gemfile:
   - gemfiles/rails51.gemfile
   - gemfiles/rails52.gemfile
   - gemfiles/rails60.gemfile
+  - gemfiles/rails61.gemfile
 matrix:
   include:
     - rvm: 2.6.3
       script: bundle exec rubocop --parallel
       env: DB=rubocop # make travis build display nicer
   exclude:
+    - rvm: 2.3.7
+      gemfile: gemfiles/rails61.gemfile
+    - rvm: 2.4.4
+      gemfile: gemfiles/rails61.gemfile
     - rvm: 2.3.7
       gemfile: gemfiles/rails60.gemfile
     - rvm: 2.4.4
