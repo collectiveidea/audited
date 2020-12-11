@@ -1,8 +1,17 @@
 require 'active_record'
 require 'logger'
 
+def get_config_from(env_name)
+  if Gem::Version.new(Rails.version) >= Gem::Version.new("6.1.0.alpha")
+    ActiveRecord::Base.configurations.configs_for(env_name: env_name)
+                                     .first.configuration_hash
+  else
+    ActiveRecord::Base.configurations[env_name]
+  end
+end
+
 begin
-  db_config = ActiveRecord::Base.configurations[Rails.env].clone
+  db_config = get_config_from(Rails.env).clone
   db_type = db_config['adapter']
   db_name = db_config.delete('database')
   raise Exception.new('No database name specified.') if db_name.blank?
