@@ -4,6 +4,7 @@ SingleCov.covered!
 
 describe Audited::Audit do
   let(:user) { Models::ActiveRecord::User.new name: "Testing" }
+  let(:tenant) { Models::ActiveRecord::Tenant.new subdomain: "testing" }
 
   describe "audit class" do
     around(:example) do |example|
@@ -132,6 +133,44 @@ describe Audited::Audit do
       subject.username = 'test'
       subject.user = user
       expect(subject.username).to be_nil
+    end
+  end
+
+  describe "tenant=" do
+    it "should be able to set the tenant to a model object" do
+      subject.tenant = tenant
+      expect(subject.tenant).to eq(tenant)
+    end
+
+    it "should be able to set the tenant to nil" do
+      subject.tenant_id = 1
+      subject.tenant_type = 'Models::ActiveRecord::Tenant'
+      subject.subdomain = 'my_tenant'
+
+      subject.tenant = nil
+
+      expect(subject.tenant).to be_nil
+      expect(subject.tenant_id).to be_nil
+      expect(subject.tenant_type).to be_nil
+      expect(subject.subdomain).to be_nil
+    end
+
+    it "should be able to set the tenant to a string" do
+      subject.tenant = 'test_tenant'
+      expect(subject.tenant).to eq('test_tenant')
+    end
+
+    it "should clear model when setting to a string" do
+      subject.tenant = tenant
+      subject.tenant = 'testing_tenant'
+      expect(subject.tenant_id).to be_nil
+      expect(subject.tenant_type).to be_nil
+    end
+
+    it "should clear the username when setting to a model" do
+      subject.subdomain = 'test_tenant'
+      subject.tenant = tenant
+      expect(subject.subdomain).to be_nil
     end
   end
 

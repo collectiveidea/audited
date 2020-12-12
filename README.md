@@ -234,6 +234,28 @@ end
 post.audits.last.user # => 'console-user-username'
 ```
 
+### Current Tenant Tracking
+
+If you're using Audited in a Rails application, all audited changes made within a request will automatically be attributed to the current tenant. By default, Audited uses the `current_tenant` method in your controller.
+
+```ruby
+class PostsController < ApplicationController
+  def create
+    current_tenant # => #<Tenant subdomain: "my_tenant">
+    @post = Post.create(params[:post])
+    @post.audits.last.tenant # => #<Tenant subdomain: "my_tenant">
+  end
+end
+```
+
+To use a method other than `current_tenant`, put the following in an initializer:
+
+```ruby
+Audited.current_tenant_method = :my_current_tenant
+```
+
+The standard Audited install assumes your Tenant model has an integer primary key type.
+
 ### Associated Audits
 
 Sometimes it's useful to associate an audit with a model other than the one being changed. For instance, given the following models:

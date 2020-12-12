@@ -30,6 +30,10 @@ ActiveRecord::Migration.verbose = false
 ActiveRecord::Base.establish_connection
 
 ActiveRecord::Schema.define do
+  create_table :tenants do |t|
+    t.column :subdomain, :string
+  end
+
   create_table :users do |t|
     t.column :name, :string
     t.column :username, :string
@@ -66,7 +70,10 @@ ActiveRecord::Schema.define do
     t.column :associated_type, :string
     t.column :user_id, :integer
     t.column :user_type, :string
+    t.column :tenant_id, :integer
+    t.column :tenant_type, :string
     t.column :username, :string
+    t.column :subdomain, :string
     t.column :action, :string
     t.column :audited_changes, :text
     t.column :version, :integer, default: 0
@@ -79,6 +86,7 @@ ActiveRecord::Schema.define do
   add_index :audits, [:auditable_id, :auditable_type], name: 'auditable_index'
   add_index :audits, [:associated_id, :associated_type], name: 'associated_index'
   add_index :audits, [:user_id, :user_type], name: 'user_index'
+  add_index :audits, [:tenant_id, :tenant_type], name: 'tenant_index'
   add_index :audits, :request_uuid
   add_index :audits, :created_at
 end
