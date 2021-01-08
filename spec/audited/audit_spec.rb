@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered!
+SingleCov.covered! uncovered: 1 # Rails version check
 
 describe Audited::Audit do
   let(:user) { Models::ActiveRecord::User.new name: "Testing" }
