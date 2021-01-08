@@ -101,7 +101,8 @@ describe AuditsController do
       controller.send(:current_user=, user)
 
       expect {
-        put :update, Rails::VERSION::MAJOR == 4 ? {id: 123} : {params: {id: 123}}
+        params = Rails::VERSION::MAJOR == 4 ? {id: 123} : {params: {id: 123}}
+        put :update, **params
       }.to_not change( Audited::Audit, :count )
     end
   end
