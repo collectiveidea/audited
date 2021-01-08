@@ -31,7 +31,7 @@ appraise 'rails52' do
 end
 
 appraise 'rails60' do
-  gem 'rails', '>= 6.0.0.rc1', '< 6.1'
+  gem 'rails', '>= 6.0.0', '< 6.1'
   gem "mysql2", ">= 0.4.4"
   gem "pg", ">= 0.18", "< 2.0"
   gem "sqlite3", "~> 1.4"
