@@ -143,7 +143,7 @@ class User < ActiveRecord::Base
 end
 ```
 
-You can update an audit if only audit_comment is present. You can optionally add the `:update_with_comment_only` option set to `false` to your `audited` call to turn this behavior off for all audits.
+You can update an audit only if audit_comment is present. You can optionally add the `:update_with_comment_only` option set to `false` to your `audited` call to turn this behavior off for all audits.
 
 ```ruby
 class User < ActiveRecord::Base
