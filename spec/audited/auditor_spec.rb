@@ -245,6 +245,12 @@ describe Audited::Auditor do
       expect(user.audits.last.audited_changes['password']).to eq(["My", "Custom", "Value", 7])
     end
 
+    it "should not redact columns with no changes to save" do
+      user = Models::ActiveRecord::UserRedactedPassword.create(password: "password")
+      user.update!(status: :reliable)
+      expect(user.audits.last.audited_changes).not_to have_key :password
+    end
+
     if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
       describe "'json' and 'jsonb' audited_changes column type" do
         let(:migrations_path) { SPEC_ROOT.join("support/active_record/postgres") }
