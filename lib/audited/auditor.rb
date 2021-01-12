@@ -254,6 +254,7 @@ module Audited
 
       def redact_values(filtered_changes)
         [audited_options[:redacted]].flatten.compact.each do |option|
+          next unless filtered_changes.key?(option.to_s)
           changes = filtered_changes[option.to_s]
           new_value = audited_options[:redaction_value] || REDACTED
           if changes.is_a? Array
