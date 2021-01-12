@@ -101,7 +101,7 @@ module Audited
 
     module AuditedInstanceMethods
       REDACTED = '[REDACTED]'
-      
+
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
@@ -170,7 +170,7 @@ module Audited
       # List of attributes that are audited.
       def audited_attributes
         audited_attributes = attributes.except(*self.class.non_audited_columns)
-        normalize_enum_changes(audited_attributes)
+        redact_and_normalize_changes(audited_attributes)
       end
 
       # Returns a list combined of record audits and associated audits.
@@ -231,9 +231,7 @@ module Audited
             all_changes.except(*self.class.non_audited_columns)
           end
 
-        filtered_changes = redact_values(filtered_changes)
-        filtered_changes = normalize_enum_changes(filtered_changes)
-        filtered_changes.to_hash
+        redact_and_normalize_changes(filtered_changes).to_hash
       end
 
       def normalize_enum_changes(changes)
@@ -252,9 +250,15 @@ module Audited
         changes
       end
 
-      def redact_values(filtered_changes)
+      def redact_and_normalize_changes(changes)
+        normalize_enum_changes(redact_changes(changes))
+      end
+
+      def redact_changes(filtered_changes)
         [audited_options[:redacted]].flatten.compact.each do |option|
           changes = filtered_changes[option.to_s]
+          next if changes.nil?
+
           new_value = audited_options[:redaction_value] || REDACTED
           if changes.is_a? Array
             values = changes.map { new_value }

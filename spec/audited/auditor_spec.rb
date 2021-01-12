@@ -215,8 +215,8 @@ describe Audited::Auditor do
     it "should redact columns specified in 'redacted' option" do
       redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
       user = Models::ActiveRecord::UserRedactedPassword.create(password: "password")
-      user.save!
       expect(user.audits.last.audited_changes['password']).to eq(redacted)
+
       user.password = "new_password"
       user.save!
       expect(user.audits.last.audited_changes['password']).to eq([redacted, redacted])
@@ -229,9 +229,9 @@ describe Audited::Auditor do
           password: "password",
           ssn: 123456789
         )
-      user.save!
       expect(user.audits.last.audited_changes['password']).to eq(redacted)
       expect(user.audits.last.audited_changes['ssn']).to eq(redacted)
+
       user.password = "new_password"
       user.ssn = 987654321
       user.save!
@@ -243,6 +243,14 @@ describe Audited::Auditor do
       user = Models::ActiveRecord::UserRedactedPasswordCustomRedaction.create(password: "password")
       user.save!
       expect(user.audits.last.audited_changes['password']).to eq(["My", "Custom", "Value", 7])
+    end
+
+    it "should not include redacted_columns in changes if they did not change" do
+      redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
+      user = Models::ActiveRecord::UserRedactedPassword.create(password: "password")
+      user.update(name: "DHH")
+
+      expect(user.audits.last.audited_changes['password']).to eq(nil)
     end
 
     if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
