@@ -2,21 +2,26 @@ require 'active_record'
 require 'logger'
 
 begin
-  db_config = ActiveRecord::Base.configurations[Rails.env].clone
-  db_type = db_config['adapter']
-  db_name = db_config.delete('database')
-  raise Exception.new('No database name specified.') if db_name.blank?
-  if db_type == 'sqlite3'
-    db_file = Pathname.new(__FILE__).dirname.join(db_name)
-    db_file.unlink if db_file.file?
+  if ActiveRecord.version >= Gem::Version.new("6.1.0")
+    db_config = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).first
+    ActiveRecord::Tasks::DatabaseTasks.create(db_config)
   else
-    if defined?(JRUBY_VERSION)
-      db_config.symbolize_keys!
-      db_config[:configure_connection] = false
+    db_config = ActiveRecord::Base.configurations[Rails.env].clone
+    db_type = db_config['adapter']
+    db_name = db_config.delete('database')
+    raise Exception.new('No database name specified.') if db_name.blank?
+    if db_type == 'sqlite3'
+      db_file = Pathname.new(__FILE__).dirname.join(db_name)
+      db_file.unlink if db_file.file?
+    else
+      if defined?(JRUBY_VERSION)
+        db_config.symbolize_keys!
+        db_config[:configure_connection] = false
+      end
+      adapter = ActiveRecord::Base.send("#{db_type}_connection", db_config)
+      adapter.recreate_database db_name, db_config.slice('charset').symbolize_keys
+      adapter.disconnect!
     end
-    adapter = ActiveRecord::Base.send("#{db_type}_connection", db_config)
-    adapter.recreate_database db_name, db_config.slice('charset').symbolize_keys
-    adapter.disconnect!
   end
 rescue => e
   Kernel.warn e
