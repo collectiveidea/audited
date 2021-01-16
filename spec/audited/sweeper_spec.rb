@@ -3,6 +3,7 @@ require "spec_helper"
 SingleCov.covered! uncovered: 2 # 2 conditional on_load conditions
 
 class AuditsController < ActionController::Base
+  around_action Audited::Sweeper.new
   before_action :populate_user
 
   attr_reader :company
