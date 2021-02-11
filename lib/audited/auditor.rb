@@ -60,7 +60,13 @@ module Audited
 
         attr_accessor :audit_comment
 
-        has_many :audits, -> { where(service_name: Rails.application.class.parent_name).order(version: :asc) }, as: :auditable, class_name:  
+        has_many :audits, ->(audited_record) do
+          where(
+            service_name: Rails.application.class.parent_name,
+            created_at: (audited_record.created_at - 1.minute)..(Time.now)
+          ).order(version: :asc)
+        end, as: :auditable, class_name: Audited.audit_class.name
+
         Audited.audit_class.audited_class_names << to_s
 
         after_create :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
