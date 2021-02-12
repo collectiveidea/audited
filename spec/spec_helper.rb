@@ -1,4 +1,7 @@
 ENV['RAILS_ENV'] = 'gemtest'
+require 'bundler/setup'
+require 'single_cov'
+SingleCov.setup :rspec
 
 if Bundler.definition.dependencies.map(&:name).include?('protected_attributes')
   require 'protected_attributes'
@@ -6,9 +9,9 @@ end
 require 'rails_app/config/environment'
 require 'rspec/rails'
 require 'audited'
+require 'audited-rspec'
 require 'audited_spec_helpers'
 require 'support/active_record/models'
-load "audited/sweeper.rb" # force to reload sweeper
 
 SPEC_ROOT = Pathname.new(File.expand_path('../', __FILE__))
 

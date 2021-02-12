@@ -41,12 +41,12 @@ module Audited
       end
 
       def only(*fields)
-        @options[:only] = fields.flatten
+        @options[:only] = fields.flatten.map(&:to_s)
         self
       end
 
       def except(*fields)
-        @options[:except] = fields.flatten
+        @options[:except] = fields.flatten.map(&:to_s)
         self
       end
 
@@ -56,16 +56,13 @@ module Audited
       end
 
       def on(*actions)
-        @options[:on] = actions.flatten
+        @options[:on] = actions.flatten.map(&:to_sym)
         self
       end
 
       def matches?(subject)
         @subject = subject
-        auditing_enabled? &&
-          associated_with_model? &&
-          records_changes_to_specified_fields? &&
-          comment_required_valid?
+        auditing_enabled? && required_checks_for_options_satisfied?
       end
 
       def failure_message
@@ -75,6 +72,8 @@ module Audited
       def negative_failure_message
         "Did not expect #{@expectation}"
       end
+
+      alias_method :failure_message_when_negated, :negative_failure_message
 
       def description
         description = "audited"
@@ -107,30 +106,82 @@ module Audited
       end
 
       def records_changes_to_specified_fields?
-        if @options[:only] || @options[:except]
-          if @options[:only]
-            except = model_class.column_names - @options[:only].map(&:to_s)
-          else
-            except = model_class.default_ignored_attributes + Audited.ignored_attributes
-            except |= @options[:except].collect(&:to_s) if @options[:except]
-          end
+        ignored_fields = build_ignored_fields_from_options
 
-          expects "non audited columns (#{model_class.non_audited_columns.inspect}) to match (#{expect})"
-          model_class.non_audited_columns =~ except
+        expects "non audited columns (#{model_class.non_audited_columns.inspect}) to match (#{ignored_fields})"
+        model_class.non_audited_columns.to_set == ignored_fields.to_set
+      end
+
+      def comment_required_valid?
+        expects "to require audit_comment before #{model_class.audited_options[:on]} when comment required"
+        validate_callbacks_include_presence_of_comment? && destroy_callbacks_include_comment_required?
+      end
+
+      def only_audit_on_designated_callbacks?
+        {
+          create: [:after, :audit_create],
+          update: [:before, :audit_update],
+          destroy: [:before, :audit_destroy]
+        }.map do |(action, kind_callback)|
+          kind, callback = kind_callback
+          callbacks_for(action, kind: kind).include?(callback) if @options[:on].include?(action)
+        end.compact.all?
+      end
+
+      def validate_callbacks_include_presence_of_comment?
+        if @options[:comment_required] && audited_on_create_or_update?
+          callbacks_for(:validate).include?(:presence_of_audit_comment)
         else
           true
         end
       end
 
-      def comment_required_valid?
-        if @options[:comment_required]
-          @subject.audit_comment = nil
+      def audited_on_create_or_update?
+        model_class.audited_options[:on].include?(:create) || model_class.audited_options[:on].include?(:update)
+      end
 
-          expects "to be invalid when audit_comment is not specified"
-          @subject.valid? == false && @subject.errors.key?(:audit_comment)
+      def destroy_callbacks_include_comment_required?
+        if @options[:comment_required] && model_class.audited_options[:on].include?(:destroy)
+          callbacks_for(:destroy).include?(:require_comment)
         else
           true
         end
+      end
+
+      def requires_comment_before_callbacks?
+        [:create, :update, :destroy].map do |action|
+          if @options[:comment_required] && model_class.audited_options[:on].include?(action)
+            callbacks_for(action).include?(:require_comment)
+          end
+        end.compact.all?
+      end
+
+      def callbacks_for(action, kind: :before)
+        model_class.send("_#{action}_callbacks").select { |cb| cb.kind == kind }.map(&:filter)
+      end
+
+      def build_ignored_fields_from_options
+        default_ignored_attributes = model_class.default_ignored_attributes
+
+        if @options[:only].present?
+          (default_ignored_attributes | model_class.column_names) - @options[:only]
+        elsif @options[:except].present?
+          default_ignored_attributes | @options[:except]
+        else
+          default_ignored_attributes
+        end
+      end
+
+      def required_checks_for_options_satisfied?
+        {
+          only: :records_changes_to_specified_fields?,
+          except: :records_changes_to_specified_fields?,
+          comment_required: :comment_required_valid?,
+          associated_with: :associated_with_model?,
+          on: :only_audit_on_designated_callbacks?
+        }.map do |(option, check)|
+          send(check) if @options[option].present?
+        end.compact.all?
       end
     end
 
@@ -148,6 +199,8 @@ module Audited
       def negative_failure_message
         "Expected #{model_class} to not have associated audits"
       end
+
+      alias_method :failure_message_when_negated, :negative_failure_message
 
       def description
         "has associated audits"

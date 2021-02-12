@@ -15,10 +15,10 @@ begin
       db_config[:configure_connection] = false
     end
     adapter = ActiveRecord::Base.send("#{db_type}_connection", db_config)
-    adapter.recreate_database db_name
+    adapter.recreate_database db_name, db_config.slice('charset').symbolize_keys
     adapter.disconnect!
   end
-rescue Exception => e
+rescue => e
   Kernel.warn e
 end
 
@@ -35,15 +35,18 @@ ActiveRecord::Schema.define do
     t.column :username, :string
     t.column :password, :string
     t.column :activated, :boolean
+    t.column :status, :integer, default: 0
     t.column :suspended_at, :datetime
-    t.column :logins, :integer, :default => 0
+    t.column :logins, :integer, default: 0
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
+    t.column :favourite_device, :string
   end
 
   create_table :companies do |t|
     t.column :name, :string
     t.column :owner_id, :integer
+    t.column :type, :string
   end
 
   create_table :authors do |t|
@@ -65,7 +68,7 @@ ActiveRecord::Schema.define do
     t.column :username, :string
     t.column :action, :string
     t.column :audited_changes, :text
-    t.column :version, :integer, :default => 0
+    t.column :version, :integer, default: 0
     t.column :comment, :string
     t.column :remote_address, :string
     t.column :request_uuid, :string
@@ -73,9 +76,9 @@ ActiveRecord::Schema.define do
     t.column :service_name, :string
   end
 
-  add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
-  add_index :audits, [:associated_id, :associated_type], :name => 'associated_index'
-  add_index :audits, [:user_id, :user_type], :name => 'user_index'
+  add_index :audits, [:auditable_id, :auditable_type], name: 'auditable_index'
+  add_index :audits, [:associated_id, :associated_type], name: 'associated_index'
+  add_index :audits, [:user_id, :user_type], name: 'user_index'
   add_index :audits, :request_uuid
   add_index :audits, :created_at
   add_index :audits, :service_name
