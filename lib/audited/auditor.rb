@@ -47,8 +47,6 @@ module Audited
       #     end
       #
       def audited(options = {})
-        return if Rails.env.test? || Rails.env.development?
-
         # don't allow multiple calls
         return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
 

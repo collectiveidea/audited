@@ -17,13 +17,6 @@ module Audited
       STORED_DATA.keys.each { |k| store.delete(k) }
     end
 
-    def before_create(audit)
-      audit.user ||= current_user
-      audit.remote_address = controller.try(:request).try(:remote_ip)
-      audit.request_uuid = request_uuid if request_uuid
-      audit.service_name = Rails.application.class.parent_name
-    end
-
     def current_user
       lambda { controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true) }
     end

@@ -94,6 +94,17 @@ describe AuditsController do
 
       expect(controller.company.audits.last.user).to eq(user)
     end
+
+    it "should record the name for the service responsible for the change" do
+      allow(Audited).to receive(:namespace_attribute_name).and_return(:service_name)
+      allow(Audited).to receive(:namespace_attribute_value).and_return("RailsApp")
+
+      expect do
+        post :create
+      end.to change( Audited::Audit, :count )
+
+      expect(controller.company.audits.last.service_name).to eq("RailsApp")
+    end
   end
 
   describe "PUT update" do

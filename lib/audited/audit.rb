@@ -39,6 +39,11 @@ module Audited
     belongs_to :associated, polymorphic: true
 
     before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
+    before_create do
+      if ::Audited.namespace_attribute_name
+        self.send("#{::Audited.namespace_attribute_name}=", ::Audited.namespace_attribute_value)
+      end
+    end
 
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
