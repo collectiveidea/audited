@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 4.10.0 (2021-01-07)
+
+Added
+
+- Add redacted option
+  [#485](https://github.com/collectiveidea/audited/pull/485)
+- Rails 6.1. support
+  [#554](https://github.com/collectiveidea/audited/pull/554)
+  [#559](https://github.com/collectiveidea/audited/pull/559)
+
+Improved
+
+- Avoid extra query on first audit version
+  [#513](https://github.com/collectiveidea/audited/pull/513)
+
+
 ## 4.9.0 (2019-07-17)
 
 Breaking changes

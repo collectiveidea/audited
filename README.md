@@ -3,7 +3,7 @@ Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.svg
 
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
-Audited currently (4.x) works with Rails 6.0, 5.2, 5.1, 5.0 and 4.2.
+Audited currently (4.x) works with Rails 6.1, Rails 6.0, 5.2, 5.1, 5.0 and 4.2.
 
 For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
 
@@ -143,7 +143,7 @@ class User < ActiveRecord::Base
 end
 ```
 
-You can update an audit if only audit_comment is present. You can optionally add the `:update_with_comment_only` option set to `false` to your `audited` call to turn this behavior off for all audits.
+You can update an audit only if audit_comment is present. You can optionally add the `:update_with_comment_only` option set to `false` to your `audited` call to turn this behavior off for all audits.
 
 ```ruby
 class User < ActiveRecord::Base
@@ -232,6 +232,16 @@ Audited.audit_class.as_user("console-user-#{ENV['SSH_USER']}") do
   post.update_attributes!(title: "Hello, world!")
 end
 post.audits.last.user # => 'console-user-username'
+```
+
+If you want to set a specific user as the auditor of the commands in a CLI environment, whether that is a string or an ActiveRecord object, you can use the following command:
+
+```rb
+Audited.store[:audited_user] = "username"
+
+# or
+
+Audited.store[:audited_user] = User.find(1)
 ```
 
 ### Associated Audits
