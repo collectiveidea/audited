@@ -10,7 +10,13 @@ module Audited
     end
 
     def store
-      Thread.current[:audited_store] ||= {}
+      current_store_value = Thread.current.thread_variable_get(:audited_store)
+
+      if current_store_value.nil?
+        Thread.current.thread_variable_set(:audited_store, {})
+      else
+        current_store_value
+      end
     end
 
     def config
