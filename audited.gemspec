@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'activerecord', '>= 4.2', '<= 6.1'
 
   gem.add_development_dependency 'appraisal'
-  gem.add_development_dependency 'rails', '>= 4.2', '< 6.1'
+  gem.add_development_dependency 'rails', '>= 4.2', '<= 6.1'
   gem.add_development_dependency 'rubocop', '~> 0.54.0'
   gem.add_development_dependency 'rspec-rails', '~> 3.5'
   gem.add_development_dependency 'single_cov'
