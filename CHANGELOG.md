@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+Improved
+- Readme updates - @gourshete
+  [#525](https://github.com/collectiveidea/audited/pull/525)
+- Allow restoring previous enum behavior with flag - @travisofthenorth
+  [#526](https://github.com/collectiveidea/audited/pull/526)
+- Follow Rails Autoloading conventions - @duncanjbrown
+  [#532](https://github.com/collectiveidea/audited/pull/532)
+- Fix own_and_associated_audits for STI Models - @eric-hemasystems
+  [#533](https://github.com/collectiveidea/audited/pull/533)
+- Rails 6.1 Improvements - @okuramasafumi, @marcrohloff
+  [#563](https://github.com/collectiveidea/audited/pull/563)
+  [#544](https://github.com/collectiveidea/audited/pull/544)
+- Use Thread local variables instead of Fibers - @arathunku
+  [#568](https://github.com/collectiveidea/audited/pull/568)
+
+Changed
+
+- Drop support for Rails 4 - @travisofthenorth
+  [#527](https://github.com/collectiveidea/audited/pull/527)
+
 ## 4.10.0 (2021-01-07)
 
 Added
