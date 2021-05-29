@@ -2,7 +2,12 @@ require 'active_record'
 
 module Audited
   class << self
-    attr_accessor :ignored_attributes, :current_user_method, :max_audits, :auditing_enabled
+    attr_accessor \
+      :auditing_enabled,
+      :current_user_method,
+      :ignored_attributes,
+      :max_audits,
+      :store_synthesized_enums
     attr_writer :audit_class
 
     def audit_class
@@ -28,6 +33,7 @@ module Audited
 
   @current_user_method = :current_user
   @auditing_enabled = true
+  @store_synthesized_enums = false
 end
 
 require 'audited/auditor'

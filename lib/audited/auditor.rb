@@ -237,6 +237,8 @@ module Audited
       end
 
       def normalize_enum_changes(changes)
+        return changes if Audited.store_synthesized_enums
+
         self.class.defined_enums.each do |name, values|
           if changes.has_key?(name)
             changes[name] = \
