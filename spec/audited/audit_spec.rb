@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered!
+SingleCov.covered! uncovered: 1 # Rails version check
 
 describe Audited::Audit do
   let(:user) { Models::ActiveRecord::User.new name: "Testing" }
@@ -62,7 +62,7 @@ describe Audited::Audit do
     end
 
     it "does not unserialize from binary columns" do
-      allow(Audited.audit_class.columns_hash["audited_changes"]).to receive(:type).and_return("foo")
+      allow(Audited::YAMLIfTextColumnType).to receive(:text_column?).and_return(false)
       audit.audited_changes = {foo: "bar"}
       expect(audit.audited_changes).to eq "{:foo=>\"bar\"}"
     end
@@ -174,7 +174,7 @@ describe Audited::Audit do
       it "uses created at" do
         Audited::Audit.delete_all
         audit = Models::ActiveRecord::User.create(name: "John").audits.last
-        audit.update_columns(created_at: Time.parse('2018-01-01'))
+        audit.update_columns(created_at: Time.zone.parse('2018-01-01'))
         expect(Audited::Audit.collection_cache_key).to match(/-20180101\d+$/)
       end
     else
