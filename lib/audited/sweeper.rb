@@ -10,7 +10,7 @@ module Audited
 
     def around(controller)
       self.controller = controller
-      STORED_DATA.each { |k,m| store[k] = send(m) }
+      STORED_DATA.each { |k, m| store[k] = send(m) }
       yield
     ensure
       self.controller = nil

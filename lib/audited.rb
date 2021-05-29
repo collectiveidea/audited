@@ -1,4 +1,4 @@
-require 'active_record'
+require "active_record"
 
 module Audited
   class << self
@@ -29,19 +29,19 @@ module Audited
     end
   end
 
-  @ignored_attributes = %w(lock_version created_at updated_at created_on updated_on)
+  @ignored_attributes = %w[lock_version created_at updated_at created_on updated_on]
 
   @current_user_method = :current_user
   @auditing_enabled = true
   @store_synthesized_enums = false
 end
 
-require 'audited/auditor'
-require 'audited/audit'
+require "audited/auditor"
+require "audited/audit"
 
 ActiveSupport.on_load :active_record do
   include Audited::Auditor
 end
 
-require 'audited/sweeper'
-require 'audited/railtie'
+require "audited/sweeper"
+require "audited/railtie"

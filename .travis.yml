@@ -26,8 +26,8 @@ gemfile:
 matrix:
   include:
     - rvm: 2.6.3
-      script: bundle exec rubocop --parallel
-      env: DB=rubocop # make travis build display nicer
+      script: bundle exec standardrb
+      env: DB=standard # make travis build display nicer
   exclude:
     - rvm: 2.3.7
       gemfile: gemfiles/rails61.gemfile
