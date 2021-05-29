@@ -124,6 +124,9 @@ module Models
       audited associated_with: :owner
     end
 
+    class OwnedCompany::STICompany < OwnedCompany
+    end
+
     class OnUpdateDestroy < ::ActiveRecord::Base
       self.table_name = 'companies'
       audited on: [:update, :destroy]
