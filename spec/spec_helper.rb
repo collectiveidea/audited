@@ -15,7 +15,7 @@ require "support/active_record/models"
 
 SPEC_ROOT = Pathname.new(File.expand_path("../", __FILE__))
 
-Dir[SPEC_ROOT.join("support/*.rb")].each { |f| require f }
+Dir[SPEC_ROOT.join("support/*.rb")].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.include AuditedSpecHelpers

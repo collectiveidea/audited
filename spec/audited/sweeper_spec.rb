@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 2 # 2 conditional on_load conditions
+SingleCov.covered!
 
 class AuditsController < ActionController::Base
   before_action :populate_user
@@ -125,7 +125,8 @@ describe Audited::Sweeper do
       expect(instance.controller).to eq("thread2 controller instance")
     end
 
-    t1.join; t2.join
+    t1.join
+    t2.join
 
     expect(instance.controller).to be_nil
   end

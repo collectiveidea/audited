@@ -1,6 +1,67 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 13 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+SingleCov.covered! uncovered: 9 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+
+class ConditionalPrivateCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+
+  audited if: :foo?
+
+  private def foo?
+    true
+  end
+end
+
+class ConditionalCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+
+  audited if: :public?
+
+  def public?
+  end
+end
+
+class ExclusiveCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+  audited if: proc { false }
+end
+
+class ExclusionaryCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+
+  audited unless: :non_profit?
+
+  def non_profit?
+  end
+end
+
+class ExclusionaryCompany2 < ::ActiveRecord::Base
+  self.table_name = "companies"
+  audited unless: proc { |c| c.exclusive? }
+
+  def exclusive?
+    true
+  end
+end
+
+class InclusiveCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+  audited if: proc { true }
+end
+
+class InclusiveCompany2 < ::ActiveRecord::Base
+  self.table_name = "companies"
+  audited unless: proc { false }
+end
+
+class Secret < ::ActiveRecord::Base
+  audited
+end
+
+class Secret2 < ::ActiveRecord::Base
+  audited
+  self.non_audited_columns = ["delta", "top_secret", "created_at"]
+end
 
 describe Audited::Auditor do
   describe "configuration" do
@@ -24,33 +85,10 @@ describe Audited::Auditor do
       context "when condition method is private" do
         subject { ConditionalPrivateCompany.new.send(:auditing_enabled) }
 
-        before do
-          class ConditionalPrivateCompany < ::ActiveRecord::Base
-            self.table_name = "companies"
-
-            audited if: :foo?
-
-            private def foo?
-              true
-            end
-          end
-        end
-
         it { is_expected.to be_truthy }
       end
 
       context "when passing a method name" do
-        before do
-          class ConditionalCompany < ::ActiveRecord::Base
-            self.table_name = "companies"
-
-            audited if: :public?
-
-            def public?
-            end
-          end
-        end
-
         context "when conditions are true" do
           before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(true) }
           it { is_expected.to be_truthy }
@@ -64,25 +102,12 @@ describe Audited::Auditor do
 
       context "when passing a Proc" do
         context "when conditions are true" do
-          before do
-            class InclusiveCompany < ::ActiveRecord::Base
-              self.table_name = "companies"
-              audited if: proc { true }
-            end
-          end
-
           subject { InclusiveCompany.new.send(:auditing_enabled) }
 
           it { is_expected.to be_truthy }
         end
 
         context "when conditions are false" do
-          before do
-            class ExclusiveCompany < ::ActiveRecord::Base
-              self.table_name = "companies"
-              audited if: proc { false }
-            end
-          end
           subject { ExclusiveCompany.new.send(:auditing_enabled) }
           it { is_expected.to be_falsey }
         end
@@ -91,17 +116,6 @@ describe Audited::Auditor do
 
     context "should be configurable which conditions aren't audited" do
       context "when using a method name" do
-        before do
-          class ExclusionaryCompany < ::ActiveRecord::Base
-            self.table_name = "companies"
-
-            audited unless: :non_profit?
-
-            def non_profit?
-            end
-          end
-        end
-
         subject { ExclusionaryCompany.new.send(:auditing_enabled) }
 
         context "when conditions are true" do
@@ -117,30 +131,12 @@ describe Audited::Auditor do
 
       context "when using a proc" do
         context "when conditions are true" do
-          before do
-            class ExclusionaryCompany < ::ActiveRecord::Base
-              self.table_name = "companies"
-              audited unless: proc { |c| c.exclusive? }
-
-              def exclusive?
-                true
-              end
-            end
-          end
-
-          subject { ExclusionaryCompany.new.send(:auditing_enabled) }
+          subject { ExclusionaryCompany2.new.send(:auditing_enabled) }
           it { is_expected.to be_falsey }
         end
 
         context "when conditions are false" do
-          before do
-            class InclusiveCompany < ::ActiveRecord::Base
-              self.table_name = "companies"
-              audited unless: proc { false }
-            end
-          end
-
-          subject { InclusiveCompany.new.send(:auditing_enabled) }
+          subject { InclusiveCompany2.new.send(:auditing_enabled) }
           it { is_expected.to be_truthy }
         end
       end
@@ -148,19 +144,11 @@ describe Audited::Auditor do
 
     it "should be configurable which attributes are not audited via ignored_attributes" do
       Audited.ignored_attributes = ["delta", "top_secret", "created_at"]
-      class Secret < ::ActiveRecord::Base
-        audited
-      end
 
       expect(Secret.non_audited_columns).to include("delta", "top_secret", "created_at")
     end
 
     it "should be configurable which attributes are not audited via non_audited_columns=" do
-      class Secret2 < ::ActiveRecord::Base
-        audited
-        self.non_audited_columns = ["delta", "top_secret", "created_at"]
-      end
-
       expect(Secret2.non_audited_columns).to include("delta", "top_secret", "created_at")
     end
 
