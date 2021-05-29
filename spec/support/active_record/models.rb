@@ -1,13 +1,13 @@
-require 'cgi'
-require File.expand_path('../schema', __FILE__)
+require "cgi"
+require File.expand_path("../schema", __FILE__)
 
 module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
       audited except: :password
-      attribute :non_column_attr if Rails.version >= '5.1'
+      attribute :non_column_attr if Rails.version >= "5.1"
       attr_protected :logins if respond_to?(:attr_protected)
-      enum status: { active: 0, reliable: 1, banned: 2 }
+      enum status: {active: 0, reliable: 1, banned: 2}
 
       def name=(val)
         write_attribute(:name, CGI.escapeHTML(val))
@@ -21,7 +21,7 @@ module Models
 
     class UserOnlyPassword < ::ActiveRecord::Base
       self.table_name = :users
-      attribute :non_column_attr if Rails.version >= '5.1'
+      attribute :non_column_attr if Rails.version >= "5.1"
       audited only: :password
     end
 
@@ -111,14 +111,14 @@ module Models
     end
 
     class Owner < ::ActiveRecord::Base
-      self.table_name = 'users'
+      self.table_name = "users"
       audited
       has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
     end
 
     class OwnedCompany < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       belongs_to :owner, class_name: "Owner"
       attr_accessible :name, :owner if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
       audited associated_with: :owner
@@ -128,22 +128,22 @@ module Models
     end
 
     class OnUpdateDestroy < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       audited on: [:update, :destroy]
     end
 
     class OnCreateDestroy < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       audited on: [:create, :destroy]
     end
 
     class OnCreateDestroyExceptName < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       audited except: :name, on: [:create, :destroy]
     end
 
     class OnCreateUpdate < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       audited on: [:create, :update]
     end
   end

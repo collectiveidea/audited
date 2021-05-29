@@ -1,9 +1,9 @@
-require 'rails/generators'
-require 'rails/generators/migration'
-require 'active_record'
-require 'rails/generators/active_record'
-require 'generators/audited/migration'
-require 'generators/audited/migration_helper'
+require "rails/generators"
+require "rails/generators/migration"
+require "active_record"
+require "rails/generators/active_record"
+require "generators/audited/migration"
+require "generators/audited/migration_helper"
 
 module Audited
   module Generators
@@ -27,31 +27,31 @@ module Audited
         columns = Audited::Audit.columns.map(&:name)
         indexes = Audited::Audit.connection.indexes(Audited::Audit.table_name)
 
-        yield :add_comment_to_audits unless columns.include?('comment')
+        yield :add_comment_to_audits unless columns.include?("comment")
 
-        if columns.include?('changes')
+        if columns.include?("changes")
           yield :rename_changes_to_audited_changes
         end
 
-        unless columns.include?('remote_address')
+        unless columns.include?("remote_address")
           yield :add_remote_address_to_audits
         end
 
-        unless columns.include?('request_uuid')
+        unless columns.include?("request_uuid")
           yield :add_request_uuid_to_audits
         end
 
-        unless columns.include?('association_id')
-          if columns.include?('auditable_parent_id')
+        unless columns.include?("association_id")
+          if columns.include?("auditable_parent_id")
             yield :rename_parent_to_association
           else
-            unless columns.include?('associated_id')
+            unless columns.include?("associated_id")
               yield :add_association_to_audits
             end
           end
         end
 
-        if columns.include?('association_id')
+        if columns.include?("association_id")
           yield :rename_association_to_associated
         end
 

@@ -72,7 +72,7 @@ describe Audited::Audit do
     let(:user) { Models::ActiveRecord::User.create(name: "John") }
 
     it "undos changes" do
-      user.update_attribute(:name, 'Joe')
+      user.update_attribute(:name, "Joe")
       user.audits.last.undo
       user.reload
       expect(user.name).to eq("John")
@@ -87,12 +87,12 @@ describe Audited::Audit do
 
     it "undos creation" do
       user # trigger create
-      expect {user.audits.last.undo}.to change(Models::ActiveRecord::User, :count).by(-1)
+      expect { user.audits.last.undo }.to change(Models::ActiveRecord::User, :count).by(-1)
     end
 
     it "fails when trying to undo unknown" do
       audit = user.audits.last
-      audit.action = 'oops'
+      audit.action = "oops"
       expect { audit.undo }.to raise_error("invalid action given oops")
     end
   end
@@ -105,8 +105,8 @@ describe Audited::Audit do
 
     it "should be able to set the user to nil" do
       subject.user_id = 1
-      subject.user_type = 'Models::ActiveRecord::User'
-      subject.username = 'joe'
+      subject.user_type = "Models::ActiveRecord::User"
+      subject.username = "joe"
 
       subject.user = nil
 
@@ -117,19 +117,19 @@ describe Audited::Audit do
     end
 
     it "should be able to set the user to a string" do
-      subject.user = 'test'
-      expect(subject.user).to eq('test')
+      subject.user = "test"
+      expect(subject.user).to eq("test")
     end
 
     it "should clear model when setting to a string" do
       subject.user = user
-      subject.user = 'testing'
+      subject.user = "testing"
       expect(subject.user_id).to be_nil
       expect(subject.user_type).to be_nil
     end
 
     it "should clear the username when setting to a model" do
-      subject.username = 'test'
+      subject.username = "test"
       subject.user = user
       expect(subject.username).to be_nil
     end
@@ -138,7 +138,7 @@ describe Audited::Audit do
   describe "revision" do
     it "should recreate attributes" do
       user = Models::ActiveRecord::User.create name: "1"
-      5.times {|i| user.update_attribute :name, (i + 2).to_s }
+      5.times { |i| user.update_attribute :name, (i + 2).to_s }
 
       user.audits.each do |audit|
         expect(audit.revision.name).to eq(audit.version.to_s)
@@ -174,7 +174,7 @@ describe Audited::Audit do
       it "uses created at" do
         Audited::Audit.delete_all
         audit = Models::ActiveRecord::User.create(name: "John").audits.last
-        audit.update_columns(created_at: Time.zone.parse('2018-01-01'))
+        audit.update_columns(created_at: Time.zone.parse("2018-01-01"))
         expect(Audited::Audit.collection_cache_key).to match(/-20180101\d+$/)
       end
     else
@@ -222,6 +222,7 @@ describe Audited::Audit do
   describe "audited_classes" do
     class Models::ActiveRecord::CustomUser < ::ActiveRecord::Base
     end
+
     class Models::ActiveRecord::CustomUserSubclass < Models::ActiveRecord::CustomUser
       audited
     end
@@ -293,8 +294,8 @@ describe Audited::Audit do
       end
     end
 
-    it "should be thread safe" do
-      begin
+    if ActiveRecord::Base.connection.adapter_name != "SQLite"
+      it "should be thread safe" do
         expect(user.save).to eq(true)
 
         t1 = Thread.new do
@@ -314,10 +315,10 @@ describe Audited::Audit do
         t1.join
         t2.join
       end
-    end if ActiveRecord::Base.connection.adapter_name != 'SQLite'
+    end
 
     it "should return the value from the yield block" do
-      result = Audited::Audit.as_user('foo') do
+      result = Audited::Audit.as_user("foo") do
         42
       end
       expect(result).to eq(42)
@@ -325,10 +326,10 @@ describe Audited::Audit do
 
     it "should reset audited_user when the yield block raises an exception" do
       expect {
-        Audited::Audit.as_user('foo') do
-          raise StandardError.new('expected')
+        Audited::Audit.as_user("foo") do
+          raise StandardError.new("expected")
         end
-      }.to raise_exception('expected')
+      }.to raise_exception("expected")
       expect(Audited.store[:audited_user]).to be_nil
     end
   end
