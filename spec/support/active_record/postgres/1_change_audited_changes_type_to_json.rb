@@ -1,5 +1,4 @@
-parent = Rails::VERSION::MAJOR == 4 ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
-class ChangeAuditedChangesTypeToJson < parent
+class ChangeAuditedChangesTypeToJson < ActiveRecord::Migration[5.0]
   def self.up
     remove_column :audits, :audited_changes
     add_column :audits, :audited_changes, :json
