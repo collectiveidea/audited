@@ -155,7 +155,7 @@ end
 
 ### Limiting stored audits
 
-You can limit the number of audits stored for your model. To configure limiting for all audited models, put the following in an initializer:
+You can limit the number of audits stored for your model. To configure limiting for all audited models, put the following in an initializer file (`config/initializers/audited.rb`):
 
 ```ruby
 Audited.max_audits = 10 # keep only 10 latest audits
@@ -194,7 +194,7 @@ class PostsController < ApplicationController
 end
 ```
 
-To use a method other than `current_user`, put the following in an initializer:
+To use a method other than `current_user`, put the following in an initializer file (`config/initializers/audited.rb`):
 
 ```ruby
 Audited.current_user_method = :authenticated_user
