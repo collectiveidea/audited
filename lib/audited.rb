@@ -33,6 +33,9 @@ end
 require 'audited/auditor'
 require 'audited/audit'
 
-::ActiveRecord::Base.send :include, Audited::Auditor
+ActiveSupport.on_load :active_record do
+  include Audited::Auditor
+end
 
 require 'audited/sweeper'
+require 'audited/railtie'

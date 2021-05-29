@@ -30,6 +30,7 @@ describe AuditsController do
   render_views
 
   before do
+    Audited::Railtie.initializers.each(&:run)
     Audited.current_user_method = :current_user
   end
 
