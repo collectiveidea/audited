@@ -42,7 +42,7 @@ module Models
 
     class CommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
-      audited comment_required: true
+      audited except: :password, comment_required: true
     end
 
     class OnCreateCommentRequiredUser < ::ActiveRecord::Base

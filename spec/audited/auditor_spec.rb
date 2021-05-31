@@ -944,6 +944,10 @@ describe Audited::Auditor do
         expect(Models::ActiveRecord::CommentRequiredUser.create(name: "Foo")).to be_valid
         Models::ActiveRecord::CommentRequiredUser.enable_auditing
       end
+
+      it "should validate when audit_comment is not supplied, and only excluded attributes changed" do
+        expect(Models::ActiveRecord::CommentRequiredUser.new(password: 'Foo')).to be_valid
+      end
     end
 
     describe "on update" do
@@ -968,6 +972,10 @@ describe Audited::Auditor do
         Models::ActiveRecord::CommentRequiredUser.disable_auditing
         expect(user.update(name: "Test")).to eq(true)
         Models::ActiveRecord::CommentRequiredUser.enable_auditing
+      end
+
+      it "should validate when audit_comment is not supplied, and only excluded attributes changed" do
+        expect(user.update(password: 'Test')).to eq(true)
       end
     end
 
