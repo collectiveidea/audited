@@ -1,6 +1,27 @@
 require "spec_helper"
 
-SingleCov.covered!
+SingleCov.covered! uncovered: 1 # Rails version check
+
+class CustomAudit < Audited::Audit
+  def custom_method
+    "I'm custom!"
+  end
+end
+
+class TempModel1 < ::ActiveRecord::Base
+  self.table_name = :companies
+end
+
+class TempModel2 < ::ActiveRecord::Base
+  self.table_name = :companies
+end
+
+class Models::ActiveRecord::CustomUser < ::ActiveRecord::Base
+end
+
+class Models::ActiveRecord::CustomUserSubclass < Models::ActiveRecord::CustomUser
+  audited
+end
 
 describe Audited::Audit do
   let(:user) { Models::ActiveRecord::User.new name: "Testing" }
@@ -9,30 +30,17 @@ describe Audited::Audit do
     around(:example) do |example|
       original_audit_class = Audited.audit_class
 
-      class CustomAudit < Audited::Audit
-        def custom_method
-          "I'm custom!"
-        end
-      end
-
-      class TempModel < ::ActiveRecord::Base
-        self.table_name = :companies
-      end
-
       example.run
 
       Audited.config { |config| config.audit_class = original_audit_class }
-      Audited::Audit.audited_class_names.delete("TempModel")
-      Object.send(:remove_const, :TempModel)
-      Object.send(:remove_const, :CustomAudit)
     end
 
     context "when a custom audit class is configured" do
       it "should be used in place of #{described_class}" do
         Audited.config { |config| config.audit_class = CustomAudit }
-        TempModel.audited
+        TempModel1.audited
 
-        record = TempModel.create
+        record = TempModel1.create
 
         audit = record.audits.first
         expect(audit).to be_a CustomAudit
@@ -42,9 +50,9 @@ describe Audited::Audit do
 
     context "when a custom audit class is not configured" do
       it "should default to #{described_class}" do
-        TempModel.audited
+        TempModel2.audited
 
-        record = TempModel.create
+        record = TempModel2.create
 
         audit = record.audits.first
         expect(audit).to be_a Audited::Audit
@@ -62,7 +70,7 @@ describe Audited::Audit do
     end
 
     it "does not unserialize from binary columns" do
-      allow(Audited.audit_class.columns_hash["audited_changes"]).to receive(:type).and_return("foo")
+      allow(Audited::YAMLIfTextColumnType).to receive(:text_column?).and_return(false)
       audit.audited_changes = {foo: "bar"}
       expect(audit.audited_changes).to eq "{:foo=>\"bar\"}"
     end
@@ -72,7 +80,7 @@ describe Audited::Audit do
     let(:user) { Models::ActiveRecord::User.create(name: "John") }
 
     it "undos changes" do
-      user.update_attribute(:name, 'Joe')
+      user.update_attribute(:name, "Joe")
       user.audits.last.undo
       user.reload
       expect(user.name).to eq("John")
@@ -87,12 +95,12 @@ describe Audited::Audit do
 
     it "undos creation" do
       user # trigger create
-      expect {user.audits.last.undo}.to change(Models::ActiveRecord::User, :count).by(-1)
+      expect { user.audits.last.undo }.to change(Models::ActiveRecord::User, :count).by(-1)
     end
 
     it "fails when trying to undo unknown" do
       audit = user.audits.last
-      audit.action = 'oops'
+      audit.action = "oops"
       expect { audit.undo }.to raise_error("invalid action given oops")
     end
   end
@@ -105,8 +113,8 @@ describe Audited::Audit do
 
     it "should be able to set the user to nil" do
       subject.user_id = 1
-      subject.user_type = 'Models::ActiveRecord::User'
-      subject.username = 'joe'
+      subject.user_type = "Models::ActiveRecord::User"
+      subject.username = "joe"
 
       subject.user = nil
 
@@ -117,19 +125,19 @@ describe Audited::Audit do
     end
 
     it "should be able to set the user to a string" do
-      subject.user = 'test'
-      expect(subject.user).to eq('test')
+      subject.user = "test"
+      expect(subject.user).to eq("test")
     end
 
     it "should clear model when setting to a string" do
       subject.user = user
-      subject.user = 'testing'
+      subject.user = "testing"
       expect(subject.user_id).to be_nil
       expect(subject.user_type).to be_nil
     end
 
     it "should clear the username when setting to a model" do
-      subject.username = 'test'
+      subject.username = "test"
       subject.user = user
       expect(subject.username).to be_nil
     end
@@ -138,7 +146,7 @@ describe Audited::Audit do
   describe "revision" do
     it "should recreate attributes" do
       user = Models::ActiveRecord::User.create name: "1"
-      5.times {|i| user.update_attribute :name, (i + 2).to_s }
+      5.times { |i| user.update_attribute :name, (i + 2).to_s }
 
       user.audits.each do |audit|
         expect(audit.revision.name).to eq(audit.version.to_s)
@@ -174,7 +182,7 @@ describe Audited::Audit do
       it "uses created at" do
         Audited::Audit.delete_all
         audit = Models::ActiveRecord::User.create(name: "John").audits.last
-        audit.update_columns(created_at: Time.parse('2018-01-01'))
+        audit.update_columns(created_at: Time.zone.parse("2018-01-01"))
         expect(Audited::Audit.collection_cache_key).to match(/-20180101\d+$/)
       end
     else
@@ -220,12 +228,6 @@ describe Audited::Audit do
   end
 
   describe "audited_classes" do
-    class Models::ActiveRecord::CustomUser < ::ActiveRecord::Base
-    end
-    class Models::ActiveRecord::CustomUserSubclass < Models::ActiveRecord::CustomUser
-      audited
-    end
-
     it "should include audited classes" do
       expect(Audited::Audit.audited_classes).to include(Models::ActiveRecord::User)
     end
@@ -293,8 +295,8 @@ describe Audited::Audit do
       end
     end
 
-    it "should be thread safe" do
-      begin
+    if ActiveRecord::Base.connection.adapter_name != "SQLite"
+      it "should be thread safe" do
         expect(user.save).to eq(true)
 
         t1 = Thread.new do
@@ -314,10 +316,10 @@ describe Audited::Audit do
         t1.join
         t2.join
       end
-    end if ActiveRecord::Base.connection.adapter_name != 'SQLite'
+    end
 
     it "should return the value from the yield block" do
-      result = Audited::Audit.as_user('foo') do
+      result = Audited::Audit.as_user("foo") do
         42
       end
       expect(result).to eq(42)
@@ -325,10 +327,10 @@ describe Audited::Audit do
 
     it "should reset audited_user when the yield block raises an exception" do
       expect {
-        Audited::Audit.as_user('foo') do
-          raise StandardError.new('expected')
+        Audited::Audit.as_user("foo") do
+          raise StandardError.new("expected")
         end
-      }.to raise_exception('expected')
+      }.to raise_exception("expected")
       expect(Audited.store[:audited_user]).to be_nil
     end
   end
