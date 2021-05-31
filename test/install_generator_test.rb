@@ -1,9 +1,9 @@
-require 'test_helper'
+require "test_helper"
 
-require 'generators/audited/install_generator'
+require "generators/audited/install_generator"
 
 class InstallGeneratorTest < Rails::Generators::TestCase
-  destination File.expand_path('../../tmp', __FILE__)
+  destination File.expand_path("../../tmp", __FILE__)
   setup :prepare_destination
   tests Audited::Generators::InstallGenerator
 
@@ -11,44 +11,44 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     run_generator
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      assert_includes(content, 'class InstallAudited')
-      assert_includes(content, 't.column :audited_changes, :text')
+      assert_includes(content, "class InstallAudited")
+      assert_includes(content, "t.column :audited_changes, :text")
     end
   end
 
   test "generate migration with 'jsonb' type for audited_changes column" do
-    run_generator %w(--audited-changes-column-type jsonb)
+    run_generator %w[--audited-changes-column-type jsonb]
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      assert_includes(content, 'class InstallAudited')
-      assert_includes(content, 't.column :audited_changes, :jsonb')
+      assert_includes(content, "class InstallAudited")
+      assert_includes(content, "t.column :audited_changes, :jsonb")
     end
   end
 
   test "generate migration with 'json' type for audited_changes column" do
-    run_generator %w(--audited-changes-column-type json)
+    run_generator %w[--audited-changes-column-type json]
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      assert_includes(content, 'class InstallAudited')
-      assert_includes(content, 't.column :audited_changes, :json')
+      assert_includes(content, "class InstallAudited")
+      assert_includes(content, "t.column :audited_changes, :json")
     end
   end
 
   test "generate migration with 'string' type for user_id column" do
-    run_generator %w(--audited-user-id-column-type string)
+    run_generator %w[--audited-user-id-column-type string]
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      assert_includes(content, 'class InstallAudited')
-      assert_includes(content, 't.column :user_id, :string')
+      assert_includes(content, "class InstallAudited")
+      assert_includes(content, "t.column :user_id, :string")
     end
   end
 
   test "generate migration with 'uuid' type for user_id column" do
-    run_generator %w(--audited-user-id-column-type uuid)
+    run_generator %w[--audited-user-id-column-type uuid]
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      assert_includes(content, 'class InstallAudited')
-      assert_includes(content, 't.column :user_id, :uuid')
+      assert_includes(content, "class InstallAudited")
+      assert_includes(content, "t.column :user_id, :uuid")
     end
   end
 
@@ -56,8 +56,7 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     run_generator
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      parent = Rails::VERSION::MAJOR == 4 ? 'ActiveRecord::Migration' : "ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]"
-      assert_includes(content, "class InstallAudited < #{parent}\n")
+      assert_includes(content, "class InstallAudited < ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]\n")
     end
   end
 end
