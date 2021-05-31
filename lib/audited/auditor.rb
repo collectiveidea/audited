@@ -320,7 +320,7 @@ module Audited
 
       def presence_of_audit_comment
         if comment_required_state?
-          errors.add(:audit_comment, "Comment can't be blank!") unless audit_comment.present?
+          errors.add(:audit_comment, :blank) unless audit_comment.present?
         end
       end
 
@@ -341,8 +341,7 @@ module Audited
 
       def require_comment
         if auditing_enabled && audit_comment.blank?
-          errors.add(:audit_comment, "Comment can't be blank!")
-          return false if Rails.version.start_with?("4.")
+          errors.add(:audit_comment, :blank)
           throw(:abort)
         end
       end
