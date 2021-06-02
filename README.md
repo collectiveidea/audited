@@ -388,6 +388,16 @@ Audited.config do |config|
 end
 ```
 
+### Enum Storage
+
+In 4.10, the default behavior for enums changed from storing the value synthesized by Rails to the value stored in the DB. You can restore the previous behavior by setting the store_synthesized_enums configuration value:
+
+```ruby
+# config/initializers/audited.rb
+
+Audited.store_synthesized_enums = true
+```
+
 ## Support
 
 You can find documentation at: http://rdoc.info/github/collectiveidea/audited
