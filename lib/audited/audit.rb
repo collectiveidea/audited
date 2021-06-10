@@ -80,13 +80,6 @@ module Audited
       end
     end
 
-    # Returns a hash of the changed attributes with the old values
-    def old_attributes
-      (audited_changes || {}).each_with_object({}.with_indifferent_access) do |(attr, values), attrs|
-        attrs[attr] = Array(values).first
-      end
-    end
-
     # Allows user to undo changes
     def undo
       case action

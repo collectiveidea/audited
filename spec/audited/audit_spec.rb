@@ -244,13 +244,6 @@ describe Audited::Audit do
     end
   end
 
-  describe "old_attributes" do
-    it "should return a hash of the old values" do
-      old_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).old_attributes
-      expect(old_attributes).to eq({"a" => 1, "b" => 3})
-    end
-  end
-
   describe "as_user" do
     it "should record user objects" do
       Audited::Audit.as_user(user) do
