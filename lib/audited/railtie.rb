@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Audited
   class Railtie < Rails::Railtie
     initializer "audited.sweeper" do

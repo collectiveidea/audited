@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
     if index_exists?(:audits, [:auditable_type, :auditable_id], name: index_name)

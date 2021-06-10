@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Audited
   # Specify this act if you want changes to your model to be saved in an
   # audit table.  This assumes there is an audits table ready.

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Audited
   class Sweeper
     STORED_DATA = {

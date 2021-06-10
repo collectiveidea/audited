@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Audited
   module RspecMatchers
     # Ensure that the model is audited.
