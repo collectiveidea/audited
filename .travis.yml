@@ -45,6 +45,10 @@ matrix:
       gemfile: gemfiles/rails42.gemfile
     - rvm: 3.0.1
       gemfile: gemfiles/rails42.gemfile
+    - rvm: 3.0.1
+      gemfile: gemfiles/rails51.gemfile
+    - rvm: 3.0.1
+      gemfile: gemfiles/rails52.gemfile
     - rvm: ruby-head
       gemfile: gemfiles/rails42.gemfile
   allow_failures:
