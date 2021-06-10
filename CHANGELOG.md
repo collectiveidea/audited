@@ -16,6 +16,8 @@ Improved
   [#544](https://github.com/collectiveidea/audited/pull/544)
 - Use Thread local variables instead of Fibers - @arathunku
   [#568](https://github.com/collectiveidea/audited/pull/568)
+- Fixes an issue where array attributes were not deserialized properly
+  [#576](https://github.com/collectiveidea/audited/pull/576)
 
 Changed
 
