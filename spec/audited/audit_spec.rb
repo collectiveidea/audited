@@ -238,16 +238,36 @@ describe Audited::Audit do
   end
 
   describe "new_attributes" do
-    it "should return a hash of the new values" do
-      new_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).new_attributes
+    it "should return the audited_changes without modification for create" do
+      new_attributes = Audited::Audit.new(audited_changes: {int: 1, array: [1]}, action: :create).new_attributes
+      expect(new_attributes).to eq({"int" => 1, "array" => [1]})
+    end
+
+    it "should return a hash that contains the after values of each attribute" do
+      new_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}, action: :update).new_attributes
       expect(new_attributes).to eq({"a" => 2, "b" => 4})
+    end
+
+    it "should return the audited_changes without modification for destroy" do
+      new_attributes = Audited::Audit.new(audited_changes: {int: 1, array: [1]}, action: :destroy).new_attributes
+      expect(new_attributes).to eq({"int" => 1, "array" => [1]})
     end
   end
 
   describe "old_attributes" do
-    it "should return a hash of the old values" do
-      old_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}).old_attributes
+    it "should return the audited_changes without modification for create" do
+      old_attributes = Audited::Audit.new(audited_changes: {int: 1, array: [1]}, action: :create).new_attributes
+      expect(old_attributes).to eq({"int" => 1, "array" => [1]})
+    end
+
+    it "should return a hash that contains the before values of each attribute" do
+      old_attributes = Audited::Audit.new(audited_changes: {a: [1, 2], b: [3, 4]}, action: :update).old_attributes
       expect(old_attributes).to eq({"a" => 1, "b" => 3})
+    end
+
+    it "should return the audited_changes without modification for destroy" do
+      old_attributes = Audited::Audit.new(audited_changes: {int: 1, array: [1]}, action: :destroy).old_attributes
+      expect(old_attributes).to eq({"int" => 1, "array" => [1]})
     end
   end
 

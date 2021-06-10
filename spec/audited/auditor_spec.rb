@@ -734,6 +734,14 @@ describe Audited::Auditor do
     it "should return nil for values greater than the number of revisions" do
       expect(user.revision(user.revisions.count + 1)).to be_nil
     end
+
+    it "should work with array attributes" do
+      u = Models::ActiveRecord::User.create!(phone_numbers: ["+1 800-444-4444"])
+      u.update!(phone_numbers: ["+1 804-222-1111", "+1 317 222-2222"])
+
+      expect(u.revision(0).phone_numbers).to eq(["+1 804-222-1111", "+1 317 222-2222"])
+      expect(u.revision(1).phone_numbers).to eq(["+1 800-444-4444"])
+    end
   end
 
   describe "revision_at" do

@@ -8,6 +8,7 @@ module Models
       attribute :non_column_attr if Rails.version >= "5.1"
       attr_protected :logins if respond_to?(:attr_protected)
       enum status: {active: 0, reliable: 1, banned: 2}
+      serialize :phone_numbers, Array
 
       def name=(val)
         write_attribute(:name, CGI.escapeHTML(val))
