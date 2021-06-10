@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
     fix_index_order_for [:associated_id, :associated_type], 'associated_index'
