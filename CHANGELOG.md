@@ -1,8 +1,16 @@
 # Audited ChangeLog
 
-## Unreleased
+## 5.0.0 (2021-06-10)
 
 Improved
+
+- Fixes an issue where array attributes were not deserialized properly - @cfeckardt, @yuki24
+  [#448](https://github.com/collectiveidea/audited/pull/448)
+  [#576](https://github.com/collectiveidea/audited/pull/576)
+- Improve error message on audit_comment and allow for i18n override - @james
+  [#523](https://github.com/collectiveidea/audited/pull/523/)
+- Don't require a comment if only non-audited fields are changed - @james
+  [#522](https://github.com/collectiveidea/audited/pull/522/)
 - Readme updates - @gourshete
   [#525](https://github.com/collectiveidea/audited/pull/525)
 - Allow restoring previous enum behavior with flag - @travisofthenorth
