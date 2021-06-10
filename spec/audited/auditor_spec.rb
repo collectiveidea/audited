@@ -946,7 +946,7 @@ describe Audited::Auditor do
       end
 
       it "should validate when audit_comment is not supplied, and only excluded attributes changed" do
-        expect(Models::ActiveRecord::CommentRequiredUser.new(password: 'Foo')).to be_valid
+        expect(Models::ActiveRecord::CommentRequiredUser.new(password: "Foo")).to be_valid
       end
     end
 
@@ -975,7 +975,7 @@ describe Audited::Auditor do
       end
 
       it "should validate when audit_comment is not supplied, and only excluded attributes changed" do
-        expect(user.update(password: 'Test')).to eq(true)
+        expect(user.update(password: "Test")).to eq(true)
       end
     end
 
