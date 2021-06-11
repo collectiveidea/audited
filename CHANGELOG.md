@@ -1,5 +1,12 @@
 # Audited ChangeLog
 
+## 5.0.1 (2021-06-11)
+
+Improved
+
+- Don't load associated model when auditing is disabled - @nut4k1
+  [#584](https://github.com/collectiveidea/audited/pull/584)
+
 ## 5.0.0 (2021-06-10)
 
 Improved
