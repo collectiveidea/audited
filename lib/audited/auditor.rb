@@ -308,10 +308,11 @@ module Audited
       end
 
       def write_audit(attrs)
-        attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
 
         if auditing_enabled
+          attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
+
           run_callbacks(:audit) {
             audit = audits.create(attrs)
             combine_audits_if_needed if attrs[:action] != "create"
