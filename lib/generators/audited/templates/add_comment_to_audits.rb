@@ -1,4 +1,4 @@
-class <%= migration_class_name %> < ActiveRecord::Migration
+class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
     add_column :audits, :comment, :string
   end

@@ -6,36 +6,65 @@ module Audited
   # * <tt>auditable</tt>: the ActiveRecord model that was changed
   # * <tt>user</tt>: the user that performed the change; a string or an ActiveRecord model
   # * <tt>action</tt>: one of create, update, or delete
-  # * <tt>audited_changes</tt>: a serialized hash of all the changes
+  # * <tt>audited_changes</tt>: a hash of all the changes
   # * <tt>comment</tt>: a comment set with the audit
   # * <tt>version</tt>: the version of the model
   # * <tt>request_uuid</tt>: a uuid based that allows audits from the same controller request
   # * <tt>created_at</tt>: Time that the change was performed
   #
-  class Audit < ::ActiveRecord::Base
-    include ActiveModel::Observing
 
+  class YAMLIfTextColumnType
+    class << self
+      def load(obj)
+        if Audited.audit_class.columns_hash["audited_changes"].type.to_s == "text"
+          ActiveRecord::Coders::YAMLColumn.new(Object).load(obj)
+        else
+          obj
+        end
+      end
+
+      def dump(obj)
+        if Audited.audit_class.columns_hash["audited_changes"].type.to_s == "text"
+          ActiveRecord::Coders::YAMLColumn.new(Object).dump(obj)
+        else
+          obj
+        end
+      end
+    end
+  end
+
+  class Audit < ::ActiveRecord::Base
     belongs_to :auditable,  polymorphic: true
     belongs_to :user,       polymorphic: true
     belongs_to :associated, polymorphic: true
 
-    before_create :set_version_number, :set_audit_user, :set_request_uuid
+    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
+    before_create do
+      self.assign_attributes(::Audited.namespace_conditions)
+    end
 
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
 
-    serialize :audited_changes
+    serialize :audited_changes, YAMLIfTextColumnType
 
     scope :ascending,     ->{ reorder(version: :asc) }
     scope :descending,    ->{ reorder(version: :desc)}
     scope :creates,       ->{ where(action: 'create')}
     scope :updates,       ->{ where(action: 'update')}
     scope :destroys,      ->{ where(action: 'destroy')}
+    scope :namespaced,    ->{ where(Audited.namespace_conditions)}
 
-    scope :up_until,      ->(date_or_time){where("created_at <= ?", date_or_time) }
-    scope :from_version,  ->(version){where(['version >= ?', version]) }
-    scope :to_version,    ->(version){where(['version <= ?', version]) }
-    scope :auditable_finder, ->(auditable_id, auditable_type){where(auditable_id: auditable_id, auditable_type: auditable_type)}
+    scope :not_before_created_at, ->(audited_record) do
+      where(created_at: Range.new(
+        ((audited_record.try(:created_at) || Time.now)  - 1.day),
+        (Time.now + 1.day)
+      ))
+    end
+    scope :up_until,      ->(date_or_time){ where("created_at <= ?", date_or_time) }
+    scope :from_version,  ->(version){ where('version >= ?', version) }
+    scope :to_version,    ->(version){ where('version <= ?', version) }
+    scope :auditable_finder, ->(auditable_id, auditable_type){ where(auditable_id: auditable_id, auditable_type: auditable_type)}
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
@@ -46,7 +75,7 @@ module Audited
     def revision
       clazz = auditable_type.constantize
       (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(version: version))
+        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(audit_version: version))
       end
     end
 
@@ -64,6 +93,23 @@ module Audited
         attrs[attr] = Array(values).first
 
         attrs
+      end
+    end
+
+    # Allows user to undo changes
+    def undo
+      case action
+      when 'create'
+        # destroys a newly created record
+        auditable.destroy!
+      when 'destroy'
+        # creates a new record with the destroyed record attributes
+        auditable_type.constantize.create!(audited_changes)
+      when 'update'
+        # changes back attributes
+        auditable.update!(audited_changes.transform_values(&:first))
+      else
+        raise StandardError, "invalid action given #{action}"
       end
     end
 
@@ -95,21 +141,22 @@ module Audited
     # by +user+. This method is hopefully threadsafe, making it ideal
     # for background operations that require audit information.
     def self.as_user(user, &block)
-      Thread.current[:audited_user] = user
+      last_audited_user = ::Audited.store[:audited_user] 
+      ::Audited.store[:audited_user] = user
       yield
     ensure
-      Thread.current[:audited_user] = nil
+      ::Audited.store[:audited_user] = last_audited_user
     end
 
     # @private
     def self.reconstruct_attributes(audits)
       attributes = {}
       result = audits.collect do |audit|
-        attributes.merge!(audit.new_attributes).merge!(version: audit.version)
+        attributes.merge!(audit.new_attributes)[:audit_version] = audit.version
         yield attributes if block_given?
       end
       block_given? ? result : attributes
-    end
+   end
 
     # @private
     def self.assign_revision_attributes(record, attributes)
@@ -125,21 +172,31 @@ module Audited
       record
     end
 
+    # use created_at as timestamp cache key
+    def self.collection_cache_key(collection = all, timestamp_column = :created_at)
+      super(collection, :created_at)
+    end
+
     private
 
     def set_version_number
-      max = self.class.auditable_finder(auditable_id, auditable_type).descending.first.try(:version) || 0
+      max = self.class.auditable_finder(auditable_id, auditable_type).maximum(:version) || 0
       self.version = max + 1
     end
 
     def set_audit_user
-      self.user = Thread.current[:audited_user] if Thread.current[:audited_user]
+      self.user ||= ::Audited.store[:audited_user] # from .as_user
+      self.user ||= ::Audited.store[:current_user].try!(:call) # from Sweeper
       nil # prevent stopping callback chains
     end
 
     def set_request_uuid
+      self.request_uuid ||= ::Audited.store[:current_request_uuid]
       self.request_uuid ||= SecureRandom.uuid
     end
-  end
 
+    def set_remote_address
+      self.remote_address ||= ::Audited.store[:current_remote_address]
+    end
+  end
 end
