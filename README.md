@@ -1,4 +1,8 @@
-Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.svg)](http://travis-ci.org/collectiveidea/audited) [![Code Climate](https://codeclimate.com/github/collectiveidea/audited.svg)](https://codeclimate.com/github/collectiveidea/audited) [![Security](https://hakiri.io/github/collectiveidea/audited/master.svg)](https://hakiri.io/github/collectiveidea/audited/master)
+Audited
+[![Gem Version](https://img.shields.io/gem/v/audited.svg)](http://rubygems.org/gems/audited)
+[![Build Status](https://secure.travis-ci.org/collectiveidea/audited.svg)](http://travis-ci.org/collectiveidea/audited)
+[![Code Climate](https://codeclimate.com/github/collectiveidea/audited.svg)](https://codeclimate.com/github/collectiveidea/audited)
+[![Security](https://hakiri.io/github/collectiveidea/audited/master.svg)](https://hakiri.io/github/collectiveidea/audited/master)
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 =======
 
@@ -32,7 +36,7 @@ Audited is currently ActiveRecord-only. In a previous life, Audited worked with 
 Add the gem to your Gemfile:
 
 ```ruby
-gem "audited", "~> 4.9"
+gem "audited", "~> 5.0"
 ```
 
 Then, from your Rails app directory, create the `audits` table:
