@@ -15,4 +15,3 @@ ActiveRecord::Schema.define do
     t.column :association_type, :string
   end
 end
-

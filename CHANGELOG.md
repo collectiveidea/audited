@@ -1,6 +1,117 @@
 # Audited ChangeLog
 
-## Unreleased
+## 5.0.1 (2021-06-11)
+
+Improved
+
+- Don't load associated model when auditing is disabled - @nut4k1
+  [#584](https://github.com/collectiveidea/audited/pull/584)
+
+## 5.0.0 (2021-06-10)
+
+Improved
+
+- Fixes an issue where array attributes were not deserialized properly - @cfeckardt, @yuki24
+  [#448](https://github.com/collectiveidea/audited/pull/448)
+  [#576](https://github.com/collectiveidea/audited/pull/576)
+- Improve error message on audit_comment and allow for i18n override - @james
+  [#523](https://github.com/collectiveidea/audited/pull/523/)
+- Don't require a comment if only non-audited fields are changed - @james
+  [#522](https://github.com/collectiveidea/audited/pull/522/)
+- Readme updates - @gourshete
+  [#525](https://github.com/collectiveidea/audited/pull/525)
+- Allow restoring previous enum behavior with flag - @travisofthenorth
+  [#526](https://github.com/collectiveidea/audited/pull/526)
+- Follow Rails Autoloading conventions - @duncanjbrown
+  [#532](https://github.com/collectiveidea/audited/pull/532)
+- Fix own_and_associated_audits for STI Models - @eric-hemasystems
+  [#533](https://github.com/collectiveidea/audited/pull/533)
+- Rails 6.1 Improvements - @okuramasafumi, @marcrohloff
+  [#563](https://github.com/collectiveidea/audited/pull/563)
+  [#544](https://github.com/collectiveidea/audited/pull/544)
+- Use Thread local variables instead of Fibers - @arathunku
+  [#568](https://github.com/collectiveidea/audited/pull/568)
+
+Changed
+
+- Drop support for Rails 4 - @travisofthenorth
+  [#527](https://github.com/collectiveidea/audited/pull/527)
+
+## 4.10.0 (2021-01-07)
+
+Added
+
+- Add redacted option
+  [#485](https://github.com/collectiveidea/audited/pull/485)
+- Rails 6.1. support
+  [#554](https://github.com/collectiveidea/audited/pull/554)
+  [#559](https://github.com/collectiveidea/audited/pull/559)
+
+Improved
+
+- Avoid extra query on first audit version
+  [#513](https://github.com/collectiveidea/audited/pull/513)
+
+
+## 4.9.0 (2019-07-17)
+
+Breaking changes
+
+- removed block support for `Audit.reconstruct_attributes`
+  [#437](https://github.com/collectiveidea/audited/pull/437)
+- removed `audited_columns`, `non_audited_columns`, `auditing_enabled=` instance methods,
+  use class methods instead
+  [#424](https://github.com/collectiveidea/audited/pull/424)
+- removed rails 4.1 and 4.0 support
+  [#431](https://github.com/collectiveidea/audited/pull/431)
+
+Added
+
+- Add `with_auditing` methods to enable temporarily
+  [#502](https://github.com/collectiveidea/audited/pull/502)
+- Add `update_with_comment_only` option to control audit creation with only comments
+  [#327](https://github.com/collectiveidea/audited/pull/327)
+- Support for Rails 6.0 and Ruby 2.6
+  [#494](https://github.com/collectiveidea/audited/pull/494)
+
+Changed
+
+- None
+
+Fixed
+
+- Ensure enum changes are stored consistently
+  [#429](https://github.com/collectiveidea/audited/pull/429)
+
+## 4.8.0 (2018-08-19)
+
+Breaking changes
+
+- None
+
+Added
+
+- Add ability to globally disable auditing
+  [#426](https://github.com/collectiveidea/audited/pull/426)
+- Add `own_and_associated_audits` method to auditable models
+  [#428](https://github.com/collectiveidea/audited/pull/428)
+- Ability to nest `as_user` within itself
+  [#450](https://github.com/collectiveidea/audited/pull/450)
+- Private methods can now be used for conditional auditing
+  [#454](https://github.com/collectiveidea/audited/pull/454)
+
+Changed
+
+- Add version to `auditable_index`
+  [#427](https://github.com/collectiveidea/audited/pull/427)
+- Rename audited resource revision `version` attribute to `audit_version` and deprecate `version` attribute
+  [#443](https://github.com/collectiveidea/audited/pull/443)
+
+Fixed
+
+- None
+
+## 4.7.1 (2018-04-10)
 
 Breaking changes
 
@@ -16,7 +127,82 @@ Changed
 
 Fixed
 
+- Allow use with Rails 5.2 final
+
+## 4.7.0 (2018-03-14)
+
+Breaking changes
+
 - None
+
+Added
+
+- Add `inverse_of: auditable` definition to audit relation
+  [#413](https://github.com/collectiveidea/audited/pull/413)
+- Add functionality to conditionally audit models
+  [#414](https://github.com/collectiveidea/audited/pull/414)
+- Allow limiting number of audits stored
+  [#405](https://github.com/collectiveidea/audited/pull/405)
+
+Changed
+
+- Reduced db calls in `#revisions` method
+  [#402](https://github.com/collectiveidea/audited/pull/402)
+  [#403](https://github.com/collectiveidea/audited/pull/403)
+- Update supported Ruby and Rails versions
+  [#404](https://github.com/collectiveidea/audited/pull/404)
+  [#409](https://github.com/collectiveidea/audited/pull/409)
+  [#415](https://github.com/collectiveidea/audited/pull/415)
+  [#416](https://github.com/collectiveidea/audited/pull/416)
+
+Fixed
+
+- Ensure that `on` and `except` options jive with `comment_required: true`
+  [#419](https://github.com/collectiveidea/audited/pull/419)
+- Fix RSpec matchers
+  [#420](https://github.com/collectiveidea/audited/pull/420)
+
+## 4.6.0 (2018-01-10)
+
+Breaking changes
+
+- None
+
+Added
+
+- Add functionality to undo specific audit
+  [#381](https://github.com/collectiveidea/audited/pull/381)
+
+Changed
+
+- Removed duplicate declaration of `non_audited_columns` method
+  [#365](https://github.com/collectiveidea/audited/pull/365)
+- Updated `audited_changes` calculation to support Rails>=5.1 change syntax
+  [#377](https://github.com/collectiveidea/audited/pull/377)
+- Improve index ordering for polymorphic indexes
+  [#385](https://github.com/collectiveidea/audited/pull/385)
+- Update CI to test on newer versions of Ruby and Rails
+  [#386](https://github.com/collectiveidea/audited/pull/386)
+  [#387](https://github.com/collectiveidea/audited/pull/387)
+  [#388](https://github.com/collectiveidea/audited/pull/388)
+- Simplify `audited_columns` calculation
+  [#391](https://github.com/collectiveidea/audited/pull/391)
+- Simplify `audited_changes` calculation
+  [#389](https://github.com/collectiveidea/audited/pull/389)
+- Normalize options passed to `audited` method
+  [#397](https://github.com/collectiveidea/audited/pull/397)
+
+Fixed
+
+- Fixed typo in rspec causing incorrect test failure
+  [#360](https://github.com/collectiveidea/audited/pull/360)
+- Allow running specs using rake
+  [#390](https://github.com/collectiveidea/audited/pull/390)
+- Passing an invalid version to `revision` returns `nil` instead of last version
+  [#384](https://github.com/collectiveidea/audited/pull/384)
+- Fix duplicate deceleration warnings
+  [#399](https://github.com/collectiveidea/audited/pull/399)
+
 
 ## 4.5.0 (2017-05-22)
 

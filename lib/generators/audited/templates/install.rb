@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
     create_table :audits, :force => true do |t|
@@ -17,8 +19,8 @@ class <%= migration_class_name %> < <%= migration_parent %>
       t.column :created_at, :datetime
     end
 
-    add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
-    add_index :audits, [:associated_id, :associated_type], :name => 'associated_index'
+    add_index :audits, [:auditable_type, :auditable_id, :version], :name => 'auditable_index'
+    add_index :audits, [:associated_type, :associated_id], :name => 'associated_index'
     add_index :audits, [:user_id, :user_type], :name => 'user_index'
     add_index :audits, :request_uuid
     add_index :audits, :created_at

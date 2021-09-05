@@ -1,73 +1,69 @@
-require 'cgi'
-require File.expand_path('../schema', __FILE__)
+require "cgi"
+require File.expand_path("../schema", __FILE__)
 
 module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
-      audited allow_mass_assignment: true, except: :password
-
+      audited except: :password
+      attribute :non_column_attr if Rails.version >= "5.1"
       attr_protected :logins if respond_to?(:attr_protected)
+      enum status: {active: 0, reliable: 1, banned: 2}
+      serialize :phone_numbers, Array
 
       def name=(val)
         write_attribute(:name, CGI.escapeHTML(val))
       end
     end
 
-    class DelegatedCompany < ::ActiveRecord::Base
-      self.table_name = :companies
-      belongs_to :user, class_name: "UserDelegateCompany"
-    end
-
-    class UserDelegateCompany < ::ActiveRecord::Base
+    class UserExceptPassword < ::ActiveRecord::Base
       self.table_name = :users
-      has_many :companies, class_name: 'DelegatedCompany', foreign_key: :owner_id
-      after_update :save_company_list
-      audited
-
-      def company_list
-        @company_string.present? ? @company_string : companies.pluck(:name).join(',')
-      end
-
-      def company_list=(val)
-        @changed_attributes ||= ActiveSupport::HashWithIndifferentAccess.new
-        @changed_attributes['company_list'] = company_list
-        @company_string = val
-      end
-
-      def save_company_list
-        @company_string.split(',').each do |name|
-          Company.find_or_create_by(name: name, owner_id: self.id)
-        end
-      end
-
-			# mock activerecord dirty feature
-			def company_list_changed?
-				changed_attributes.include?("company_list")
-			end
-
-			def company_list_was
-				changed_attributes.include?("company_list") ? changed_attributes["company_list"] : __send__("company_list")
-			end
-
-			def company_list_change
-				[changed_attributes['company_list'], __send__('company_list')] if changed_attributes.include?("company_list")
-			end
-
-			def company_list_changes
-				[changed_attributes['company_list'], __send__('company_list')] if changed_attributes.include?("company_list")
-			end
-
+      audited except: :password
     end
 
     class UserOnlyPassword < ::ActiveRecord::Base
       self.table_name = :users
-      attribute :non_column_attr if Rails.version >= '5.1'
-      audited allow_mass_assignment: true, only: :password
+      attribute :non_column_attr if Rails.version >= "5.1"
+      audited only: :password
+    end
+
+    class UserRedactedPassword < ::ActiveRecord::Base
+      self.table_name = :users
+      audited redacted: :password
+    end
+
+    class UserMultipleRedactedAttributes < ::ActiveRecord::Base
+      self.table_name = :users
+      audited redacted: [:password, :ssn]
+    end
+
+    class UserRedactedPasswordCustomRedaction < ::ActiveRecord::Base
+      self.table_name = :users
+      audited redacted: :password, redaction_value: ["My", "Custom", "Value", 7]
     end
 
     class CommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
-      audited comment_required: true
+      audited except: :password, comment_required: true
+    end
+
+    class OnCreateCommentRequiredUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited comment_required: true, on: :create
+    end
+
+    class OnUpdateCommentRequiredUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited comment_required: true, on: :update
+    end
+
+    class OnDestroyCommentRequiredUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited comment_required: true, on: :destroy
+    end
+
+    class NoUpdateWithCommentOnlyUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited update_with_comment_only: false
     end
 
     class AccessibleAfterDeclarationUser < ::ActiveRecord::Base
@@ -84,7 +80,7 @@ module Models
 
     class NoAttributeProtectionUser < ::ActiveRecord::Base
       self.table_name = :users
-      audited allow_mass_assignment: true
+      audited
     end
 
     class UserWithAfterAudit < ::ActiveRecord::Base
@@ -103,6 +99,11 @@ module Models
       end
     end
 
+    class MaxAuditsUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited max_audits: 5
+    end
+
     class Company < ::ActiveRecord::Base
       audited
     end
@@ -110,37 +111,40 @@ module Models
     class Company::STICompany < Company
     end
 
-
     class Owner < ::ActiveRecord::Base
-      self.table_name = 'users'
+      self.table_name = "users"
+      audited
       has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
     end
 
     class OwnedCompany < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       belongs_to :owner, class_name: "Owner"
       attr_accessible :name, :owner if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
       audited associated_with: :owner
     end
 
+    class OwnedCompany::STICompany < OwnedCompany
+    end
+
     class OnUpdateDestroy < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       audited on: [:update, :destroy]
     end
 
     class OnCreateDestroy < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       audited on: [:create, :destroy]
     end
 
     class OnCreateDestroyExceptName < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       audited except: :name, on: [:create, :destroy]
     end
 
     class OnCreateUpdate < ::ActiveRecord::Base
-      self.table_name = 'companies'
+      self.table_name = "companies"
       audited on: [:create, :update]
     end
   end

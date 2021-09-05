@@ -1,20 +1,29 @@
-Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.svg)](http://travis-ci.org/collectiveidea/audited) [![Dependency Status](https://gemnasium.com/collectiveidea/audited.svg)](https://gemnasium.com/collectiveidea/audited)[![Code Climate](https://codeclimate.com/github/collectiveidea/audited.svg)](https://codeclimate.com/github/collectiveidea/audited) [![Security](https://hakiri.io/github/collectiveidea/audited/master.svg)](https://hakiri.io/github/collectiveidea/audited/master)
+Audited
+[![Gem Version](https://img.shields.io/gem/v/audited.svg)](http://rubygems.org/gems/audited)
+[![Build Status](https://secure.travis-ci.org/collectiveidea/audited.svg)](http://travis-ci.org/collectiveidea/audited)
+[![Code Climate](https://codeclimate.com/github/collectiveidea/audited.svg)](https://codeclimate.com/github/collectiveidea/audited)
+[![Security](https://hakiri.io/github/collectiveidea/audited/master.svg)](https://hakiri.io/github/collectiveidea/audited/master)
+[![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 =======
 
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
-Audited currently (4.x) works with Rails 5.1, 5.0 and 4.2. It may work with 4.1 and 4.0, but this is not guaranteed.
 
+Audited currently (5.x) works with Rails 6.1, 6.0, 5.2, 5.1, and 5.0.
+
+For Rails 4, use gem version 4.x
 For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
 
 ## Supported Rubies
 
 Audited supports and is [tested against](http://travis-ci.org/collectiveidea/audited) the following Ruby versions:
 
-* 2.1.5
-* 2.2.4
-* 2.3.1
-* 2.4.1
+* 2.3.8
+* 2.4.10
+* 2.5.9
+* 2.6.7
+* 2.7.3
+* 3.0.1
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
@@ -27,7 +36,7 @@ Audited is currently ActiveRecord-only. In a previous life, Audited worked with 
 Add the gem to your Gemfile:
 
 ```ruby
-gem "audited", "~> 4.5"
+gem "audited", "~> 5.0"
 ```
 
 Then, from your Rails app directory, create the `audits` table:
@@ -37,7 +46,9 @@ $ rails generate audited:install
 $ rake db:migrate
 ```
 
-If you're using PostgreSQL, then you can use `rails generate audited:install --audited-changes-column-type jsonb` (or `json`) to store audit changes natively with its JSON column types. If you're using something other than integer primary keys (e.g. UUID) for your User model, then you can use `rails generate audited:install --audited-user-id-column-type uuid` to customize the `audits` table `user_id` column type.
+By default changes are stored in YAML format. If you're using PostgreSQL, then you can use `rails generate audited:install --audited-changes-column-type jsonb` (or `json` for MySQL 5.7+ and Rails 5+) to store audit changes natively with database JSON column types.
+
+If you're using something other than integer primary keys (e.g. UUID) for your User model, then you can use `rails generate audited:install --audited-user-id-column-type uuid` to customize the `audits` table `user_id` column type.
 
 #### Upgrading
 
@@ -66,7 +77,7 @@ By default, whenever a user is created, updated or destroyed, a new audit is cre
 ```ruby
 user = User.create!(name: "Steve")
 user.audits.count # => 1
-user.update_attributes!(name: "Ryan")
+user.update!(name: "Ryan")
 user.audits.count # => 2
 user.destroy
 user.audits.count # => 3
@@ -75,7 +86,7 @@ user.audits.count # => 3
 Audits contain information regarding what action was taken on the model and what changes were made.
 
 ```ruby
-user.update_attributes!(name: "Ryan")
+user.update!(name: "Ryan")
 audit = user.audits.last
 audit.action # => "update"
 audit.audited_changes # => {"name"=>["Steve", "Ryan"]}
@@ -129,7 +140,7 @@ end
 You can attach comments to each audit using an `audit_comment` attribute on your model.
 
 ```ruby
-user.update_attributes!(name: "Ryan", audit_comment: "Changing name, just because")
+user.update!(name: "Ryan", audit_comment: "Changing name, just because")
 user.audits.last.comment # => "Changing name, just because"
 ```
 
@@ -139,6 +150,41 @@ You can optionally add the `:comment_required` option to your `audited` call to 
 class User < ActiveRecord::Base
   audited :comment_required => true
 end
+```
+
+You can update an audit only if audit_comment is present. You can optionally add the `:update_with_comment_only` option set to `false` to your `audited` call to turn this behavior off for all audits.
+
+```ruby
+class User < ActiveRecord::Base
+  audited :update_with_comment_only => false
+end
+```
+
+### Limiting stored audits
+
+You can limit the number of audits stored for your model. To configure limiting for all audited models, put the following in an initializer file (`config/initializers/audited.rb`):
+
+```ruby
+Audited.max_audits = 10 # keep only 10 latest audits
+```
+
+or customize per model:
+
+```ruby
+class User < ActiveRecord::Base
+  audited max_audits: 2
+end
+```
+
+Whenever an object is updated or destroyed, extra audits are combined with newer ones and the old ones are destroyed.
+
+```ruby
+user = User.create!(name: "Steve")
+user.audits.count # => 1
+user.update!(name: "Ryan")
+user.audits.count # => 2
+user.destroy
+user.audits.count # => 2
 ```
 
 ### Current User Tracking
@@ -155,7 +201,7 @@ class PostsController < ApplicationController
 end
 ```
 
-To use a method other than `current_user`, put the following in an initializer:
+To use a method other than `current_user`, put the following in an initializer file (`config/initializers/audited.rb`):
 
 ```ruby
 Audited.current_user_method = :authenticated_user
@@ -165,16 +211,16 @@ Outside of a request, Audited can still record the user with the `as_user` metho
 
 ```ruby
 Audited.audit_class.as_user(User.find(1)) do
-  post.update_attribute!(title: "Hello, world!")
+  post.update!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
 ```
 
 The standard Audited install assumes your User model has an integer primary key type. If this isn't true (e.g. you're using UUID primary keys), you'll need to create a migration to update the `audits` table `user_id` column type. (See Installation above for generator flags if you'd like to regenerate the install migration.)
 
-#### Custom Auditor
+#### Custom Audit User
 
-You might need to use a custom auditor from time to time. It can be done by simply passing in a string:
+You might need to use a custom auditor from time to time. This can be done by simply passing in a string:
 
 ```ruby
 class ApplicationController < ActionController::Base
@@ -186,6 +232,25 @@ class ApplicationController < ActionController::Base
     end
   end
 end
+```
+
+`as_user` also accepts a string, which can be useful for auditing updates made in a CLI environment:
+
+```rb
+Audited.audit_class.as_user("console-user-#{ENV['SSH_USER']}") do
+  post.update_attributes!(title: "Hello, world!")
+end
+post.audits.last.user # => 'console-user-username'
+```
+
+If you want to set a specific user as the auditor of the commands in a CLI environment, whether that is a string or an ActiveRecord object, you can use the following command:
+
+```rb
+Audited.store[:audited_user] = "username"
+
+# or
+
+Audited.store[:audited_user] = User.find(1)
 ```
 
 ### Associated Audits
@@ -222,10 +287,41 @@ Now, when an audit is created for a user, that user's company is also saved alon
 ```ruby
 company = Company.create!(name: "Collective Idea")
 user = company.users.create!(name: "Steve")
-user.update_attribute!(name: "Steve Richert")
+user.update!(name: "Steve Richert")
 user.audits.last.associated # => #<Company name: "Collective Idea">
 company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
+
+You can access records' own audits and associated audits in one go:
+```ruby
+company.own_and_associated_audits
+```
+
+### Conditional auditing
+
+If you want to audit only under specific conditions, you can provide conditional options (similar to ActiveModel callbacks) that will ensure your model is only audited for these conditions.
+
+```ruby
+class User < ActiveRecord::Base
+  audited if: :active?
+
+  private
+
+  def active?
+    last_login > 6.months.ago
+  end
+end
+```
+
+Just like in ActiveModel, you can use an inline Proc in your conditions:
+
+```ruby
+class User < ActiveRecord::Base
+  audited unless: Proc.new { |u| u.ninja? }
+end
+```
+
+In the above case, the user will only be audited when `User#ninja` is `false`.
 
 ### Disabling auditing
 
@@ -258,6 +354,29 @@ To disable auditing on an entire model:
 User.auditing_enabled = false
 ```
 
+To disable auditing on all models:
+
+```ruby
+Audited.auditing_enabled = false
+```
+
+If you have auditing disabled by default on your model you can enable auditing
+temporarily.
+
+```ruby
+User.auditing_enabled = false
+@user.save_with_auditing
+```
+
+or:
+
+```ruby
+User.auditing_enabled = false
+@user.with_auditing do
+  @user.save
+end
+```
+
 ### Custom `Audit` model
 
 If you want to extend or modify the audit model, create a new class that
@@ -278,28 +397,14 @@ Audited.config do |config|
 end
 ```
 
-## Gotchas
+### Enum Storage
 
-### Using attr_protected with Rails 4.x
-
-If you're using the `protected_attributes` gem with Rails 4.0, 4.1 or 4.2 (the gem isn't supported in Rails 5.0 or higher), you'll have to take an extra couple of steps to get `audited` working.
-
-First be sure to add `allow_mass_assignment: true` to your `audited` call; otherwise Audited will
-interfere with `protected_attributes` and none of your `save` calls will work.
+In 4.10, the default behavior for enums changed from storing the value synthesized by Rails to the value stored in the DB. You can restore the previous behavior by setting the store_synthesized_enums configuration value:
 
 ```ruby
-class User < ActiveRecord::Base
-  audited allow_mass_assignment: true
-end
-```
+# config/initializers/audited.rb
 
-Second, be sure to add `audit_ids` to the list of protected attributes to prevent data loss.
-
-```ruby
-class User < ActiveRecord::Base
-  audited allow_mass_assignment: true
-  attr_protected :logins, :audit_ids
-end
+Audited.store_synthesized_enums = true
 ```
 
 ## Support
