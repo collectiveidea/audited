@@ -35,3 +35,10 @@ appraise "rails61" do
   gem "pg", ">= 1.1", "< 2.0"
   gem "sqlite3", "~> 1.4"
 end
+
+appraise "rails70" do
+  gem "rails", ">= 7.0.0.alpha2", "< 7.1"
+  gem "mysql2", ">= 0.4.4"
+  gem "pg", ">= 1.1"
+  gem "sqlite3", ">= 1.4"
+end
