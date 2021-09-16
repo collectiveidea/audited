@@ -39,9 +39,9 @@ module Audited
 end
 
 require "audited/auditor"
-require "audited/audit"
 
 ActiveSupport.on_load :active_record do
+  require "audited/audit"
   include Audited::Auditor
 end
 
