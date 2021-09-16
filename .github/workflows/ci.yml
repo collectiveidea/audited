@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [2.3, 2.4, 2.5, 2.6, 2.7, 3.0]
+        gemfile:
+          - gemfiles/rails50.gemfile
+          - gemfiles/rails51.gemfile
+          - gemfiles/rails52.gemfile
+          - gemfiles/rails60.gemfile
+          - gemfiles/rails61.gemfile
+          - gemfiles/rails70.gemfile
+        db: [POSTGRES, MYSQL, SQLITE]
+        exclude:
+          # Rails 5.0 supports Ruby 2.2-2.4
+          - gemfile: gemfiles/rails50.gemfile
+            ruby: 2.5
+          - gemfile: gemfiles/rails50.gemfile
+            ruby: 2.6
+          - gemfile: gemfiles/rails50.gemfile
+            ruby: 2.7
+          - gemfile: gemfiles/rails50.gemfile
+            ruby: 3.0
+
+          # Rails 5.1 supports Ruby 2.2-2.5
+          - gemfile: gemfiles/rails51.gemfile
+            ruby: 2.6
+          - gemfile: gemfiles/rails51.gemfile
+            ruby: 2.7
+          - gemfile: gemfiles/rails51.gemfile
+            ruby: 3.0
+
+          # Rails 5.2 supports Ruby 2.2-2.5
+          - gemfile: gemfiles/rails52.gemfile
+            ruby: 2.6
+          - gemfile: gemfiles/rails52.gemfile
+            ruby: 2.7
+          - gemfile: gemfiles/rails52.gemfile
+            ruby: 3.0
+
+          # Rails 6.0 supports Ruby 2.5-2.7
+          - gemfile: gemfiles/rails60.gemfile
+            ruby: 2.3
+          - gemfile: gemfiles/rails60.gemfile
+            ruby: 2.4
+          - gemfile: gemfiles/rails60.gemfile
+            ruby: 3.0
+
+          # Rails 6.1 supports Ruby 2.5+
+          - gemfile: gemfiles/rails61.gemfile
+            ruby: 2.3
+          - gemfile: gemfiles/rails61.gemfile
+            ruby: 2.4
+
+          # Rails 7 supports Ruby 2.5+
+          - gemfile: gemfiles/rails70.gemfile
+            ruby: 2.3
+          - gemfile: gemfiles/rails70.gemfile
+            ruby: 2.4
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: githubci
+          POSTGRES_PASSWORD: correcthorsebatterystaple
+          POSTGRES_DB: audited_test
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      DB_DATABASE: wordpress_test
+      DB_USER: root
+      DB_PASSWORD: 'root'
+      DB_HOST: localhost
+
+    steps:
+    - name: Setup MySQL
+      run: |
+        sudo /etc/init.d/mysql start
+        mysql -e 'CREATE DATABASE wordpress_test;' -uroot -proot
+        mysql -e 'SHOW DATABASES;' -uroot -proot
+    - uses: actions/checkout@v2
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+    - name: Copy gemfile
+      run: cp -f ${{ matrix.gemfile }} Gemfile
+    - name: Install dependencies
+      run: bundle install
+    - name: Run tests
+      env:
+        DB: ${{ matrix.db }}
+      run: bundle exec rake
