@@ -10,6 +10,7 @@ postgresql: &POSTGRES
   adapter: postgresql
   username: postgres
   password: postgres
+  host: localhost
   database: audited_test
   min_messages: ERROR
 
