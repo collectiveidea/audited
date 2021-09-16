@@ -62,11 +62,15 @@ jobs:
           - appraisal: rails61
             ruby: 2.4
 
-          # Rails 7 supports Ruby 2.5+
+          # Rails 7 supports Ruby 2.7+
           - appraisal: rails70
             ruby: 2.3
           - appraisal: rails70
             ruby: 2.4
+          - appraisal: rails70
+            ruby: 2.5
+          - appraisal: rails70
+            ruby: 2.6
 
     services:
       postgres:
