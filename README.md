@@ -39,6 +39,15 @@ Add the gem to your Gemfile:
 gem "audited", "~> 5.0"
 ```
 
+And if you're using ```require: false``` you must add initializers like this:
+
+```ruby
+#./config/initializers/audited.rb
+require "audited"
+
+Audited::Railtie.initializers.each(&:run)
+```
+
 Then, from your Rails app directory, create the `audits` table:
 
 ```bash
