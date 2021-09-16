@@ -2,6 +2,7 @@
 
 source "https://rubygems.org"
 
+gem "appraisal", github: "excid3/appraisal", branch: "fix-bundle-env"
 gem "rails", ">= 6.0.0", "< 6.1"
 gem "mysql2", ">= 0.4.4"
 gem "pg", ">= 0.18", "< 2.0"

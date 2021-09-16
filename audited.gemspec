@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "activerecord", ">= 5.0", "< 6.2"
 
-  gem.add_development_dependency "appraisal"
+  # gem.add_development_dependency "appraisal"
   gem.add_development_dependency "rails", ">= 5.0", "< 6.2"
   gem.add_development_dependency "rspec-rails"
   gem.add_development_dependency "standard"
