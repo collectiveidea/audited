@@ -103,4 +103,4 @@ jobs:
     - name: Run tests
       env:
         DB: ${{ matrix.db }}
-      run: bundle exec rake
+      run: bundle exec appraisal ${{ matrix.appraisal }} rake
