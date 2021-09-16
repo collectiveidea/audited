@@ -93,14 +93,14 @@ jobs:
         mysql -e 'CREATE DATABASE wordpress_test;' -uroot -proot
         mysql -e 'SHOW DATABASES;' -uroot -proot
     - uses: actions/checkout@v2
+    - name: Copy Gemfile
+      run: cp -f gemfiles/${{ matrix.appraisal }}.gemfile Gemfile
     - name: Set up Ruby ${{ matrix.ruby }}
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
-    - name: Install dependencies
-      run: bundle exec appraisal install
     - name: Run tests
       env:
         DB: ${{ matrix.db }}
-      run: bundle exec appraisal ${{ matrix.appraisal }} rake
+      run: bundle exec rake
