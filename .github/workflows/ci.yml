@@ -99,7 +99,7 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
     - name: Install dependencies
-      run: bundle install
+      run: bundle exec appraisal install
     - name: Run tests
       env:
         DB: ${{ matrix.db }}
