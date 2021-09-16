@@ -72,8 +72,8 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_USER: githubci
-          POSTGRES_PASSWORD: correcthorsebatterystaple
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD:
           POSTGRES_DB: audited_test
         ports:
           - 5432:5432
@@ -81,17 +81,17 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     env:
-      DB_DATABASE: wordpress_test
+      DB_DATABASE: audited_test
       DB_USER: root
-      DB_PASSWORD: 'root'
+      DB_PASSWORD: ''
       DB_HOST: localhost
 
     steps:
     - name: Setup MySQL
       run: |
         sudo /etc/init.d/mysql start
-        mysql -e 'CREATE DATABASE wordpress_test;' -uroot -proot
-        mysql -e 'SHOW DATABASES;' -uroot -proot
+        mysql -e 'CREATE DATABASE audited_test;' -uroot
+        mysql -e 'SHOW DATABASES;' -uroot
     - uses: actions/checkout@v2
     - name: Copy Gemfile
       run: sed 's/\.\././' gemfiles/${{ matrix.appraisal }}.gemfile > Gemfile
