@@ -22,6 +22,11 @@ jobs:
           - rails70
         db: [POSTGRES, MYSQL, SQLITE]
         exclude:
+          # MySQL has issues on Ruby 2.3
+          # https://github.com/ruby/setup-ruby/issues/150
+          - ruby: 2.3
+            db: MYSQL
+
           # Rails 5.0 supports Ruby 2.2-2.4
           - appraisal: rails50
             ruby: 2.5
@@ -62,11 +67,15 @@ jobs:
           - appraisal: rails61
             ruby: 2.4
 
-          # Rails 7 supports Ruby 2.5+
+          # Rails 7 supports Ruby 2.7+
           - appraisal: rails70
             ruby: 2.3
           - appraisal: rails70
             ruby: 2.4
+          - appraisal: rails70
+            ruby: 2.5
+          - appraisal: rails70
+            ruby: 2.6
 
     services:
       postgres:
