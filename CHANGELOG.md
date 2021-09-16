@@ -1,5 +1,21 @@
 # Audited ChangeLog
 
+## 5.0.2 (2021-09-16)
+
+Added
+
+- Relax ActiveRecord version constraint to support Rails 7
+  [#597](https://github.com/collectiveidea/audited/pull/597)
+
+Improved
+
+- Improve loading - @mvastola
+  [#592](https://github.com/collectiveidea/audited/pull/592)
+- Update README - @danirod, clement1234
+  [#596](https://github.com/collectiveidea/audited/pull/596)
+  [#594](https://github.com/collectiveidea/audited/pull/594)
+
+
 ## 5.0.1 (2021-06-11)
 
 Improved

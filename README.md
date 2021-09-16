@@ -9,21 +9,21 @@ Audited
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
 
-Audited currently (5.x) works with Rails 6.1, 6.0, 5.2, 5.1, and 5.0.
+Audited currently (5.x) works with Rails 7.0, 6.1, 6.0, 5.2, 5.1, and 5.0.
 
 For Rails 4, use gem version 4.x
 For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
 
 ## Supported Rubies
 
-Audited supports and is [tested against](http://travis-ci.org/collectiveidea/audited) the following Ruby versions:
+Audited supports and is [tested against](https://github.com/collectiveidea/audited/actions/workflows/ci.yml) the following Ruby versions:
 
-* 2.3.8
-* 2.4.10
-* 2.5.9
-* 2.6.7
-* 2.7.3
-* 3.0.1
+* 2.3
+* 2.4
+* 2.5
+* 2.6
+* 2.7
+* 3.0
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
