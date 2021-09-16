@@ -13,59 +13,59 @@ jobs:
       fail-fast: false
       matrix:
         ruby: [2.3, 2.4, 2.5, 2.6, 2.7, 3.0]
-        gemfile:
-          - gemfiles/rails50.gemfile
-          - gemfiles/rails51.gemfile
-          - gemfiles/rails52.gemfile
-          - gemfiles/rails60.gemfile
-          - gemfiles/rails61.gemfile
-          - gemfiles/rails70.gemfile
+        appraisal:
+          - rails50
+          - rails51
+          - rails52
+          - rails60
+          - rails61
+          - rails70
         db: [POSTGRES, MYSQL, SQLITE]
         exclude:
           # Rails 5.0 supports Ruby 2.2-2.4
-          - gemfile: gemfiles/rails50.gemfile
+          - appraisal: rails50
             ruby: 2.5
-          - gemfile: gemfiles/rails50.gemfile
+          - appraisal: rails50
             ruby: 2.6
-          - gemfile: gemfiles/rails50.gemfile
+          - appraisal: rails50
             ruby: 2.7
-          - gemfile: gemfiles/rails50.gemfile
+          - appraisal: rails50
             ruby: 3.0
 
           # Rails 5.1 supports Ruby 2.2-2.5
-          - gemfile: gemfiles/rails51.gemfile
+          - appraisal: rails51
             ruby: 2.6
-          - gemfile: gemfiles/rails51.gemfile
+          - appraisal: rails51
             ruby: 2.7
-          - gemfile: gemfiles/rails51.gemfile
+          - appraisal: rails51
             ruby: 3.0
 
           # Rails 5.2 supports Ruby 2.2-2.5
-          - gemfile: gemfiles/rails52.gemfile
+          - appraisal: rails52
             ruby: 2.6
-          - gemfile: gemfiles/rails52.gemfile
+          - appraisal: rails52
             ruby: 2.7
-          - gemfile: gemfiles/rails52.gemfile
+          - appraisal: rails52
             ruby: 3.0
 
           # Rails 6.0 supports Ruby 2.5-2.7
-          - gemfile: gemfiles/rails60.gemfile
+          - appraisal: rails60
             ruby: 2.3
-          - gemfile: gemfiles/rails60.gemfile
+          - appraisal: rails60
             ruby: 2.4
-          - gemfile: gemfiles/rails60.gemfile
+          - appraisal: rails60
             ruby: 3.0
 
           # Rails 6.1 supports Ruby 2.5+
-          - gemfile: gemfiles/rails61.gemfile
+          - appraisal: rails61
             ruby: 2.3
-          - gemfile: gemfiles/rails61.gemfile
+          - appraisal: rails61
             ruby: 2.4
 
           # Rails 7 supports Ruby 2.5+
-          - gemfile: gemfiles/rails70.gemfile
+          - appraisal: rails70
             ruby: 2.3
-          - gemfile: gemfiles/rails70.gemfile
+          - appraisal: rails70
             ruby: 2.4
 
     services:
@@ -98,11 +98,9 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
-    - name: Copy gemfile
-      run: cp -f ${{ matrix.gemfile }} Gemfile
     - name: Install dependencies
       run: bundle install
     - name: Run tests
       env:
         DB: ${{ matrix.db }}
-      run: bundle exec rake
+      run: bundle exec appraisal ${{ matrix.appraisal }} rake
