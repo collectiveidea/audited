@@ -94,7 +94,7 @@ jobs:
         mysql -e 'SHOW DATABASES;' -uroot -proot
     - uses: actions/checkout@v2
     - name: Copy Gemfile
-      run: cp -f gemfiles/${{ matrix.appraisal }}.gemfile Gemfile
+      run: sed 's/\.\././' gemfiles/${{ matrix.appraisal }}.gemfile > Gemfile
     - name: Set up Ruby ${{ matrix.ruby }}
       uses: ruby/setup-ruby@v1
       with:
