@@ -286,6 +286,7 @@ class User < ActiveRecord::Base
 end
 
 class Company < ActiveRecord::Base
+  audited
   has_many :users
   has_associated_audits
 end
