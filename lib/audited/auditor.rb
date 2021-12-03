@@ -454,7 +454,9 @@ module Audited
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
         max_audits = audited_options[:max_audits] || Audited.max_audits
-        audited_options[:max_audits] = Integer(max_audits).abs if max_audits
+        return unless max_audits
+
+        audited_options[:max_audits] = max_audits.is_a?(Proc) ? Integer(max_audits.call).abs : Integer(max_audits).abs
       end
 
       def calculate_non_audited_columns
