@@ -415,34 +415,38 @@ describe Audited::Auditor do
       expect {
         @user.destroy
       }.to change(Audited::Audit, :count)
+    end
 
-      expect(@user.audits.size).to eq(2)
+    it "should nullify audits" do
+      expect {
+        @user.destroy
+      }.to change( Audited::Audit.where(:auditable_type => 'Models::ActiveRecord::User', :auditable_id => nil), :count ).by(2)
+
+      expect(@user.audits.size).to eq(0)
     end
 
     it "should set the action to 'destroy'" do
       @user.destroy
 
-      expect(@user.audits.last.action).to eq("destroy")
-      expect(Audited::Audit.destroys.order(:id).last).to eq(@user.audits.last)
-      expect(@user.audits.destroys.last).to eq(@user.audits.last)
+      expect(Audited::Audit.last.action).to eq('destroy')
     end
 
     it "should store all of the audited attributes" do
       @user.destroy
 
-      expect(@user.audits.last.audited_changes).to eq(@user.audited_attributes)
+      expect(Audited::Audit.last.audited_changes).to eq(@user.audited_attributes)
     end
 
     it "should store enum value" do
       @user.destroy
-      expect(@user.audits.last.audited_changes["status"]).to eq(0)
+      expect(Audited::Audit.last.audited_changes["status"]).to eq(0)
     end
 
     it "should be able to reconstruct a destroyed record without history" do
       @user.audits.delete_all
       @user.destroy
 
-      revision = @user.audits.first.revision
+      revision = Audited::Audit.last.revision
       expect(revision.name).to eq(@user.name)
     end
 
@@ -461,8 +465,6 @@ describe Audited::Auditor do
       expect {
         owner.destroy
       }.to change(Audited::Audit, :count)
-
-      expect(company.audits.map { |a| a.action }).to eq(["create", "destroy"])
     end
   end
 
@@ -493,7 +495,7 @@ describe Audited::Auditor do
 
     it "should store the associated object on destroy" do
       owned_company.destroy
-      expect(owned_company.audits.last.associated).to eq(owner)
+      expect(Audited::Audit.last.associated).to eq(owner)
     end
   end
 
@@ -504,6 +506,17 @@ describe Audited::Auditor do
     it "should list the associated audits" do
       expect(owner.associated_audits.length).to eq(1)
       expect(owner.associated_audits.first.auditable).to eq(owned_company)
+    end
+
+    it "should nullify associated audits on destroy" do
+      expect {
+        owner.destroy
+      }.to change(Audited::Audit.where(associated_id: nil), :count).by(2)
+
+      expect(Audited::Audit.where(associated_id: nil).last(2).map(&:auditable_type)).to eq([
+        'Models::ActiveRecord::OwnedCompany',
+        'Models::ActiveRecord::Owner']
+      )
     end
   end
 
@@ -727,7 +740,7 @@ describe Audited::Auditor do
     it "should re-insert destroyed records" do
       user.destroy
       expect {
-        user.revision(1).save!
+        user.revision(:previous).save!
       }.to change(Models::ActiveRecord::User, :count).by(1)
     end
 

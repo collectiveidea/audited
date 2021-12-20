@@ -86,6 +86,11 @@ module Audited
         before_update :audit_update if audited_options[:on].include?(:update)
         before_destroy :audit_destroy if audited_options[:on].include?(:destroy)
 
+        # Avoid orphaned audits
+        after_destroy do |auditable|
+          auditable.audits.update_all :auditable_id => nil
+        end
+
         # Define and set after_audit and around_audit callbacks. This might be useful if you want
         # to notify a party after the audit has been created or if you want to access the newly-created
         # audit.
@@ -97,7 +102,7 @@ module Audited
       end
 
       def has_associated_audits
-        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name
+        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name, dependent: :nullify
       end
     end
 
