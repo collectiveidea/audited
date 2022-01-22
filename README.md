@@ -108,6 +108,8 @@ revisions.
 user.revisions
 user.revision(1)
 user.revision_at(Date.parse("2016-01-01"))
+user.revisions_before(Date.parse("2016-01-01"))
+user.revisions_after(Date.parse("2016-01-01"))
 ```
 
 ### Specifying columns

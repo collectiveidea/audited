@@ -58,6 +58,8 @@ module Audited
     scope :destroys, -> { where(action: "destroy") }
 
     scope :up_until, ->(date_or_time) { where("created_at <= ?", date_or_time) }
+    scope :after, ->(date_or_time) { where("created_at > ?", date_or_time) }
+    scope :before, ->(date_or_time) { where("created_at < ?", date_or_time) }
     scope :from_version, ->(version) { where("version >= ?", version) }
     scope :to_version, ->(version) { where("version <= ?", version) }
     scope :auditable_finder, ->(auditable_id, auditable_type) { where(auditable_id: auditable_id, auditable_type: auditable_type) }
