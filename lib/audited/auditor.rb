@@ -169,6 +169,18 @@ module Audited
         revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
       end
 
+      # Find a revision recorded after to the date/time provided.
+      def revision_after(date_or_time)
+        audits = self.audits.after(date_or_time)
+        revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
+      end
+      
+      # Find the revision recorded before to the date/time provided.
+      def revision_before(date_or_time)
+        audits = self.audits.before(date_or_time)
+        revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
+      end
+
       # List of attributes that are audited.
       def audited_attributes
         audited_attributes = attributes.except(*self.class.non_audited_columns)

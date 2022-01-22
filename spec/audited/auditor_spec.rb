@@ -760,6 +760,54 @@ describe Audited::Auditor do
     end
   end
 
+  describe "revisions_before" do
+    let(:user) { create_user }
+
+    it "should find all revisions before the given time" do
+      audit = user.audits.first
+      time = 1.hour.ago
+      audit.created_at = time
+      audit.save!
+      user.update! name: "updated"
+      user.revisions_before(time).each do |revision|
+        expect(revison.created_at).to be < time
+      end
+      
+    end
+
+    it "should be nil if given a time before audits" do
+      expect(user.revisions_before(1.week.ago)).to be_nil
+    end
+
+    it 'shoud be nil if given a time after now' do
+      user.update! name: "future update"
+      user.audits.last.update! created_at: Time.now + 1.day
+      expect(user.revisions_before(Time.now)).to be_nil
+    end
+  end
+
+  describe "revisions_after" do
+    let(:user) { create_user }
+
+    it "should find all revisions after the given time" do
+      user.update! name: "updated"
+      time = Time.zone.now + 1.day
+      user.audits.last.update! created_at: time
+      user.revisions_after(Time.zone.now).each do |revision|
+        expect(revision.created_at).to be > time
+      end
+    end
+
+    it "should be empty if given a time before audits" do
+      expect(user.revisions_after(1.week.ago)).to be_empty
+    end
+
+    it 'shoud be empty if given a time before now' do
+      user.audits.last.update! created_at: Time.now - 1.day
+      expect(user.revisions_after(Time.now)).to be_empty
+    end
+  end
+
   describe "own_and_associated_audits" do
     it "should return audits for self and associated audits" do
       owner = Models::ActiveRecord::Owner.create!
