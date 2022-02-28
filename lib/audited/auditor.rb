@@ -172,7 +172,8 @@ module Audited
       # List of attributes that are audited.
       def audited_attributes
         audited_attributes = attributes.except(*self.class.non_audited_columns)
-        normalize_enum_changes(audited_attributes)
+        filtered_changes = redact_values(audited_attributes)
+        normalize_enum_changes(filtered_changes)
       end
 
       # Returns a list combined of record audits and associated audits.
