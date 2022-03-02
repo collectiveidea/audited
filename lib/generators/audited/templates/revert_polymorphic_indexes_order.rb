@@ -14,9 +14,9 @@ class <%= migration_class_name %> < <%= migration_parent %>
   private
 
   def fix_index_order_for(columns, index_name)
-    if index_exists? :audits, columns, name: index_name
-      remove_index :audits, name: index_name
-      add_index :audits, columns.reverse, name: index_name
+    if index_exists? :audit_trails, columns, name: index_name
+      remove_index :audit_trails, name: index_name
+      add_index :audit_trails, columns.reverse, name: index_name
     end
   end
 end

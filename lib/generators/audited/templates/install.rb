@@ -2,7 +2,7 @@
 
 class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
-    create_table :audits, :force => true do |t|
+    create_table :audit_trails, :force => true do |t|
       t.column :auditable_id, :integer
       t.column :auditable_type, :string
       t.column :associated_id, :integer
@@ -19,14 +19,14 @@ class <%= migration_class_name %> < <%= migration_parent %>
       t.column :created_at, :datetime
     end
 
-    add_index :audits, [:auditable_type, :auditable_id, :version], :name => 'auditable_index'
-    add_index :audits, [:associated_type, :associated_id], :name => 'associated_index'
-    add_index :audits, [:user_id, :user_type], :name => 'user_index'
-    add_index :audits, :request_uuid
-    add_index :audits, :created_at
+    add_index :audit_trails, [:auditable_type, :auditable_id, :version], :name => 'auditable_index'
+    add_index :audit_trails, [:associated_type, :associated_id], :name => 'associated_index'
+    add_index :audit_trails, [:user_id, :user_type], :name => 'user_index'
+    add_index :audit_trails, :request_uuid
+    add_index :audit_trails, :created_at
   end
 
   def self.down
-    drop_table :audits
+    drop_table :audit_trails
   end
 end

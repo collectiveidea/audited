@@ -2,10 +2,10 @@
 
 class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
-    add_column :audits, :comment, :string
+    add_column :audit_trails, :comment, :string
   end
 
   def self.down
-    remove_column :audits, :comment
+    remove_column :audit_trails, :comment
   end
 end
