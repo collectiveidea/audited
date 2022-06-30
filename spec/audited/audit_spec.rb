@@ -183,7 +183,18 @@ describe Audited::Audit do
         Audited::Audit.delete_all
         audit = Models::ActiveRecord::User.create(name: "John").audits.last
         audit.update_columns(created_at: Time.zone.parse("2018-01-01"))
-        expect(Audited::Audit.collection_cache_key).to match(/-20180101\d+$/)
+
+        # Change with Rails 6 defaults
+        # from
+        # expect(Audited::Audit.collection_cache_key).to match(/-20180101\d+$/)
+
+        # to
+        #
+        expect(
+          Audited::Audit.collection_cache_key
+        ).to match(%r{\Aaudited/audits/query-[a-z0-9]+\z})
+        # due to collection_cache_versioning
+        # now being true by default
       end
     else
       it "is not defined" do
@@ -353,5 +364,13 @@ describe Audited::Audit do
       }.to raise_exception("expected")
       expect(Audited.store[:audited_user]).to be_nil
     end
+  end
+
+  it "can be created without a user" do
+    audit = Audited::Audit.create!(
+      auditable_id: 123,
+      auditable_type: 'Donut'
+    )
+    assert audit.id
   end
 end

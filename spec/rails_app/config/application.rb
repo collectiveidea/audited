@@ -1,7 +1,17 @@
-require "active_record/railtie"
+# require "active_record/railtie"
+
+require 'rails'
+# Pick the frameworks you want:
+require 'active_model/railtie'
+# require "active_job/railtie"
+require 'active_record/railtie'
+require 'rails/test_unit/railtie'
 
 module RailsApp
   class Application < Rails::Application
+    # Initialize configuration defaults for originally generated Rails version.
+    config.load_defaults 6.0
+
     config.root = File.expand_path("../../", __FILE__)
     config.i18n.enforce_available_locales = true
   end
