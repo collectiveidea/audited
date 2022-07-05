@@ -234,6 +234,14 @@ describe Audited::Auditor do
       expect(user.audits.last.audited_changes["password"]).to eq(["My", "Custom", "Value", 7])
     end
 
+    if ::ActiveRecord::VERSION::MAJOR >= 7
+      it "should filter encrypted attributes" do
+        user = Models::ActiveRecord::UserWithEncryptedPassword.create(password: "password")
+        user.save
+        expect(user.audits.last.audited_changes["password"]).to eq("[FILTERED]")
+      end
+    end
+
     if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
       describe "'json' and 'jsonb' audited_changes column type" do
         let(:migrations_path) { SPEC_ROOT.join("support/active_record/postgres") }

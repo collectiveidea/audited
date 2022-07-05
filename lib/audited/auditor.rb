@@ -172,6 +172,8 @@ module Audited
       # List of attributes that are audited.
       def audited_attributes
         audited_attributes = attributes.except(*self.class.non_audited_columns)
+        audited_attributes = redact_values(audited_attributes)
+        audited_attributes = filter_encrypted_attrs(audited_attributes)
         normalize_enum_changes(audited_attributes)
       end
 
@@ -233,6 +235,7 @@ module Audited
           end
 
         filtered_changes = redact_values(filtered_changes)
+        filtered_changes = filter_encrypted_attrs(filtered_changes)
         filtered_changes = normalize_enum_changes(filtered_changes)
         filtered_changes.to_hash
       end
@@ -256,19 +259,36 @@ module Audited
       end
 
       def redact_values(filtered_changes)
-        [audited_options[:redacted]].flatten.compact.each do |option|
-          changes = filtered_changes[option.to_s]
-          new_value = audited_options[:redaction_value] || REDACTED
-          values = if changes.is_a? Array
-            changes.map { new_value }
-          else
-            new_value
-          end
-          hash = {option.to_s => values}
-          filtered_changes.merge!(hash)
+        filter_attr_values(
+          audited_changes: filtered_changes,
+          attrs:           Array(audited_options[:redacted]).map(&:to_s),
+          placeholder:     audited_options[:redaction_value] || REDACTED,
+        )
+      end
+
+      def filter_encrypted_attrs(filtered_changes)
+        filter_attr_values(
+          audited_changes: filtered_changes,
+          attrs:           respond_to?(:encrypted_attributes) ? Array(encrypted_attributes).map(&:to_s) : [],
+        )
+      end
+
+      # Replace values for given attrs to a placeholder and return modified hash
+      #
+      # @param audited_changes [Hash] Hash of changes to be saved to audited version record
+      # @param attrs [Array<String>] Array of attrs, values of which will be replaced to placeholder value
+      # @param placeholder [String] Placeholder to replace original attr values
+      def filter_attr_values(audited_changes: {}, attrs: [], placeholder: '[FILTERED]')
+        attrs.each do |attr|
+          next unless audited_changes.key?(attr)
+
+          changes = audited_changes[attr]
+          values = changes.is_a?(Array) ? changes.map { placeholder } : placeholder
+
+          audited_changes[attr] = values
         end
 
-        filtered_changes
+        audited_changes
       end
 
       def rails_below?(rails_version)
