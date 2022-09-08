@@ -400,9 +400,10 @@ end
 Then set it in an initializer:
 ```ruby
 # config/initializers/audited.rb
-
-Audited.config do |config|
-  config.audit_class = CustomAudit
+ActiveSupport.on_load :active_record do
+  Audited.config do |config|
+    config.audit_class = CustomAudit
+  end
 end
 ```
 
