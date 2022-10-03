@@ -555,6 +555,30 @@ describe Audited::Auditor do
       end
     end
 
+    it "should combine field that has never changed" do
+      stub_global_max_audits(2) do
+        user = Models::ActiveRecord::User.create!(name: "Brandon", username: "brandon")
+        user.update!(username: "keepers")
+        user.update!(activated: true)
+        audits = user.audits
+
+        expect(audits.count).to eq(2)
+        expect(audits[0].audited_changes).to include({"name" => "Brandon", "username" => ["brandon", "keepers"]})
+        expect(audits[1].audited_changes).to eq({"activated" => [nil, true]})
+      end
+    end
+
+    it "should be able to access revisions if field never changed" do
+      stub_global_max_audits(2) do
+        user = Models::ActiveRecord::User.create!(name: "Brandon", username: "brandon")
+        user.update!(username: "keepers")
+        user.update!(activated: true)
+        revisions = user.revisions
+
+        expect(revisions[0].attributes).to include({"name" => "Brandon", "username" => "keepers"})
+      end
+    end
+
     it "should add comment line for combined audit" do
       stub_global_max_audits(2) do
         user = Models::ActiveRecord::User.create!(name: "Foobar 1")
