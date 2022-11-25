@@ -16,30 +16,39 @@ module Audited
   #
 
   class YAMLIfTextColumnType
-    class << self
-      def load(obj)
-        if text_column?
-          ActiveRecord::Coders::YAMLColumn.new(Object).load(obj)
-        else
-          obj
-        end
-      end
+    def initialize(model)
+      @model = model
+    end
 
-      def dump(obj)
-        if text_column?
-          ActiveRecord::Coders::YAMLColumn.new(Object).dump(obj)
-        else
-          obj
-        end
+    def load(obj)
+      if text_column?
+        ActiveRecord::Coders::YAMLColumn.new(Object).load(obj)
+      else
+        obj
       end
+    end
 
-      def text_column?
-        Audited.audit_class.columns_hash["audited_changes"].type.to_s == "text"
+    def dump(obj)
+      if text_column?
+        ActiveRecord::Coders::YAMLColumn.new(Object).dump(obj)
+      else
+        obj
       end
+    end
+
+    private
+
+    def text_column?
+      @model.columns_hash["audited_changes"].type.to_s == "text"
     end
   end
 
   class Audit < ::ActiveRecord::Base
+    def self.inherited(klass)
+      super
+      klass.serialize :audited_changes, YAMLIfTextColumnType.new(klass)
+    end
+
     belongs_to :auditable, polymorphic: true
     belongs_to :user, polymorphic: true
     belongs_to :associated, polymorphic: true
@@ -49,7 +58,7 @@ module Audited
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
 
-    serialize :audited_changes, YAMLIfTextColumnType
+    serialize :audited_changes, YAMLIfTextColumnType.new(self)
 
     scope :ascending, -> { reorder(version: :asc) }
     scope :descending, -> { reorder(version: :desc) }
