@@ -177,9 +177,8 @@ module Audited
 
       # Returns a list combined of record audits and associated audits.
       def own_and_associated_audits
-        Audited.audit_class.unscoped
-          .where("(auditable_type = :type AND auditable_id = :id) OR (associated_type = :type AND associated_id = :id)",
-            type: self.class.base_class.name, id: id)
+        Audited.audit_class.unscoped.where(auditable: self)
+          .or(Audited.audit_class.unscoped.where(associated: self))
           .order(created_at: :desc)
       end
 
