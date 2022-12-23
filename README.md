@@ -2,7 +2,6 @@ Audited
 [![Gem Version](https://img.shields.io/gem/v/audited.svg)](http://rubygems.org/gems/audited)
 ![Build Status](https://github.com/collectiveidea/audited/actions/workflows/ci.yml/badge.svg)
 [![Code Climate](https://codeclimate.com/github/collectiveidea/audited.svg)](https://codeclimate.com/github/collectiveidea/audited)
-[![Security](https://hakiri.io/github/collectiveidea/audited/master.svg)](https://hakiri.io/github/collectiveidea/audited/master)
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 =======
 
