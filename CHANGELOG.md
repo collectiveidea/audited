@@ -11,8 +11,9 @@ Changed
 
 Improved
 
-- README improvements - @jess
+- README improvements - @jess, @mstroming
   [#605](https://github.com/collectiveidea/audited/pull/605)
+  [#640](https://github.com/collectiveidea/audited/issues/640)
 - Ignore deadlocks in concurrent audit combinations - @Crammaman
   [#621](https://github.com/collectiveidea/audited/pull/621)
 - Fix timestamped_migrations deprecation warning - @shouichi

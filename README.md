@@ -314,9 +314,7 @@ If you want to audit only under specific conditions, you can provide conditional
 ```ruby
 class User < ActiveRecord::Base
   audited if: :active?
-
-  private
-
+  
   def active?
     last_login > 6.months.ago
   end
