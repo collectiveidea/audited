@@ -1,5 +1,13 @@
 # Audited ChangeLog
 
+## Unreleased
+
+Improved
+
+- Test against more Rails/Versions - @enomotodev, @danielmorrison
+  [#610](https://github.com/collectiveidea/audited/pull/610)
+  [#643](https://github.com/collectiveidea/audited/pull/643)
+
 ## 5.0.2 (2021-09-16)
 
 Added
@@ -11,7 +19,7 @@ Improved
 
 - Improve loading - @mvastola
   [#592](https://github.com/collectiveidea/audited/pull/592)
-- Update README - @danirod, clement1234
+- Update README - @danirod, @clement1234
   [#596](https://github.com/collectiveidea/audited/pull/596)
   [#594](https://github.com/collectiveidea/audited/pull/594)
 
