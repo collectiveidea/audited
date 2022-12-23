@@ -387,6 +387,17 @@ User.auditing_enabled = false
 end
 ```
 
+### Encrypted attributes
+
+If you're using ActiveRecord's encryption (available from Rails 7) to encrypt some attributes, Audited will automatically filter values of these attributes. No additional configuration is required. Changes to encrypted attributes will be logged as `[FILTERED]`.
+
+```ruby
+class User < ActiveRecord::Base
+  audited
+  encrypts :password
+end
+```
+
 ### Custom `Audit` model
 
 If you want to extend or modify the audit model, create a new class that

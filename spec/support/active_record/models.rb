@@ -41,6 +41,14 @@ module Models
       audited redacted: :password, redaction_value: ["My", "Custom", "Value", 7]
     end
 
+    if ::ActiveRecord::VERSION::MAJOR >= 7
+      class UserWithEncryptedPassword < ::ActiveRecord::Base
+        self.table_name = :users
+        audited
+        encrypts :password
+      end
+    end
+
     class CommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
       audited except: :password, comment_required: true

@@ -44,4 +44,9 @@ RailsApp::Application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  if ::ActiveRecord::VERSION::MAJOR >= 7
+    config.active_record.encryption.key_derivation_salt = SecureRandom.hex
+    config.active_record.encryption.primary_key = SecureRandom.hex
+  end
 end
