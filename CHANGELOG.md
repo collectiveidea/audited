@@ -1,6 +1,6 @@
 # Audited ChangeLog
 
-## Unreleased
+## 5.1.0 (2022-12-23)
 
 Changed
 
