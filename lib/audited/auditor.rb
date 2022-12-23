@@ -13,7 +13,7 @@ module Audited
   #
   # See <tt>Audited::Auditor::ClassMethods#audited</tt>
   # for configuration options
-  module Auditor #:nodoc:
+  module Auditor # :nodoc:
     extend ActiveSupport::Concern
 
     CALLBACKS = [:audit_create, :audit_update, :audit_destroy]
@@ -290,20 +290,20 @@ module Audited
 
       def audit_create
         write_audit(action: "create", audited_changes: audited_attributes,
-                    comment: audit_comment)
+          comment: audit_comment)
       end
 
       def audit_update
         unless (changes = audited_changes).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
           write_audit(action: "update", audited_changes: changes,
-                      comment: audit_comment)
+            comment: audit_comment)
         end
       end
 
       def audit_destroy
         unless new_record?
           write_audit(action: "destroy", audited_changes: audited_attributes,
-                      comment: audit_comment)
+            comment: audit_comment)
         end
       end
 

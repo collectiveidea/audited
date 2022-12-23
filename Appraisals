@@ -6,6 +6,7 @@ appraise "rails50" do
   gem "mysql2", ">= 0.3.18", "< 0.6.0"
   gem "pg", ">= 0.18", "< 2.0"
   gem "sqlite3", "~> 1.3.6"
+  gem "psych", "~> 3.1"
 end
 
 appraise "rails51" do
@@ -13,13 +14,15 @@ appraise "rails51" do
   gem "mysql2", ">= 0.3.18", "< 0.6.0"
   gem "pg", ">= 0.18", "< 2.0"
   gem "sqlite3", "~> 1.3.6"
+  gem "psych", "~> 3.1"
 end
 
 appraise "rails52" do
-  gem "rails", ">= 5.2.0", "< 5.3"
+  gem "rails", ">= 5.2.8.1", "< 5.3"
   gem "mysql2", ">= 0.4.4", "< 0.6.0"
   gem "pg", ">= 0.18", "< 2.0"
   gem "sqlite3", "~> 1.3.6"
+  gem "psych", "~> 3.1"
 end
 
 appraise "rails60" do
