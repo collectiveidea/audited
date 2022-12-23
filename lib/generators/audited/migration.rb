@@ -16,7 +16,7 @@ module Audited
       private
 
       def timestamped_migrations?
-        Rails.version >= "7.0" ?
+        (Rails.version >= "7.0") ?
           ::ActiveRecord.timestamped_migrations :
           ::ActiveRecord::Base.timestamped_migrations
       end

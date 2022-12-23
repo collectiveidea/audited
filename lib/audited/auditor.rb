@@ -266,15 +266,15 @@ module Audited
       def redact_values(filtered_changes)
         filter_attr_values(
           audited_changes: filtered_changes,
-          attrs:           Array(audited_options[:redacted]).map(&:to_s),
-          placeholder:     audited_options[:redaction_value] || REDACTED,
+          attrs: Array(audited_options[:redacted]).map(&:to_s),
+          placeholder: audited_options[:redaction_value] || REDACTED
         )
       end
 
       def filter_encrypted_attrs(filtered_changes)
         filter_attr_values(
           audited_changes: filtered_changes,
-          attrs:           respond_to?(:encrypted_attributes) ? Array(encrypted_attributes).map(&:to_s) : [],
+          attrs: respond_to?(:encrypted_attributes) ? Array(encrypted_attributes).map(&:to_s) : []
         )
       end
 
@@ -283,7 +283,7 @@ module Audited
       # @param audited_changes [Hash] Hash of changes to be saved to audited version record
       # @param attrs [Array<String>] Array of attrs, values of which will be replaced to placeholder value
       # @param placeholder [String] Placeholder to replace original attr values
-      def filter_attr_values(audited_changes: {}, attrs: [], placeholder: '[FILTERED]')
+      def filter_attr_values(audited_changes: {}, attrs: [], placeholder: "[FILTERED]")
         attrs.each do |attr|
           next unless audited_changes.key?(attr)
 
