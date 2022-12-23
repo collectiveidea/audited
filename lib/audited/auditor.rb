@@ -13,7 +13,7 @@ module Audited
   #
   # See <tt>Audited::Auditor::ClassMethods#audited</tt>
   # for configuration options
-  module Auditor #:nodoc:
+  module Auditor # :nodoc:
     extend ActiveSupport::Concern
 
     CALLBACKS = [:audit_create, :audit_update, :audit_destroy]
@@ -177,9 +177,8 @@ module Audited
 
       # Returns a list combined of record audits and associated audits.
       def own_and_associated_audits
-        Audited.audit_model.unscoped
-          .where("(auditable_type = :type AND auditable_id = :id) OR (associated_type = :type AND associated_id = :id)",
-            type: self.class.base_class.name, id: id)
+        Audited.audit_model.unscoped.where(auditable: self)
+          .or(Audited.audit_model.unscoped.where(associated: self))
           .order(created_at: :desc)
       end
 
@@ -290,20 +289,20 @@ module Audited
 
       def audit_create
         write_audit(action: "create", audited_changes: audited_attributes,
-                    comment: audit_comment)
+          comment: audit_comment)
       end
 
       def audit_update
         unless (changes = audited_changes).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
           write_audit(action: "update", audited_changes: changes,
-                      comment: audit_comment)
+            comment: audit_comment)
         end
       end
 
       def audit_destroy
         unless new_record?
           write_audit(action: "destroy", audited_changes: audited_attributes,
-                      comment: audit_comment)
+            comment: audit_comment)
         end
       end
 
@@ -397,7 +396,7 @@ module Audited
       #   end
       #
       def without_auditing
-        auditing_was_enabled = auditing_enabled
+        auditing_was_enabled = class_auditing_enabled
         disable_auditing
         yield
       ensure
@@ -411,7 +410,7 @@ module Audited
       #   end
       #
       def with_auditing
-        auditing_was_enabled = auditing_enabled
+        auditing_was_enabled = class_auditing_enabled
         enable_auditing
         yield
       ensure
@@ -435,7 +434,7 @@ module Audited
       end
 
       def auditing_enabled
-        Audited.store.fetch("#{table_name}_auditing_enabled", true) && Audited.auditing_enabled
+        class_auditing_enabled && Audited.auditing_enabled
       end
 
       def auditing_enabled=(val)
@@ -465,6 +464,10 @@ module Audited
         else
           default_ignored_attributes
         end
+      end
+
+      def class_auditing_enabled
+        Audited.store.fetch("#{table_name}_auditing_enabled", true)
       end
     end
   end

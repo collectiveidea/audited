@@ -18,12 +18,13 @@ For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.c
 
 Audited supports and is [tested against](https://github.com/collectiveidea/audited/actions/workflows/ci.yml) the following Ruby versions:
 
-* 2.3
+* 2.3 (only tested on Sqlite due to testing issues with other DBs)
 * 2.4
 * 2.5
 * 2.6
 * 2.7
 * 3.0
+* 3.1
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
