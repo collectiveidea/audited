@@ -78,14 +78,14 @@ module Audited
     # Returns a hash of the changed attributes with the new values
     def new_attributes
       (audited_changes || {}).each_with_object({}.with_indifferent_access) do |(attr, values), attrs|
-        attrs[attr] = (action == "update" ? values.last : values)
+        attrs[attr] = ((action == "update") ? values.last : values)
       end
     end
 
     # Returns a hash of the changed attributes with the old values
     def old_attributes
       (audited_changes || {}).each_with_object({}.with_indifferent_access) do |(attr, values), attrs|
-        attrs[attr] = (action == "update" ? values.first : values)
+        attrs[attr] = ((action == "update") ? values.first : values)
       end
     end
 
@@ -174,7 +174,7 @@ module Audited
       if action == "create"
         self.version = 1
       else
-        collection = Rails::VERSION::MAJOR >= 6 ? self.class.unscoped : self.class
+        collection = (Rails::VERSION::MAJOR >= 6) ? self.class.unscoped : self.class
         max = collection.auditable_finder(auditable_id, auditable_type).maximum(:version) || 0
         self.version = max + 1
       end

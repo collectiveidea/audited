@@ -272,11 +272,11 @@ describe Audited::Auditor do
       yesterday = 1.day.ago
 
       u = Models::ActiveRecord::NoAttributeProtectionUser.new(name: "name",
-                                                              username: "username",
-                                                              password: "password",
-                                                              activated: true,
-                                                              suspended_at: yesterday,
-                                                              logins: 2)
+        username: "username",
+        password: "password",
+        activated: true,
+        suspended_at: yesterday,
+        logins: 2)
 
       expect(u.name).to eq("name")
       expect(u.username).to eq("username")
