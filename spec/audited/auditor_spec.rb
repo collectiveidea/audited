@@ -814,6 +814,15 @@ describe Audited::Auditor do
       }.to_not change(Audited::Audit, :count)
     end
 
+    context "when global audits are disabled" do
+      it "should re-enable class audits after #without_auditing block" do
+        Audited.auditing_enabled = false
+        Models::ActiveRecord::User.without_auditing {}
+        Audited.auditing_enabled = true
+        expect(Models::ActiveRecord::User.auditing_enabled).to eql(true)
+      end
+    end
+
     it "should reset auditing status even it raises an exception" do
       begin
         Models::ActiveRecord::User.without_auditing { raise }
@@ -882,6 +891,15 @@ describe Audited::Auditor do
         Models::ActiveRecord::User.with_auditing { Models::ActiveRecord::User.create!(name: "Brandon") }
         Models::ActiveRecord::User.auditing_enabled = true
       }.to change(Audited::Audit, :count).by(1)
+    end
+
+    context "when global audits are disabled" do
+      it "should re-enable class audits after #with_auditing block" do
+        Audited.auditing_enabled = false
+        Models::ActiveRecord::User.with_auditing {}
+        Audited.auditing_enabled = true
+        expect(Models::ActiveRecord::User.auditing_enabled).to eql(true)
+      end
     end
 
     it "should reset auditing status even it raises an exception" do
