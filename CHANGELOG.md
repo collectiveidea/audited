@@ -6,9 +6,17 @@ Changed
 
 - config.audit_class takes a string - @simmerz
   [#609](https://github.com/collectiveidea/audited/pull/609)
+- Filter encrypted attributes automatically - @vlad-psh
+  [#630](https://github.com/collectiveidea/audited/pull/630)
 
 Improved
 
+- README improvements - @jess
+  [#605](https://github.com/collectiveidea/audited/pull/605)
+- Ignore deadlocks in concurrent audit combinations - @Crammaman
+  [#621](https://github.com/collectiveidea/audited/pull/621)
+- Fix timestamped_migrations deprecation warning - @shouichi
+  [#624](https://github.com/collectiveidea/audited/pull/624)
 - Ensure audits are re-enabled after blocks - @dcorlett
   [#632](https://github.com/collectiveidea/audited/pull/632)
 - Replace raw string where clause with query methods - @macowie
