@@ -220,7 +220,7 @@ Audited.current_user_method = :authenticated_user
 Outside of a request, Audited can still record the user with the `as_user` method:
 
 ```ruby
-Audited.audit_class.as_user(User.find(1)) do
+Audited.audit_model.as_user(User.find(1)) do
   post.update!(title: "Hello, world!")
 end
 post.audits.last.user # => #<User id: 1>
@@ -247,7 +247,7 @@ end
 `as_user` also accepts a string, which can be useful for auditing updates made in a CLI environment:
 
 ```rb
-Audited.audit_class.as_user("console-user-#{ENV['SSH_USER']}") do
+Audited.audit_model.as_user("console-user-#{ENV['SSH_USER']}") do
   post.update_attributes!(title: "Hello, world!")
 end
 post.audits.last.user # => 'console-user-username'
@@ -403,7 +403,7 @@ Then set it in an initializer:
 # config/initializers/audited.rb
 
 Audited.config do |config|
-  config.audit_class = CustomAudit
+  config.audit_class = "CustomAudit"
 end
 ```
 

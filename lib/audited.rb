@@ -13,7 +13,11 @@ module Audited
     attr_writer :audit_class
 
     def audit_class
-      @audit_class ||= Audit
+      @audit_class ||= "Audited::Audit"
+    end
+
+    def audit_model
+      audit_class.constantize
     end
 
     def store

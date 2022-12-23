@@ -37,7 +37,7 @@ describe Audited::Audit do
 
     context "when a custom audit class is configured" do
       it "should be used in place of #{described_class}" do
-        Audited.config { |config| config.audit_class = CustomAudit }
+        Audited.config { |config| config.audit_class = "CustomAudit" }
         TempModel1.audited
 
         record = TempModel1.create
@@ -62,7 +62,7 @@ describe Audited::Audit do
   end
 
   describe "#audited_changes" do
-    let(:audit) { Audited.audit_class.new }
+    let(:audit) { Audited.audit_model.new }
 
     it "can unserialize yaml from text columns" do
       audit.audited_changes = {foo: "bar"}
