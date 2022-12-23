@@ -17,6 +17,7 @@ SPEC_ROOT = Pathname.new(File.expand_path("../", __FILE__))
 
 Dir[SPEC_ROOT.join("support/*.rb")].sort.each { |f| require f }
 
+ActiveRecord.use_yaml_unsafe_load = true
 RSpec.configure do |config|
   config.include AuditedSpecHelpers
   config.use_transactional_fixtures = false if Rails.version.start_with?("4.")
