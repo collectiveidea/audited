@@ -2,9 +2,18 @@
 
 ## Unreleased
 
+Changed
+
+- config.audit_class takes a string - @simmerz
+  [#609](https://github.com/collectiveidea/audited/pull/609)
+
 Improved
 
-- Test against more Rails/Versions - @enomotodev, @danielmorrison
+- Ensure audits are re-enabled after blocks - @dcorlett
+  [#632](https://github.com/collectiveidea/audited/pull/632)
+- Replace raw string where clause with query methods - @macowie
+  [#642](https://github.com/collectiveidea/audited/pull/642)
+- Test against more Ruby/Rails Versions - @enomotodev, @danielmorrison
   [#610](https://github.com/collectiveidea/audited/pull/610)
   [#643](https://github.com/collectiveidea/audited/pull/643)
 
