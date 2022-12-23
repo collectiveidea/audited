@@ -193,6 +193,9 @@ module Audited
         transaction do
           combine_target.save!
           audits_to_combine.unscope(:limit).where("version < ?", combine_target.version).delete_all
+	rescue ActiveRecord::Deadlocked
+	  # Ignore Deadlocks, if the same record is getting its old audits combined more than once at the same time then
+          #  both combining operations will be the same. Ignoring this error allows one of the combines to go through successfully.
         end
       end
 
