@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: [2.3, 2.4, 2.5, 2.6, 2.7, 3.0]
+        ruby: [2.3, 2.4, 2.5, 2.6, 2.7, 3.0, 3.1]
         appraisal:
           - rails50
           - rails51
@@ -36,6 +36,8 @@ jobs:
             ruby: 2.7
           - appraisal: rails50
             ruby: 3.0
+          - appraisal: rails50
+            ruby: 3.1
 
           # Rails 5.1 supports Ruby 2.2-2.5
           - appraisal: rails51
@@ -44,6 +46,8 @@ jobs:
             ruby: 2.7
           - appraisal: rails51
             ruby: 3.0
+          - appraisal: rails51
+            ruby: 3.1
 
           # Rails 5.2 supports Ruby 2.2-2.5
           - appraisal: rails52
@@ -52,6 +56,8 @@ jobs:
             ruby: 2.7
           - appraisal: rails52
             ruby: 3.0
+          - appraisal: rails52
+            ruby: 3.1
 
           # Rails 6.0 supports Ruby 2.5-2.7
           - appraisal: rails60
@@ -60,6 +66,8 @@ jobs:
             ruby: 2.4
           - appraisal: rails60
             ruby: 3.0
+          - appraisal: rails60
+            ruby: 3.1
 
           # Rails 6.1 supports Ruby 2.5+
           - appraisal: rails61
