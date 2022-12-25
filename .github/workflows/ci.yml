@@ -27,7 +27,7 @@ jobs:
           - ruby: 2.3
             db: MYSQL
 
-          # PostgresSQL is segfaulting on 2.3
+          # PostgreSQL is segfaulting on 2.3
           # Doesn't seem worth solving.
           - ruby: 2.3
             db: POSTGRES
