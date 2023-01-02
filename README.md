@@ -428,7 +428,7 @@ Audited.store_synthesized_enums = true
 
 ## Support
 
-You can find documentation at: http://rdoc.info/github/collectiveidea/audited
+You can find documentation at: https://www.rubydoc.info/gems/audited
 
 Or join the [mailing list](http://groups.google.com/group/audited) to get help or offer suggestions.
 
