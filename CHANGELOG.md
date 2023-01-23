@@ -1,5 +1,17 @@
 # Audited ChangeLog
 
+## 5.2.0 (2023-01-23)
+
+Improved
+
+- config.audit_class can take a string or constant - @rocket-turtle
+  Fixes overzealous change in 5.1.0 where it only took a string.
+  [#648](https://github.com/collectiveidea/audited/pull/648)
+- README link fix - @jeremiahlukus
+  [#646](https://github.com/collectiveidea/audited/pull/646)
+- Typo fix in GitHub Actions - @jdufresne
+  [#644](https://github.com/collectiveidea/audited/pull/644)
+
 ## 5.1.0 (2022-12-23)
 
 Changed
