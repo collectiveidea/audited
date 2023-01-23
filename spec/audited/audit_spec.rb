@@ -62,7 +62,7 @@ describe Audited::Audit do
   end
 
   describe "#audited_changes" do
-    let(:audit) { Audited.audit_model.new }
+    let(:audit) { Audited.audit_class.new }
 
     it "can unserialize yaml from text columns" do
       audit.audited_changes = {foo: "bar"}
