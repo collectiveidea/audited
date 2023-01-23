@@ -15,7 +15,7 @@ module Audited
     def audit_class
       # The audit_class is set as String in the initializer. It can not be constantized during initialization and must
       # be constantized at runtime. See https://github.com/collectiveidea/audited/issues/608
-      @audit_class = @audit_class.constantize if @audit_class.is_a?(String)
+      @audit_class = @audit_class.safe_constantize if @audit_class.is_a?(String)
       @audit_class ||= Audited::Audit
     end
 
