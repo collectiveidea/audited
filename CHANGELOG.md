@@ -1,5 +1,11 @@
 # Audited ChangeLog
 
+## Unreleased
+
+- Testing updates - @jdufresne
+  [#652](https://github.com/collectiveidea/audited/pull/652)
+  [#653](https://github.com/collectiveidea/audited/pull/653)
+
 ## 5.2.0 (2023-01-23)
 
 Improved
