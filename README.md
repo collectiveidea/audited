@@ -24,6 +24,7 @@ Audited supports and is [tested against](https://github.com/collectiveidea/audit
 * 2.7
 * 3.0
 * 3.1
+* 3.2
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
