@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Allow using with Padrino and other non-Rails projects - @https://www.npr.org/2023/02/09/1155464337/rebecca-black-leaves-the-meme-in-the-rear-view
+  [#655](https://github.com/collectiveidea/audited/pull/655)
 - Testing updates - @jdufresne
   [#652](https://github.com/collectiveidea/audited/pull/652)
   [#653](https://github.com/collectiveidea/audited/pull/653)
