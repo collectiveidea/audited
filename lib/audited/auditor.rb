@@ -231,7 +231,7 @@ module Audited
       private
 
       def audited_changes
-        all_changes = respond_to?(:changes_to_save) ? changes_to_save : changes
+        all_changes = changes
         filtered_changes = \
           if audited_options[:only].present?
             all_changes.slice(*self.class.audited_columns)

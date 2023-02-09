@@ -380,6 +380,12 @@ describe Audited::Auditor do
       expect(@user.audits.last.audited_changes["status"]).to eq([0, 1])
     end
 
+    it "should store the change of the custom attribute which extended dirty feature" do
+			@user = Models::ActiveRecord::UserDelegateCompany.create(name: 'Brandon', username: 'brandon', password: 'password')
+      @user.update_attributes company_list: 'apple,google'
+      expect(@user.audits.last.audited_changes).to eq({ 'company_list' => ['', 'apple,google'] })
+    end
+
     it "should store audit comment" do
       expect(@user.audits.last.comment).to eq("Update")
     end
