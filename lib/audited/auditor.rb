@@ -231,23 +231,13 @@ module Audited
 
       private
 
-      def audited_changes
-        all_changes = respond_to?(:changes_to_save) ? changes_to_save : changes
-        filtered_changes = \
-          if audited_options[:only].present?
-            all_changes.slice(*self.class.audited_columns)
-          else
-            all_changes.except(*self.class.non_audited_columns)
-          end
+      def audited_changes(for_touch: false)
+        all_changes = if for_touch
+                        previous_changes
+                      else
+                        respond_to?(:changes_to_save) ? changes_to_save : changes
+                      end
 
-        filtered_changes = redact_values(filtered_changes)
-        filtered_changes = filter_encrypted_attrs(filtered_changes)
-        filtered_changes = normalize_enum_changes(filtered_changes)
-        filtered_changes.to_hash
-      end
-
-      def touch_changes
-        all_changes = previous_changes
         filtered_changes = \
           if audited_options[:only].present?
             all_changes.slice(*self.class.audited_columns)
@@ -341,7 +331,7 @@ module Audited
       end
 
       def audit_touch
-        unless (changes = touch_changes).empty?
+        unless (changes = audited_changes(for_touch: true)).empty?
           write_audit(action: "update", audited_changes: changes,
             comment: audit_comment)
         end
