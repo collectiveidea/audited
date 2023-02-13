@@ -84,6 +84,7 @@ module Audited
 
         after_create :audit_create if audited_options[:on].include?(:create)
         before_update :audit_update if audited_options[:on].include?(:update)
+        after_touch :audit_touch if audited_options[:on].include?(:touch)
         before_destroy :audit_destroy if audited_options[:on].include?(:destroy)
 
         # Define and set after_audit and around_audit callbacks. This might be useful if you want
@@ -245,6 +246,21 @@ module Audited
         filtered_changes.to_hash
       end
 
+      def touch_changes
+        all_changes = previous_changes
+        filtered_changes = \
+          if audited_options[:only].present?
+            all_changes.slice(*self.class.audited_columns)
+          else
+            all_changes.except(*self.class.non_audited_columns)
+          end
+
+        filtered_changes = redact_values(filtered_changes)
+        filtered_changes = filter_encrypted_attrs(filtered_changes)
+        filtered_changes = normalize_enum_changes(filtered_changes)
+        filtered_changes.to_hash
+      end
+
       def normalize_enum_changes(changes)
         return changes if Audited.store_synthesized_enums
 
@@ -319,6 +335,13 @@ module Audited
 
       def audit_update
         unless (changes = audited_changes).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
+          write_audit(action: "update", audited_changes: changes,
+            comment: audit_comment)
+        end
+      end
+
+      def audit_touch
+        unless (changes = touch_changes).empty?
           write_audit(action: "update", audited_changes: changes,
             comment: audit_comment)
         end
