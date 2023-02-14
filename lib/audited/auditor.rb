@@ -84,7 +84,7 @@ module Audited
 
         after_create :audit_create if audited_options[:on].include?(:create)
         before_update :audit_update if audited_options[:on].include?(:update)
-        after_touch :audit_touch if audited_options[:on].include?(:touch)
+        after_touch :audit_touch if audited_options[:on].include?(:touch) && ::ActiveRecord::VERSION::MAJOR >= 6
         before_destroy :audit_destroy if audited_options[:on].include?(:destroy)
 
         # Define and set after_audit and around_audit callbacks. This might be useful if you want

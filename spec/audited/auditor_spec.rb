@@ -414,37 +414,39 @@ describe Audited::Auditor do
     end
   end
 
-  describe "on touch" do
-    before do
-      @user = create_user(name: "Brandon", status: :active, audit_comment: "Touch")
-    end
+  if ::ActiveRecord::VERSION::MAJOR >= 6
+    describe "on touch" do
+      before do
+        @user = create_user(name: "Brandon", status: :active, audit_comment: "Touch")
+      end
 
-    it "should save an audit" do
-      expect { @user.touch(:suspended_at) }.to change(Audited::Audit, :count).by(1)
-    end
+      it "should save an audit" do
+        expect { @user.touch(:suspended_at) }.to change(Audited::Audit, :count).by(1)
+      end
 
-    it "should set the action to 'update'" do
-      @user.touch(:suspended_at)
-      expect(@user.audits.last.action).to eq("update")
-      expect(Audited::Audit.updates.order(:id).last).to eq(@user.audits.last)
-      expect(@user.audits.updates.last).to eq(@user.audits.last)
-    end
+      it "should set the action to 'update'" do
+        @user.touch(:suspended_at)
+        expect(@user.audits.last.action).to eq("update")
+        expect(Audited::Audit.updates.order(:id).last).to eq(@user.audits.last)
+        expect(@user.audits.updates.last).to eq(@user.audits.last)
+      end
 
-    it "should store the changed attributes" do
-      @user.touch(:suspended_at)
-      expect(@user.audits.last.audited_changes["suspended_at"][0]).to be_nil
-      expect(@user.audits.last.audited_changes["suspended_at"][1]).to be_within(1).of(Time.current)
-    end
+      it "should store the changed attributes" do
+        @user.touch(:suspended_at)
+        expect(@user.audits.last.audited_changes["suspended_at"][0]).to be_nil
+        expect(@user.audits.last.audited_changes["suspended_at"][1]).to be_within(1).of(Time.current)
+      end
 
-    it "should store audit comment" do
-      expect(@user.audits.last.comment).to eq("Touch")
-    end
+      it "should store audit comment" do
+        expect(@user.audits.last.comment).to eq("Touch")
+      end
 
-    it "should not save an audit if only specified on create/destroy" do
-      on_create_destroy = Models::ActiveRecord::OnCreateDestroyUser.create(name: "Bart")
-      expect {
-        on_create_destroy.touch(:suspended_at)
-      }.to_not change(Audited::Audit, :count)
+      it "should not save an audit if only specified on create/destroy" do
+        on_create_destroy = Models::ActiveRecord::OnCreateDestroyUser.create(name: "Bart")
+        expect {
+          on_create_destroy.touch(:suspended_at)
+        }.to_not change(Audited::Audit, :count)
+      end
     end
   end
 
