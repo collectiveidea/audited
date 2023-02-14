@@ -1,6 +1,9 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 9 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+# not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+# also, an additional 3 around `after_touch` for Versions before 6.
+uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 12 : 9
+SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
   self.table_name = "companies"
