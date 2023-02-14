@@ -234,8 +234,10 @@ module Audited
       def audited_changes(for_touch: false)
         all_changes = if for_touch
                         previous_changes
+                      elsif respond_to?(:changes_to_save)
+                        changes_to_save
                       else
-                        respond_to?(:changes_to_save) ? changes_to_save : changes
+                        changes
                       end
 
         filtered_changes = \
