@@ -146,6 +146,11 @@ module Models
       audited on: [:create, :destroy]
     end
 
+    class OnCreateDestroyUser < ::ActiveRecord::Base
+      self.table_name = "users"
+      audited on: [:create, :destroy]
+    end
+
     class OnCreateDestroyExceptName < ::ActiveRecord::Base
       self.table_name = "companies"
       audited except: :name, on: [:create, :destroy]

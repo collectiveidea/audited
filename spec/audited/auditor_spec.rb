@@ -1,6 +1,9 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 9 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+# not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+# also, an additional 3 around `after_touch` for Versions before 6.
+uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 12 : 9
+SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
   self.table_name = "companies"
@@ -410,6 +413,42 @@ describe Audited::Auditor do
           @user.audit_comment = "Comment"
           @user.save!
         }.to change(Audited::Audit, :count)
+      end
+    end
+  end
+
+  if ::ActiveRecord::VERSION::MAJOR >= 6
+    describe "on touch" do
+      before do
+        @user = create_user(name: "Brandon", status: :active, audit_comment: "Touch")
+      end
+
+      it "should save an audit" do
+        expect { @user.touch(:suspended_at) }.to change(Audited::Audit, :count).by(1)
+      end
+
+      it "should set the action to 'update'" do
+        @user.touch(:suspended_at)
+        expect(@user.audits.last.action).to eq("update")
+        expect(Audited::Audit.updates.order(:id).last).to eq(@user.audits.last)
+        expect(@user.audits.updates.last).to eq(@user.audits.last)
+      end
+
+      it "should store the changed attributes" do
+        @user.touch(:suspended_at)
+        expect(@user.audits.last.audited_changes["suspended_at"][0]).to be_nil
+        expect(Time.parse(@user.audits.last.audited_changes["suspended_at"][1].to_s)).to be_within(1.second).of(Time.current)
+      end
+
+      it "should store audit comment" do
+        expect(@user.audits.last.comment).to eq("Touch")
+      end
+
+      it "should not save an audit if only specified on create/destroy" do
+        on_create_destroy = Models::ActiveRecord::OnCreateDestroyUser.create(name: "Bart")
+        expect {
+          on_create_destroy.touch(:suspended_at)
+        }.to_not change(Audited::Audit, :count)
       end
     end
   end
