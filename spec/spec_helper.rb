@@ -19,7 +19,6 @@ Dir[SPEC_ROOT.join("support/*.rb")].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.include AuditedSpecHelpers
-  config.include ActiveSupport::Testing::TimeHelpers
   config.use_transactional_fixtures = false if Rails.version.start_with?("4.")
   config.use_transactional_tests = false if config.respond_to?(:use_transactional_tests=)
 end

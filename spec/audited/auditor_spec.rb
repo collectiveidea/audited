@@ -419,12 +419,6 @@ describe Audited::Auditor do
       @user = create_user(name: "Brandon", status: :active, audit_comment: "Touch")
     end
 
-    around do |example|
-      freeze_time do
-        example.run
-      end
-    end
-
     it "should save an audit" do
       expect { @user.touch(:suspended_at) }.to change(Audited::Audit, :count).by(1)
     end
@@ -438,7 +432,8 @@ describe Audited::Auditor do
 
     it "should store the changed attributes" do
       @user.touch(:suspended_at)
-      expect(@user.audits.last.audited_changes).to eq({"suspended_at" => [nil, Time.current]})
+      expect(@user.audits.last.audited_changes["suspended_at"][0]).to be_nil
+      expect(@user.audits.last.audited_changes["suspended_at"][1]).to be_within(1).of(Time.current)
     end
 
     it "should store audit comment" do
