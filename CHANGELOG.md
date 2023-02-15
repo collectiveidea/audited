@@ -1,5 +1,10 @@
 # Audited ChangeLog
 
+## Unreleased
+
+- Testing Improvements - @mcyoung
+  [#658](https://github.com/collectiveidea/audited/pull/658)
+
 ## 5.3.0 (2023-02-14)
 
 - Audit touch calls - @mcyoung
