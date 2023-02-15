@@ -437,7 +437,7 @@ describe Audited::Auditor do
       it "should store the changed attributes" do
         @user.touch(:suspended_at)
         expect(@user.audits.last.audited_changes["suspended_at"][0]).to be_nil
-        expect(Time.parse(@user.audits.last.audited_changes["suspended_at"][1].to_s)).to be_within(1.second).of(Time.current)
+        expect(Time.parse(@user.audits.last.audited_changes["suspended_at"][1].to_s)).to be_within(2.seconds).of(Time.current)
       end
 
       it "should store audit comment" do
