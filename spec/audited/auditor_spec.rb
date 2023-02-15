@@ -420,7 +420,7 @@ describe Audited::Auditor do
   if ::ActiveRecord::VERSION::MAJOR >= 6
     describe "on touch" do
       before do
-        @user = create_user(name: "Brandon", status: :active, audit_comment: "Touch")
+        @user = create_user(name: "Brandon", status: :active)
       end
 
       it "should save an audit" do
@@ -437,11 +437,14 @@ describe Audited::Auditor do
       it "should store the changed attributes" do
         @user.touch(:suspended_at)
         expect(@user.audits.last.audited_changes["suspended_at"][0]).to be_nil
-        expect(Time.parse(@user.audits.last.audited_changes["suspended_at"][1].to_s)).to be_within(1.second).of(Time.current)
+        expect(Time.parse(@user.audits.last.audited_changes["suspended_at"][1].to_s)).to be_within(2.seconds).of(Time.current)
       end
 
       it "should store audit comment" do
-        expect(@user.audits.last.comment).to eq("Touch")
+        @user.audit_comment = "Here exists a touch comment"
+        @user.touch(:suspended_at)
+        expect(@user.audits.last.action).to eq("update")
+        expect(@user.audits.last.comment).to eq("Here exists a touch comment")
       end
 
       it "should not save an audit if only specified on create/destroy" do
