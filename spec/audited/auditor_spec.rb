@@ -218,17 +218,25 @@ describe Audited::Auditor do
       redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
       user =
         Models::ActiveRecord::UserMultipleRedactedAttributes.create(
-          password: "password",
-          ssn: 123456789
+          password: "password"
         )
       user.save!
       expect(user.audits.last.audited_changes["password"]).to eq(redacted)
+      # Saving '[REDACTED]' value for 'ssn' even if value wasn't set explicitly when record was created
       expect(user.audits.last.audited_changes["ssn"]).to eq(redacted)
+
       user.password = "new_password"
       user.ssn = 987654321
       user.save!
       expect(user.audits.last.audited_changes["password"]).to eq([redacted, redacted])
       expect(user.audits.last.audited_changes["ssn"]).to eq([redacted, redacted])
+
+      # If we haven't changed any attrs from 'redacted' list, audit should not contain these keys
+      user.name = "new name"
+      user.save!
+      expect(user.audits.last.audited_changes).to have_key('name')
+      expect(user.audits.last.audited_changes).not_to have_key('password')
+      expect(user.audits.last.audited_changes).not_to have_key('ssn')
     end
 
     it "should redact columns in 'redacted' column with custom option" do
