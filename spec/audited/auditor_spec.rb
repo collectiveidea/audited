@@ -1,8 +1,8 @@
 require "spec_helper"
 
 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
-# also, an additional 3 around `after_touch` for Versions before 6.
-uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 12 : 9
+# also, an additional 6 around `after_touch` for Versions before 6.
+uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 15 : 9
 SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
@@ -452,6 +452,27 @@ describe Audited::Auditor do
         expect {
           on_create_destroy.touch(:suspended_at)
         }.to_not change(Audited::Audit, :count)
+      end
+
+      context "matches previous update audit" do
+        it "should not save an audit if exactly matches the previous update" do
+          time = Time.current
+          @user.update(suspended_at: time)
+          @user.update_columns(suspended_at: nil)
+          expect {
+            @user.touch(:suspended_at, time: time)
+          }.to_not change(Audited::Audit, :count)
+        end
+
+        it "should save an audit if it matches a previous update that isn't the last update" do
+          time = Time.current
+          @user.update(suspended_at: time)
+          @user.update(name: "Another Audit")
+          @user.update_columns(suspended_at: nil)
+          expect {
+            @user.touch(:suspended_at, time: time)
+          }.to change(Audited::Audit, :count)
+        end
       end
     end
   end

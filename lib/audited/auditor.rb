@@ -333,10 +333,16 @@ module Audited
       end
 
       def audit_touch
-        unless (changes = audited_changes(for_touch: true)).empty?
-          write_audit(action: "update", audited_changes: changes,
-            comment: audit_comment)
-        end
+        changes = audited_changes(for_touch: true)
+
+        return if changes.empty?
+
+        audit_attrs = { action: "update", audited_changes: changes, comment: audit_comment }
+
+        # Ensure we're not attempting to audit the same as a just audited update:
+        return if audits.where(audit_attrs).last == audits.last
+
+        write_audit(audit_attrs)
       end
 
       def audit_destroy
