@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Testing Improvements - @vlad-psh
+  [#628](https://github.com/collectiveidea/audited/pull/628)
 - Testing Improvements - @mcyoung
   [#658](https://github.com/collectiveidea/audited/pull/658)
 
