@@ -124,11 +124,12 @@ module Models
       audited
       has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
+      accepts_nested_attributes_for :companies
     end
 
     class OwnedCompany < ::ActiveRecord::Base
       self.table_name = "companies"
-      belongs_to :owner, class_name: "Owner"
+      belongs_to :owner, class_name: "Owner", touch: true
       attr_accessible :name, :owner if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
       audited associated_with: :owner
     end
