@@ -161,5 +161,10 @@ module Models
       self.table_name = "companies"
       audited on: [:create, :update]
     end
+
+    class OnTouchOnly < ::ActiveRecord::Base
+      self.table_name = "users"
+      audited on: [:touch]
+    end
   end
 end
