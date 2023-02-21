@@ -1,8 +1,8 @@
 require "spec_helper"
 
 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
-# also, an additional 3 around `after_touch` for Versions before 6.
-uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 12 : 9
+# also, an additional 5 around `after_touch` for Versions before 6.
+uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 14 : 9
 SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
@@ -146,7 +146,7 @@ describe Audited::Auditor do
     end
 
     it "should be configurable which attributes are not audited via ignored_attributes" do
-      Audited.ignored_attributes = ["delta", "top_secret", "created_at"]
+      Audited.ignored_attributes = ["delta", "top_secret", "created_at", "updated_at"]
 
       expect(Secret.non_audited_columns).to include("delta", "top_secret", "created_at")
     end
@@ -460,6 +460,44 @@ describe Audited::Auditor do
         expect {
           on_create_destroy.touch(:suspended_at)
         }.to_not change(Audited::Audit, :count)
+      end
+
+      context "don't double audit" do
+        let(:user) { Models::ActiveRecord::Owner.create(name: "OwnerUser", suspended_at: 1.month.ago, companies_attributes: [{ name: "OwnedCompany" }]) }
+        let(:company) { user.companies.first }
+
+        it "should only create 1 (create) audit for object" do
+          expect(user.audits.count).to eq(1)
+          expect(user.audits.first.action).to eq("create")
+        end
+
+        it "should only create 1 (create) audit for nested resource" do
+          expect(company.audits.count).to eq(1)
+          expect(company.audits.first.action).to eq("create")
+        end
+
+        context "after creating" do
+          it "updating / touching nested resource shouldn't save touch audit on parent object" do
+            expect { company.touch(:type) }.not_to change(user.audits, :count)
+            expect { company.update(type: "test") }.not_to change(user.audits, :count)
+          end
+
+          it "updating / touching parent object shouldn't save previous data" do
+            expect { user.touch(:suspended_at) }.to change(user.audits, :count).from(1).to(2)
+            expect(user.audits.last.action).to eq("update")
+            expect(user.audits.last.audited_changes.keys).to eq(%w[suspended_at])
+          end
+        end
+
+        context "after updating" do
+          it "changing nested resource shouldn't audit owner" do
+            expect { user.update(username: "test") }.to change(user.audits, :count).from(1).to(2)
+            expect { company.update(type: "test") }.not_to change(user.audits, :count)
+
+            expect { user.touch(:suspended_at) }.to change(user.audits, :count).from(2).to(3)
+            expect { company.update(type: "another_test") }.not_to change(user.audits, :count)
+          end
+        end
       end
     end
   end
