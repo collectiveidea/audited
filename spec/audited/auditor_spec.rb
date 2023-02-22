@@ -2,7 +2,7 @@ require "spec_helper"
 
 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
 # also, an additional 6 around `after_touch` for Versions before 6.
-uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 15 : 9
+uncovered = (ActiveRecord::VERSION::MAJOR < 6) ? 15 : 9
 SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
@@ -234,9 +234,9 @@ describe Audited::Auditor do
       # If we haven't changed any attrs from 'redacted' list, audit should not contain these keys
       user.name = "new name"
       user.save!
-      expect(user.audits.last.audited_changes).to have_key('name')
-      expect(user.audits.last.audited_changes).not_to have_key('password')
-      expect(user.audits.last.audited_changes).not_to have_key('ssn')
+      expect(user.audits.last.audited_changes).to have_key("name")
+      expect(user.audits.last.audited_changes).not_to have_key("password")
+      expect(user.audits.last.audited_changes).not_to have_key("ssn")
     end
 
     it "should redact columns in 'redacted' column with custom option" do
@@ -479,7 +479,7 @@ describe Audited::Auditor do
       end
 
       context "don't double audit" do
-        let(:user) { Models::ActiveRecord::Owner.create(name: "OwnerUser", suspended_at: 1.month.ago, companies_attributes: [{ name: "OwnedCompany" }]) }
+        let(:user) { Models::ActiveRecord::Owner.create(name: "OwnerUser", suspended_at: 1.month.ago, companies_attributes: [{name: "OwnedCompany"}]) }
         let(:company) { user.companies.first }
 
         it "should only create 1 (create) audit for object" do

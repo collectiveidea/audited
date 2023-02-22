@@ -233,12 +233,12 @@ module Audited
 
       def audited_changes(for_touch: false)
         all_changes = if for_touch
-                        previous_changes
-                      elsif respond_to?(:changes_to_save)
-                        changes_to_save
-                      else
-                        changes
-                      end
+          previous_changes
+        elsif respond_to?(:changes_to_save)
+          changes_to_save
+        else
+          changes
+        end
 
         filtered_changes = \
           if audited_options[:only].present?
@@ -252,7 +252,7 @@ module Audited
             next unless audits.present?
 
             audits.last.audited_changes[k].to_json == v.to_json ||
-            audits.last.audited_changes[k].to_json == v[1].to_json
+              audits.last.audited_changes[k].to_json == v[1].to_json
           end
         end
 
