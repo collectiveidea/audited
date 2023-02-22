@@ -1,8 +1,8 @@
 require "spec_helper"
 
 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
-# also, an additional 5 around `after_touch` for Versions before 6.
-uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 14 : 9
+# also, an additional 6 around `after_touch` for Versions before 6.
+uncovered = ActiveRecord::VERSION::MAJOR < 6 ? 15 : 9
 SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
@@ -460,6 +460,22 @@ describe Audited::Auditor do
         expect {
           on_create_destroy.touch(:suspended_at)
         }.to_not change(Audited::Audit, :count)
+      end
+
+      it "should store an audit if touch is the only audit" do
+        on_touch = Models::ActiveRecord::OnTouchOnly.create(name: "Bart")
+        expect {
+          on_touch.update(name: "NotBart")
+        }.to_not change(Audited::Audit, :count)
+        expect {
+          on_touch.touch(:suspended_at)
+        }.to change(on_touch.audits, :count).from(0).to(1)
+
+        @user.audits.destroy_all
+        expect(@user.audits).to be_empty
+        expect {
+          @user.touch(:suspended_at)
+        }.to change(@user.audits, :count).from(0).to(1)
       end
 
       context "don't double audit" do

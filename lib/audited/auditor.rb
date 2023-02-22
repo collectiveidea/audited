@@ -249,6 +249,8 @@ module Audited
 
         if for_touch
           filtered_changes.reject! do |k, v|
+            next unless audits.present?
+
             audits.last.audited_changes[k].to_json == v.to_json ||
             audits.last.audited_changes[k].to_json == v[1].to_json
           end
