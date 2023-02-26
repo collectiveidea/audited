@@ -69,11 +69,6 @@ describe Audited::Audit do
       expect(audit.audited_changes).to eq foo: "bar"
     end
 
-    it "does not unserialize from binary columns" do
-      allow(Audited::YAMLIfTextColumnType).to receive(:text_column?).and_return(false)
-      audit.audited_changes = {foo: "bar"}
-      expect(audit.audited_changes).to eq "{:foo=>\"bar\"}"
-    end
   end
 
   describe "#undo" do

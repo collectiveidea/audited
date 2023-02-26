@@ -10,7 +10,10 @@ module Audited
       :ignored_attributes,
       :max_audits,
       :store_synthesized_enums
-    attr_writer :audit_class
+    attr_writer \
+      :audit_class,
+      :encoding_type
+
 
     def audit_class
       # The audit_class is set as String in the initializer. It can not be constantized during initialization and must
@@ -22,6 +25,20 @@ module Audited
     # remove audit_model in next major version it was only shortly present in 5.1.0
     alias_method :audit_model, :audit_class
     deprecate audit_model: "use Audited.audit_class instead of Audited.audit_model. This method will be removed."
+
+    def encoding_type
+      @encoding_type ||= :json
+    end
+
+    def coder
+      if encoding_type == :json
+        ActiveRecord::Coders::JSON
+      elsif encoding_type == :yaml
+        ActiveRecord::Coders::YAMLColumn
+      else
+        ActiveRecord::Coders::ColumnSerializer
+      end
+    end
 
     def store
       current_store_value = Thread.current.thread_variable_get(:audited_store)

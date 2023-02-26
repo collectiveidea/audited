@@ -15,30 +15,6 @@ module Audited
   # * <tt>created_at</tt>: Time that the change was performed
   #
 
-  class YAMLIfTextColumnType
-    class << self
-      def load(obj)
-        if text_column?
-          ActiveRecord::Coders::YAMLColumn.new(Object).load(obj)
-        else
-          obj
-        end
-      end
-
-      def dump(obj)
-        if text_column?
-          ActiveRecord::Coders::YAMLColumn.new(Object).dump(obj)
-        else
-          obj
-        end
-      end
-
-      def text_column?
-        Audited.audit_class.columns_hash["audited_changes"].type.to_s == "text"
-      end
-    end
-  end
-
   class Audit < ::ActiveRecord::Base
     belongs_to :auditable, polymorphic: true
     belongs_to :user, polymorphic: true
@@ -49,7 +25,7 @@ module Audited
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
 
-    serialize :audited_changes, YAMLIfTextColumnType
+    serialize :audited_changes, coder: Audited.coder
 
     scope :ascending, -> { reorder(version: :asc) }
     scope :descending, -> { reorder(version: :desc) }
