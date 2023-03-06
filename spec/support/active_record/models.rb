@@ -124,11 +124,12 @@ module Models
       audited
       has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
+      accepts_nested_attributes_for :companies
     end
 
     class OwnedCompany < ::ActiveRecord::Base
       self.table_name = "companies"
-      belongs_to :owner, class_name: "Owner"
+      belongs_to :owner, class_name: "Owner", touch: true
       attr_accessible :name, :owner if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
       audited associated_with: :owner
     end
@@ -146,6 +147,11 @@ module Models
       audited on: [:create, :destroy]
     end
 
+    class OnCreateDestroyUser < ::ActiveRecord::Base
+      self.table_name = "users"
+      audited on: [:create, :destroy]
+    end
+
     class OnCreateDestroyExceptName < ::ActiveRecord::Base
       self.table_name = "companies"
       audited except: :name, on: [:create, :destroy]
@@ -154,6 +160,11 @@ module Models
     class OnCreateUpdate < ::ActiveRecord::Base
       self.table_name = "companies"
       audited on: [:create, :update]
+    end
+
+    class OnTouchOnly < ::ActiveRecord::Base
+      self.table_name = "users"
+      audited on: [:touch]
     end
   end
 end

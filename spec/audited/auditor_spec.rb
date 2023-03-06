@@ -1,6 +1,9 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 9 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+# not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
+# also, an additional 6 around `after_touch` for Versions before 6.
+uncovered = (ActiveRecord::VERSION::MAJOR < 6) ? 15 : 9
+SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
   self.table_name = "companies"
@@ -143,7 +146,7 @@ describe Audited::Auditor do
     end
 
     it "should be configurable which attributes are not audited via ignored_attributes" do
-      Audited.ignored_attributes = ["delta", "top_secret", "created_at"]
+      Audited.ignored_attributes = ["delta", "top_secret", "created_at", "updated_at"]
 
       expect(Secret.non_audited_columns).to include("delta", "top_secret", "created_at")
     end
@@ -215,17 +218,25 @@ describe Audited::Auditor do
       redacted = Audited::Auditor::AuditedInstanceMethods::REDACTED
       user =
         Models::ActiveRecord::UserMultipleRedactedAttributes.create(
-          password: "password",
-          ssn: 123456789
+          password: "password"
         )
       user.save!
       expect(user.audits.last.audited_changes["password"]).to eq(redacted)
+      # Saving '[REDACTED]' value for 'ssn' even if value wasn't set explicitly when record was created
       expect(user.audits.last.audited_changes["ssn"]).to eq(redacted)
+
       user.password = "new_password"
       user.ssn = 987654321
       user.save!
       expect(user.audits.last.audited_changes["password"]).to eq([redacted, redacted])
       expect(user.audits.last.audited_changes["ssn"]).to eq([redacted, redacted])
+
+      # If we haven't changed any attrs from 'redacted' list, audit should not contain these keys
+      user.name = "new name"
+      user.save!
+      expect(user.audits.last.audited_changes).to have_key("name")
+      expect(user.audits.last.audited_changes).not_to have_key("password")
+      expect(user.audits.last.audited_changes).not_to have_key("ssn")
     end
 
     it "should redact columns in 'redacted' column with custom option" do
@@ -410,6 +421,99 @@ describe Audited::Auditor do
           @user.audit_comment = "Comment"
           @user.save!
         }.to change(Audited::Audit, :count)
+      end
+    end
+  end
+
+  if ::ActiveRecord::VERSION::MAJOR >= 6
+    describe "on touch" do
+      before do
+        @user = create_user(name: "Brandon", status: :active)
+      end
+
+      it "should save an audit" do
+        expect { @user.touch(:suspended_at) }.to change(Audited::Audit, :count).by(1)
+      end
+
+      it "should set the action to 'update'" do
+        @user.touch(:suspended_at)
+        expect(@user.audits.last.action).to eq("update")
+        expect(Audited::Audit.updates.order(:id).last).to eq(@user.audits.last)
+        expect(@user.audits.updates.last).to eq(@user.audits.last)
+      end
+
+      it "should store the changed attributes" do
+        @user.touch(:suspended_at)
+        expect(@user.audits.last.audited_changes["suspended_at"][0]).to be_nil
+        expect(Time.parse(@user.audits.last.audited_changes["suspended_at"][1].to_s)).to be_within(2.seconds).of(Time.current)
+      end
+
+      it "should store audit comment" do
+        @user.audit_comment = "Here exists a touch comment"
+        @user.touch(:suspended_at)
+        expect(@user.audits.last.action).to eq("update")
+        expect(@user.audits.last.comment).to eq("Here exists a touch comment")
+      end
+
+      it "should not save an audit if only specified on create/destroy" do
+        on_create_destroy = Models::ActiveRecord::OnCreateDestroyUser.create(name: "Bart")
+        expect {
+          on_create_destroy.touch(:suspended_at)
+        }.to_not change(Audited::Audit, :count)
+      end
+
+      it "should store an audit if touch is the only audit" do
+        on_touch = Models::ActiveRecord::OnTouchOnly.create(name: "Bart")
+        expect {
+          on_touch.update(name: "NotBart")
+        }.to_not change(Audited::Audit, :count)
+        expect {
+          on_touch.touch(:suspended_at)
+        }.to change(on_touch.audits, :count).from(0).to(1)
+
+        @user.audits.destroy_all
+        expect(@user.audits).to be_empty
+        expect {
+          @user.touch(:suspended_at)
+        }.to change(@user.audits, :count).from(0).to(1)
+      end
+
+      context "don't double audit" do
+        let(:user) { Models::ActiveRecord::Owner.create(name: "OwnerUser", suspended_at: 1.month.ago, companies_attributes: [{name: "OwnedCompany"}]) }
+        let(:company) { user.companies.first }
+
+        it "should only create 1 (create) audit for object" do
+          expect(user.audits.count).to eq(1)
+          expect(user.audits.first.action).to eq("create")
+        end
+
+        it "should only create 1 (create) audit for nested resource" do
+          expect(company.audits.count).to eq(1)
+          expect(company.audits.first.action).to eq("create")
+        end
+
+        context "after creating" do
+          it "updating / touching nested resource shouldn't save touch audit on parent object" do
+            expect { company.touch(:type) }.not_to change(user.audits, :count)
+            expect { company.update(type: "test") }.not_to change(user.audits, :count)
+          end
+
+          it "updating / touching parent object shouldn't save previous data" do
+            expect { user.touch(:suspended_at) }.to change(user.audits, :count).from(1).to(2)
+            expect(user.audits.last.action).to eq("update")
+            expect(user.audits.last.audited_changes.keys).to eq(%w[suspended_at])
+          end
+        end
+
+        context "after updating" do
+          it "changing nested resource shouldn't audit owner" do
+            expect { user.update(username: "test") }.to change(user.audits, :count).from(1).to(2)
+            expect { company.update(type: "test") }.not_to change(user.audits, :count)
+
+            expect { user.touch(:suspended_at) }.to change(user.audits, :count).from(2).to(3)
+            expect { company.update(type: "another_test") }.not_to change(user.audits, :count)
+          end
+        end
       end
     end
   end
