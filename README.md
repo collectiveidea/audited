@@ -238,7 +238,7 @@ class ApplicationController < ActionController::Base
     if current_user
       current_user
     else
-      'Elon Musk'
+      'Alexander Fleming'
     end
   end
 end
