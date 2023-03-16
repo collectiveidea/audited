@@ -247,12 +247,11 @@ module Audited
             all_changes.except(*self.class.non_audited_columns)
           end
 
-        if for_touch
+        if for_touch && audits.present?
+          last_audit = audits.last.audited_changes
           filtered_changes.reject! do |k, v|
-            next unless audits.present?
-
-            audits.last.audited_changes[k].to_json == v.to_json ||
-              audits.last.audited_changes[k].to_json == v[1].to_json
+            last_audit[k].to_json == v.to_json ||
+            last_audit[k].to_json == v[1].to_json
           end
         end
 
