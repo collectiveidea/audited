@@ -14,9 +14,9 @@ Gem::Specification.new do |gem|
 
   gem.files = `git ls-files`.split($\).reject { |f| f =~ /(\.gemspec)/ }
 
-  gem.required_ruby_version = ">= 2.3.0"
+  gem.required_ruby_version = ">= 2.7.0"
 
-  gem.add_dependency "activerecord", ">= 5.0", "< 7.1"
+  gem.add_dependency "activerecord", ">= 6.0", "< 7.1"
 
   gem.add_development_dependency "appraisal"
   gem.add_development_dependency "rails", ">= 5.0", "< 7.1"

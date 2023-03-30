@@ -8,8 +8,9 @@ Audited
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
 
-Audited currently (5.x) works with Rails 7.0, 6.1, 6.0, 5.2, 5.1, and 5.0.
+Audited currently (5.x) works with Rails 7.0, 6.1, 6.0.
 
+For Rails 5, use gem version 5.x
 For Rails 4, use gem version 4.x
 For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
 
@@ -17,10 +18,6 @@ For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.c
 
 Audited supports and is [tested against](https://github.com/collectiveidea/audited/actions/workflows/ci.yml) the following Ruby versions:
 
-* 2.3 (only tested on Sqlite due to testing issues with other DBs)
-* 2.4
-* 2.5
-* 2.6
 * 2.7
 * 3.0
 * 3.1
