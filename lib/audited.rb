@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_record"
+require "request_store"
 
 module Audited
   class << self
@@ -24,13 +25,7 @@ module Audited
     deprecate audit_model: "use Audited.audit_class instead of Audited.audit_model. This method will be removed."
 
     def store
-      current_store_value = Thread.current.thread_variable_get(:audited_store)
-
-      if current_store_value.nil?
-        Thread.current.thread_variable_set(:audited_store, {})
-      else
-        current_store_value
-      end
+      RequestStore.store[:audited_store] ||= {}
     end
 
     def config
