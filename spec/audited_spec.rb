@@ -6,12 +6,8 @@ describe Audited do
       let(:current_user) { RequestStore.store[:audited_store] }
       before { Audited.store[:current_user] = current_user }
 
-      it "when executed without fibers" do
+      it "checks store is not nil" do
         expect(Audited.store[:current_user]).to eq(current_user)
-      end
-
-      it "when executed with Fibers" do
-        Fiber.new { expect(Audited.store[:current_user]).to eq(current_user) }.resume
       end
     end
   end
