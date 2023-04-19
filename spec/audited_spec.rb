@@ -3,7 +3,7 @@ require "spec_helper"
 describe Audited do
   describe "#store" do
     describe "maintains state of store" do
-      let(:current_user) { "current_user" }
+      let(:current_user) { RequestStore.store[:audited_user] }
       before { Audited.store[:current_user] = current_user }
 
       it "when executed without fibers" do
