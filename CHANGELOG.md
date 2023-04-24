@@ -4,6 +4,8 @@
 
 - Use RequestStore instead of Thread.current for thread-safe requests - @tiagocassio
   [#669](https://github.com/collectiveidea/audited/pull/669)
+- Clean up Touch audits - @mcyoung, @akostadinov
+  [#668](https://github.com/collectiveidea/audited/pull/668)
 
 ## 5.3.2 (2023-02-22)
 
