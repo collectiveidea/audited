@@ -13,7 +13,7 @@ module Audited
   #
   # See <tt>Audited::Auditor::ClassMethods#audited</tt>
   # for configuration options
-  module Auditor #:nodoc:
+  module Auditor # :nodoc:
     extend ActiveSupport::Concern
 
     CALLBACKS = [:audit_create, :audit_update, :audit_destroy]
@@ -84,6 +84,7 @@ module Audited
 
         after_create :audit_create if audited_options[:on].include?(:create)
         before_update :audit_update if audited_options[:on].include?(:update)
+        after_touch :audit_touch if audited_options[:on].include?(:touch) && ::ActiveRecord::VERSION::MAJOR >= 6
         before_destroy :audit_destroy if audited_options[:on].include?(:destroy)
 
         # Avoid orphaned audits
@@ -177,14 +178,15 @@ module Audited
       # List of attributes that are audited.
       def audited_attributes
         audited_attributes = attributes.except(*self.class.non_audited_columns)
+        audited_attributes = redact_values(audited_attributes)
+        audited_attributes = filter_encrypted_attrs(audited_attributes)
         normalize_enum_changes(audited_attributes)
       end
 
       # Returns a list combined of record audits and associated audits.
       def own_and_associated_audits
-        Audited.audit_class.unscoped
-          .where("(auditable_type = :type AND auditable_id = :id) OR (associated_type = :type AND associated_id = :id)",
-            type: self.class.base_class.name, id: id)
+        Audited.audit_class.unscoped.where(auditable: self)
+          .or(Audited.audit_class.unscoped.where(associated: self))
           .order(created_at: :desc)
       end
 
@@ -195,8 +197,13 @@ module Audited
         combine_target.comment = "#{combine_target.comment}\nThis audit is the result of multiple audits being combined."
 
         transaction do
-          combine_target.save!
-          audits_to_combine.unscope(:limit).where("version < ?", combine_target.version).delete_all
+          begin
+            combine_target.save!
+            audits_to_combine.unscope(:limit).where("version < ?", combine_target.version).delete_all
+          rescue ActiveRecord::Deadlocked
+            # Ignore Deadlocks, if the same record is getting its old audits combined more than once at the same time then
+            # both combining operations will be the same. Ignoring this error allows one of the combines to go through successfully.
+          end
         end
       end
 
@@ -229,8 +236,15 @@ module Audited
 
       private
 
-      def audited_changes
-        all_changes = respond_to?(:changes_to_save) ? changes_to_save : changes
+      def audited_changes(for_touch: false)
+        all_changes = if for_touch
+          previous_changes
+        elsif respond_to?(:changes_to_save)
+          changes_to_save
+        else
+          changes
+        end
+
         filtered_changes = \
           if audited_options[:only].present?
             all_changes.slice(*self.class.audited_columns)
@@ -238,7 +252,15 @@ module Audited
             all_changes.except(*self.class.non_audited_columns)
           end
 
+        if for_touch && (last_audit = audits.last&.audited_changes)
+          filtered_changes.reject! do |k, v|
+            last_audit[k].to_json == v.to_json ||
+            last_audit[k].to_json == v[1].to_json
+          end
+        end
+
         filtered_changes = redact_values(filtered_changes)
+        filtered_changes = filter_encrypted_attrs(filtered_changes)
         filtered_changes = normalize_enum_changes(filtered_changes)
         filtered_changes.to_hash
       end
@@ -262,19 +284,36 @@ module Audited
       end
 
       def redact_values(filtered_changes)
-        [audited_options[:redacted]].flatten.compact.each do |option|
-          changes = filtered_changes[option.to_s]
-          new_value = audited_options[:redaction_value] || REDACTED
-          values = if changes.is_a? Array
-            changes.map { new_value }
-          else
-            new_value
-          end
-          hash = {option.to_s => values}
-          filtered_changes.merge!(hash)
+        filter_attr_values(
+          audited_changes: filtered_changes,
+          attrs: Array(audited_options[:redacted]).map(&:to_s),
+          placeholder: audited_options[:redaction_value] || REDACTED
+        )
+      end
+
+      def filter_encrypted_attrs(filtered_changes)
+        filter_attr_values(
+          audited_changes: filtered_changes,
+          attrs: respond_to?(:encrypted_attributes) ? Array(encrypted_attributes).map(&:to_s) : []
+        )
+      end
+
+      # Replace values for given attrs to a placeholder and return modified hash
+      #
+      # @param audited_changes [Hash] Hash of changes to be saved to audited version record
+      # @param attrs [Array<String>] Array of attrs, values of which will be replaced to placeholder value
+      # @param placeholder [String] Placeholder to replace original attr values
+      def filter_attr_values(audited_changes: {}, attrs: [], placeholder: "[FILTERED]")
+        attrs.each do |attr|
+          next unless audited_changes.key?(attr)
+
+          changes = audited_changes[attr]
+          values = changes.is_a?(Array) ? changes.map { placeholder } : placeholder
+
+          audited_changes[attr] = values
         end
 
-        filtered_changes
+        audited_changes
       end
 
       def rails_below?(rails_version)
@@ -295,20 +334,27 @@ module Audited
 
       def audit_create
         write_audit(action: "create", audited_changes: audited_attributes,
-                    comment: audit_comment)
+          comment: audit_comment)
       end
 
       def audit_update
         unless (changes = audited_changes).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
           write_audit(action: "update", audited_changes: changes,
-                      comment: audit_comment)
+            comment: audit_comment)
+        end
+      end
+
+      def audit_touch
+        unless (changes = audited_changes(for_touch: true)).empty?
+          write_audit(action: "update", audited_changes: changes,
+            comment: audit_comment)
         end
       end
 
       def audit_destroy
         unless new_record?
           write_audit(action: "destroy", audited_changes: audited_attributes,
-                      comment: audit_comment)
+            comment: audit_comment)
         end
       end
 
@@ -402,7 +448,7 @@ module Audited
       #   end
       #
       def without_auditing
-        auditing_was_enabled = auditing_enabled
+        auditing_was_enabled = class_auditing_enabled
         disable_auditing
         yield
       ensure
@@ -416,7 +462,7 @@ module Audited
       #   end
       #
       def with_auditing
-        auditing_was_enabled = auditing_enabled
+        auditing_was_enabled = class_auditing_enabled
         enable_auditing
         yield
       ensure
@@ -440,7 +486,7 @@ module Audited
       end
 
       def auditing_enabled
-        Audited.store.fetch("#{table_name}_auditing_enabled", true) && Audited.auditing_enabled
+        class_auditing_enabled && Audited.auditing_enabled
       end
 
       def auditing_enabled=(val)
@@ -455,7 +501,7 @@ module Audited
 
       def normalize_audited_options
         audited_options[:on] = Array.wrap(audited_options[:on])
-        audited_options[:on] = [:create, :update, :destroy] if audited_options[:on].empty?
+        audited_options[:on] = [:create, :update, :touch, :destroy] if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
         max_audits = audited_options[:max_audits] || Audited.max_audits
@@ -470,6 +516,10 @@ module Audited
         else
           default_ignored_attributes
         end
+      end
+
+      def class_auditing_enabled
+        Audited.store.fetch("#{table_name}_auditing_enabled", true)
       end
     end
   end

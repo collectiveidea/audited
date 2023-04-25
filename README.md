@@ -2,7 +2,6 @@ Audited
 [![Gem Version](https://img.shields.io/gem/v/audited.svg)](http://rubygems.org/gems/audited)
 ![Build Status](https://github.com/collectiveidea/audited/actions/workflows/ci.yml/badge.svg)
 [![Code Climate](https://codeclimate.com/github/collectiveidea/audited.svg)](https://codeclimate.com/github/collectiveidea/audited)
-[![Security](https://hakiri.io/github/collectiveidea/audited/master.svg)](https://hakiri.io/github/collectiveidea/audited/master)
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 =======
 
@@ -18,12 +17,14 @@ For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.c
 
 Audited supports and is [tested against](https://github.com/collectiveidea/audited/actions/workflows/ci.yml) the following Ruby versions:
 
-* 2.3
+* 2.3 (only tested on Sqlite due to testing issues with other DBs)
 * 2.4
 * 2.5
 * 2.6
 * 2.7
 * 3.0
+* 3.1
+* 3.2
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
@@ -36,7 +37,7 @@ Audited is currently ActiveRecord-only. In a previous life, Audited worked with 
 Add the gem to your Gemfile:
 
 ```ruby
-gem "audited", "~> 5.0"
+gem "audited"
 ```
 
 And if you're using ```require: false``` you must add initializers like this:
@@ -237,7 +238,7 @@ class ApplicationController < ActionController::Base
     if current_user
       current_user
     else
-      'Elon Musk'
+      'Alexander Fleming'
     end
   end
 end
@@ -286,6 +287,7 @@ class User < ActiveRecord::Base
 end
 
 class Company < ActiveRecord::Base
+  audited
   has_many :users
   has_associated_audits
 end
@@ -313,8 +315,6 @@ If you want to audit only under specific conditions, you can provide conditional
 ```ruby
 class User < ActiveRecord::Base
   audited if: :active?
-
-  private
 
   def active?
     last_login > 6.months.ago
@@ -386,6 +386,17 @@ User.auditing_enabled = false
 end
 ```
 
+### Encrypted attributes
+
+If you're using ActiveRecord's encryption (available from Rails 7) to encrypt some attributes, Audited will automatically filter values of these attributes. No additional configuration is required. Changes to encrypted attributes will be logged as `[FILTERED]`.
+
+```ruby
+class User < ActiveRecord::Base
+  audited
+  encrypts :password
+end
+```
+
 ### Custom `Audit` model
 
 If you want to extend or modify the audit model, create a new class that
@@ -402,7 +413,7 @@ Then set it in an initializer:
 # config/initializers/audited.rb
 
 Audited.config do |config|
-  config.audit_class = CustomAudit
+  config.audit_class = "CustomAudit"
 end
 ```
 
@@ -418,7 +429,7 @@ Audited.store_synthesized_enums = true
 
 ## Support
 
-You can find documentation at: http://rdoc.info/github/collectiveidea/audited
+You can find documentation at: https://www.rubydoc.info/gems/audited
 
 Or join the [mailing list](http://groups.google.com/group/audited) to get help or offer suggestions.
 

@@ -37,7 +37,7 @@ describe Audited::Audit do
 
     context "when a custom audit class is configured" do
       it "should be used in place of #{described_class}" do
-        Audited.config { |config| config.audit_class = CustomAudit }
+        Audited.config { |config| config.audit_class = "CustomAudit" }
         TempModel1.audited
 
         record = TempModel1.create

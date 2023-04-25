@@ -17,6 +17,7 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = ">= 2.3.0"
 
   gem.add_dependency "activerecord", ">= 5.0", "< 7.1"
+  gem.add_dependency "request_store", "~> 1.2"
 
   gem.add_development_dependency "appraisal"
   gem.add_development_dependency "rails", ">= 5.0", "< 7.1"
@@ -30,7 +31,7 @@ Gem::Specification.new do |gem|
     gem.add_development_dependency "activerecord-jdbcpostgresql-adapter", "~> 1.3"
     gem.add_development_dependency "activerecord-jdbcmysql-adapter", "~> 1.3"
   else
-    gem.add_development_dependency "sqlite3", "~> 1.3"
+    gem.add_development_dependency "sqlite3", ">= 1.3.6"
     gem.add_development_dependency "mysql2", ">= 0.3.20"
     gem.add_development_dependency "pg", ">= 0.18", "< 2.0"
   end
