@@ -145,6 +145,12 @@ class User < ActiveRecord::Base
 end
 ```
 
+You can ignore the default callbacks globally unless the callback action is specified in your model using the `:on` option. To configure default callback exclusion, put the following in an initializer file (`config/initializers/audited.rb`):
+
+```ruby
+Audited.ignored_default_callbacks = [:create, :update] # ignore callbacks create and delete
+```
+
 ### Comments
 
 You can attach comments to each audit using an `audit_comment` attribute on your model.

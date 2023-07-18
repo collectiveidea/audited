@@ -9,6 +9,7 @@ module Audited
       :auditing_enabled,
       :current_user_method,
       :ignored_attributes,
+      :ignored_default_callbacks,
       :max_audits,
       :store_synthesized_enums
     attr_writer :audit_class
@@ -34,6 +35,7 @@ module Audited
   end
 
   @ignored_attributes = %w[lock_version created_at updated_at created_on updated_on]
+  @ignored_default_callbacks = []
 
   @current_user_method = :current_user
   @auditing_enabled = true
