@@ -148,18 +148,19 @@ module Audited
 
     # @private
     def self.reconstruct_attributes(audits)
-      unless audits.first&.action == "create"
-        later_attributes = audits.last.descendants.each_with_object({}) do |audit, all|
-          all.merge!(audit.old_attributes)
-        end
-      end
-
       previous_attributes = audits.each_with_object({}) do |audit, all|
         all.merge!(audit.new_attributes)
         all[:audit_version] = audit.version
       end
 
-      later_attributes.merge(previous_attributes)
+      unless audits.empty? || audits.first.action == "create"
+        later_attributes = audits.last.descendants.each_with_object({}) do |audit, all|
+          all.merge!(audit.old_attributes)
+        end
+        return later_attributes.merge(previous_attributes)
+      end
+
+      previous_attributes
     end
 
     # @private
