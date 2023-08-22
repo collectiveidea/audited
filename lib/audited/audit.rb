@@ -61,9 +61,14 @@ module Audited
     scope :from_version, ->(version) { where("version >= ?", version) }
     scope :to_version, ->(version) { where("version <= ?", version) }
     scope :auditable_finder, ->(auditable_id, auditable_type) { where(auditable_id: auditable_id, auditable_type: auditable_type) }
-    # Return all audits older than the current one.
+    # Return all audits older than and the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
+    end
+
+    # Returns all the audits younger than and the current one.
+    def descendants
+      self.class.ascending.auditable_finder(auditable_id, auditable_type).from_version(version)
     end
 
     # Return an instance of what the object looked like at this revision. If
@@ -143,10 +148,18 @@ module Audited
 
     # @private
     def self.reconstruct_attributes(audits)
-      audits.each_with_object({}) do |audit, all|
+      unless audits.first&.action == "create"
+        later_attributes = audits.last.descendants.each_with_object({}) do |audit, all|
+          all.merge!(audit.old_attributes)
+        end
+      end
+
+      previous_attributes = audits.each_with_object({}) do |audit, all|
         all.merge!(audit.new_attributes)
         all[:audit_version] = audit.version
       end
+
+      later_attributes.merge(previous_attributes)
     end
 
     # @private

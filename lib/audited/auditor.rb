@@ -415,6 +415,11 @@ module Audited
 
       def reconstruct_attributes(audits)
         attributes = {}
+
+        unless self.audits.creates.any?
+          self.audits.each { |audit| attributes.merge!(audit.old_attributes) }
+        end
+
         audits.each { |audit| attributes.merge!(audit.new_attributes) }
         attributes
       end
