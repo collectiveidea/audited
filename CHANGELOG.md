@@ -1,5 +1,10 @@
 # Audited ChangeLog
 
+## 5.4.0 (2023-09-30)
+
+- Add Rails 7.1 support - @yuki24
+  [#686](https://github.com/collectiveidea/audited/pull/686)
+
 ## 5.3.3 (2023-03-24)
 
 - Use RequestStore instead of Thread.current for thread-safe requests - @tiagocassio

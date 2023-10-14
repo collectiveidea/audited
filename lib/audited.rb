@@ -22,7 +22,8 @@ module Audited
 
     # remove audit_model in next major version it was only shortly present in 5.1.0
     alias_method :audit_model, :audit_class
-    deprecate audit_model: "use Audited.audit_class instead of Audited.audit_model. This method will be removed."
+    deprecate audit_model: "use Audited.audit_class instead of Audited.audit_model. This method will be removed.",
+              deprecator: ActiveSupport::Deprecation.new('6.0.0', 'Audited')
 
     def store
       RequestStore.store[:audited_store] ||= {}
