@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "active_record"
-require "request_store"
 
 module Audited
   class << self
@@ -26,7 +25,7 @@ module Audited
               deprecator: ActiveSupport::Deprecation.new('6.0.0', 'Audited')
 
     def store
-      RequestStore.store[:audited_store] ||= {}
+      Audited::RequestStore.audited_store ||= {}
     end
 
     def config
@@ -42,6 +41,7 @@ module Audited
 end
 
 require "audited/auditor"
+require "audited/request_store"
 
 ActiveSupport.on_load :active_record do
   require "audited/audit"
