@@ -1,5 +1,12 @@
 # Audited ChangeLog
 
+## 5.4.1 (2023-09-30)
+
+- Replace RequestStore with ActiveSupport::CurrentAttributes - @the-spectator
+  [#673](https://github.com/collectiveidea/audited/pull/673/)
+- Don't require railtie when used outside of Rails - @nicduke38degrees
+  [#665](https://github.com/collectiveidea/audited/pull/665)
+
 ## 5.4.0 (2023-09-30)
 
 - Add Rails 7.1 support - @yuki24
