@@ -5,11 +5,11 @@ module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
       audited except: :password
-      attribute :non_column_attr if Rails.version >= "5.1"
+      attribute :non_column_attr if Rails.gem_version >= Gem::Version.new("5.1")
       attr_protected :logins if respond_to?(:attr_protected)
       enum status: {active: 0, reliable: 1, banned: 2}
 
-      if Rails.version >= "7.1"
+      if Rails.gem_version >= Gem::Version.new("7.1")
         serialize :phone_numbers, type: Array
       else
         serialize :phone_numbers, Array
@@ -27,7 +27,7 @@ module Models
 
     class UserOnlyPassword < ::ActiveRecord::Base
       self.table_name = :users
-      attribute :non_column_attr if Rails.version >= "5.1"
+      attribute :non_column_attr if Rails.gem_version >= Gem::Version.new("5.1")
       audited only: :password
     end
 
