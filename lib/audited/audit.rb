@@ -49,7 +49,11 @@ module Audited
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
 
-    serialize :audited_changes, YAMLIfTextColumnType
+    if Rails.version >= "7.1"
+      serialize :audited_changes, coder: YAMLIfTextColumnType
+    else
+      serialize :audited_changes, YAMLIfTextColumnType
+    end
 
     scope :ascending, -> { reorder(version: :asc) }
     scope :descending, -> { reorder(version: :desc) }
@@ -174,7 +178,7 @@ module Audited
       if action == "create"
         self.version = 1
       else
-        collection = (Rails::VERSION::MAJOR >= 6) ? self.class.unscoped : self.class
+        collection = (ActiveRecord::VERSION::MAJOR >= 6) ? self.class.unscoped : self.class
         max = collection.auditable_finder(auditable_id, auditable_type).maximum(:version) || 0
         self.version = max + 1
       end

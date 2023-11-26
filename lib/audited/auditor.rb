@@ -84,6 +84,7 @@ module Audited
 
         after_create :audit_create if audited_options[:on].include?(:create)
         before_update :audit_update if audited_options[:on].include?(:update)
+        after_touch :audit_touch if audited_options[:on].include?(:touch) && ::ActiveRecord::VERSION::MAJOR >= 6
         before_destroy :audit_destroy if audited_options[:on].include?(:destroy)
 
         # Define and set after_audit and around_audit callbacks. This might be useful if you want
@@ -230,14 +231,28 @@ module Audited
 
       private
 
-      def audited_changes
-        all_changes = respond_to?(:changes_to_save) ? changes_to_save : changes
+      def audited_changes(for_touch: false)
+        all_changes = if for_touch
+          previous_changes
+        elsif respond_to?(:changes_to_save)
+          changes_to_save
+        else
+          changes
+        end
+
         filtered_changes = \
           if audited_options[:only].present?
             all_changes.slice(*self.class.audited_columns)
           else
             all_changes.except(*self.class.non_audited_columns)
           end
+
+        if for_touch && (last_audit = audits.last&.audited_changes)
+          filtered_changes.reject! do |k, v|
+            last_audit[k].to_json == v.to_json ||
+            last_audit[k].to_json == v[1].to_json
+          end
+        end
 
         filtered_changes = redact_values(filtered_changes)
         filtered_changes = filter_encrypted_attrs(filtered_changes)
@@ -319,6 +334,13 @@ module Audited
 
       def audit_update
         unless (changes = audited_changes).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
+          write_audit(action: "update", audited_changes: changes,
+            comment: audit_comment)
+        end
+      end
+
+      def audit_touch
+        unless (changes = audited_changes(for_touch: true)).empty?
           write_audit(action: "update", audited_changes: changes,
             comment: audit_comment)
         end
@@ -474,7 +496,7 @@ module Audited
 
       def normalize_audited_options
         audited_options[:on] = Array.wrap(audited_options[:on])
-        audited_options[:on] = [:create, :update, :destroy] if audited_options[:on].empty?
+        audited_options[:on] = [:create, :update, :touch, :destroy] if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
         max_audits = audited_options[:max_audits] || Audited.max_audits

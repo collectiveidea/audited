@@ -1,6 +1,6 @@
 require "spec_helper"
 
-SingleCov.covered! uncovered: 1 # Rails version check
+SingleCov.covered! uncovered: 2 # Rails version check
 
 class CustomAudit < Audited::Audit
   def custom_method

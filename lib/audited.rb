@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_record"
+require "request_store"
 
 module Audited
   class << self
@@ -21,16 +22,11 @@ module Audited
 
     # remove audit_model in next major version it was only shortly present in 5.1.0
     alias_method :audit_model, :audit_class
-    deprecate audit_model: "use Audited.audit_class instead of Audited.audit_model. This method will be removed."
+    deprecate audit_model: "use Audited.audit_class instead of Audited.audit_model. This method will be removed.",
+              deprecator: ActiveSupport::Deprecation.new('6.0.0', 'Audited')
 
     def store
-      current_store_value = Thread.current.thread_variable_get(:audited_store)
-
-      if current_store_value.nil?
-        Thread.current.thread_variable_set(:audited_store, {})
-      else
-        current_store_value
-      end
+      RequestStore.store[:audited_store] ||= {}
     end
 
     def config
@@ -53,4 +49,4 @@ ActiveSupport.on_load :active_record do
 end
 
 require "audited/sweeper"
-require "audited/railtie"
+require "audited/railtie" if Audited.const_defined?(:Rails)

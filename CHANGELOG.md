@@ -1,7 +1,48 @@
 # Audited ChangeLog
 
-## Unreleased
+## 5.4.2 (2023-11-30)
 
+- Revert replacing RequetStore with ActiveSupport::CurrentAttributes until it is fully tested.
+
+## 5.4.1 (2023-11-30)
+
+- Replace RequestStore with ActiveSupport::CurrentAttributes - @the-spectator
+  [#673](https://github.com/collectiveidea/audited/pull/673/)
+- Don't require railtie when used outside of Rails - @nicduke38degrees
+  [#665](https://github.com/collectiveidea/audited/pull/665)
+
+## 5.4.0 (2023-09-30)
+
+- Add Rails 7.1 support - @yuki24
+  [#686](https://github.com/collectiveidea/audited/pull/686)
+
+## 5.3.3 (2023-03-24)
+
+- Use RequestStore instead of Thread.current for thread-safe requests - @tiagocassio
+  [#669](https://github.com/collectiveidea/audited/pull/669)
+- Clean up Touch audits - @mcyoung, @akostadinov
+  [#668](https://github.com/collectiveidea/audited/pull/668)
+
+## 5.3.2 (2023-02-22)
+
+- Touch audit bug fixes - @mcyoung
+  [#662](https://github.com/collectiveidea/audited/pull/662)
+
+## 5.3.1 (2023-02-21)
+
+- Ensure touch support doesn't cause double audits - @mcyoung
+  [#660](https://github.com/collectiveidea/audited/pull/660)
+- Testing Improvements - @vlad-psh
+  [#628](https://github.com/collectiveidea/audited/pull/628)
+- Testing Improvements - @mcyoung
+  [#658](https://github.com/collectiveidea/audited/pull/658)
+
+## 5.3.0 (2023-02-14)
+
+- Audit touch calls - @mcyoung
+  [#657](https://github.com/collectiveidea/audited/pull/657)
+- Allow using with Padrino and other non-Rails projects - @nicduke38degrees
+  [#655](https://github.com/collectiveidea/audited/pull/655)
 - Testing updates - @jdufresne
   [#652](https://github.com/collectiveidea/audited/pull/652)
   [#653](https://github.com/collectiveidea/audited/pull/653)

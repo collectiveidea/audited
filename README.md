@@ -8,7 +8,7 @@ Audited
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
 
-Audited currently (5.x) works with Rails 7.0, 6.1, 6.0, 5.2, 5.1, and 5.0.
+Audited currently (5.x) works with Rails 7.1, 7.0, 6.1, 6.0, 5.2, 5.1, and 5.0.
 
 For Rails 4, use gem version 4.x
 For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
@@ -37,7 +37,7 @@ Audited is currently ActiveRecord-only. In a previous life, Audited worked with 
 Add the gem to your Gemfile:
 
 ```ruby
-gem "audited", "~> 5.0"
+gem "audited"
 ```
 
 And if you're using ```require: false``` you must add initializers like this:
@@ -238,7 +238,7 @@ class ApplicationController < ActionController::Base
     if current_user
       current_user
     else
-      'Elon Musk'
+      'Alexander Fleming'
     end
   end
 end
