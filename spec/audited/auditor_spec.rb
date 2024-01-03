@@ -358,6 +358,12 @@ describe Audited::Auditor do
         Models::ActiveRecord::OnUpdateDestroy.create!(name: "Bart")
       }.to_not change(Audited::Audit, :count)
     end
+
+    it "should save readonly columns" do
+      expect {
+        Models::ActiveRecord::UserWithReadOnlyAttrs.create!(name: "Bart")
+      }.to change(Audited::Audit, :count)
+    end
   end
 
   describe "on update" do
@@ -407,6 +413,16 @@ describe Audited::Auditor do
       expect { @user.update_attribute :logins, "0" }.to_not change(Audited::Audit, :count)
       expect { @user.update_attribute :activated, 1 }.to_not change(Audited::Audit, :count)
       expect { @user.update_attribute :activated, "1" }.to_not change(Audited::Audit, :count)
+    end
+
+    context "with readonly attributes" do
+      before do
+        @user = create_user_with_readonly_attrs(status: "active")
+      end
+
+      it "should not save readonly columns" do
+        expect { @user.update! status: "banned" }.to_not change(Audited::Audit, :count)
+      end
     end
 
     describe "with no dirty changes" do

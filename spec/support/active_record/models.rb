@@ -54,6 +54,12 @@ module Models
       end
     end
 
+    class UserWithReadOnlyAttrs < ::ActiveRecord::Base
+      self.table_name = :users
+      audited
+      attr_readonly :status
+    end
+
     class CommentRequiredUser < ::ActiveRecord::Base
       self.table_name = :users
       audited except: :password, comment_required: true
