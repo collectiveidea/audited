@@ -498,7 +498,7 @@ module Audited
 
       def normalize_audited_options
         audited_options[:on] = Array.wrap(audited_options[:on])
-        audited_options[:on] = [:create, :update, :touch, :destroy] if audited_options[:on].empty?
+        audited_options[:on] = ([:create, :update, :touch, :destroy] - Audited.ignored_default_callbacks) if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
         max_audits = audited_options[:max_audits] || Audited.max_audits
