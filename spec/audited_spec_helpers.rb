@@ -3,6 +3,10 @@ module AuditedSpecHelpers
     Models::ActiveRecord::User.create({name: "Brandon", username: "brandon", password: "password", favourite_device: "Android Phone"}.merge(attrs))
   end
 
+  def create_user_with_readonly_attrs(attrs = {})
+    Models::ActiveRecord::UserWithReadOnlyAttrs.create({name: "Brandon", username: "brandon", password: "password", favourite_device: "Android Phone"}.merge(attrs))
+  end
+
   def build_user(attrs = {})
     Models::ActiveRecord::User.new({name: "darth", username: "darth", password: "noooooooo"}.merge(attrs))
   end
