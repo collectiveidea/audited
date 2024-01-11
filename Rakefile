@@ -5,8 +5,6 @@ require "rspec/core/rake_task"
 require "rake/testtask"
 require "appraisal"
 
-Bundler::GemHelper.install_tasks(name: "audited")
-
 RSpec::Core::RakeTask.new(:spec)
 
 Rake::TestTask.new do |t|

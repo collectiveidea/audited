@@ -7,6 +7,7 @@ on:
 
 jobs:
   push:
+    if: github.repository == 'collectiveidea/audited'
     runs-on: ubuntu-latest
 
     permissions:
