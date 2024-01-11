@@ -133,7 +133,7 @@ end
 
 ### Specifying callbacks
 
-By default, a new audit is created for any Create, Update or Destroy action. You can, however, limit the actions audited.
+By default, a new audit is created for any Create, Update, Touch (Rails 6+) or Destroy action. You can, however, limit the actions audited.
 
 ```ruby
 class User < ActiveRecord::Base
