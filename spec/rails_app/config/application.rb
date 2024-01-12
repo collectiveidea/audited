@@ -30,7 +30,7 @@ module RailsApp
           ActiveSupport::TimeWithZone ActiveSupport::TimeZone ActiveSupport::HashWithIndifferentAccess]
     end
 
-    if Rails.version >= "7.1"
+    if Rails.gem_version >= Gem::Version.new("7.1")
       config.active_support.cache_format_version = 7.1
     end
   end

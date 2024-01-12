@@ -245,6 +245,27 @@ describe Audited::Auditor do
       expect(user.audits.last.audited_changes["password"]).to eq(["My", "Custom", "Value", 7])
     end
 
+    context "when ignored_default_callbacks is set" do
+      before { Audited.ignored_default_callbacks = [:create] }
+      after { Audited.ignored_default_callbacks = [] }
+
+      it "should remove create callback" do
+        class DefaultCallback < ::ActiveRecord::Base
+          audited
+        end
+
+        expect(DefaultCallback.audited_options[:on]).to eq([:update, :touch, :destroy])
+      end
+
+      it "should keep create callback if specified" do
+        class CallbacksSpecified < ::ActiveRecord::Base
+          audited on: [:create, :update, :destroy]
+        end
+
+        expect(CallbacksSpecified.audited_options[:on]).to eq([:create, :update, :destroy])
+      end
+    end
+
     if ::ActiveRecord::VERSION::MAJOR >= 7
       it "should filter encrypted attributes" do
         user = Models::ActiveRecord::UserWithEncryptedPassword.create(password: "password")
@@ -358,6 +379,12 @@ describe Audited::Auditor do
         Models::ActiveRecord::OnUpdateDestroy.create!(name: "Bart")
       }.to_not change(Audited::Audit, :count)
     end
+
+    it "should save readonly columns" do
+      expect {
+        Models::ActiveRecord::UserWithReadOnlyAttrs.create!(name: "Bart")
+      }.to change(Audited::Audit, :count)
+    end
   end
 
   describe "on update" do
@@ -407,6 +434,16 @@ describe Audited::Auditor do
       expect { @user.update_attribute :logins, "0" }.to_not change(Audited::Audit, :count)
       expect { @user.update_attribute :activated, 1 }.to_not change(Audited::Audit, :count)
       expect { @user.update_attribute :activated, "1" }.to_not change(Audited::Audit, :count)
+    end
+
+    context "with readonly attributes" do
+      before do
+        @user = create_user_with_readonly_attrs(status: "active")
+      end
+
+      it "should not save readonly columns" do
+        expect { @user.update! status: "banned" }.to_not change(Audited::Audit, :count)
+      end
     end
 
     describe "with no dirty changes" do

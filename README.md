@@ -133,16 +133,22 @@ end
 
 ### Specifying callbacks
 
-By default, a new audit is created for any Create, Update or Destroy action. You can, however, limit the actions audited.
+By default, a new audit is created for any Create, Update, Touch (Rails 6+) or Destroy action. You can, however, limit the actions audited.
 
 ```ruby
 class User < ActiveRecord::Base
   # All fields and actions
   # audited
 
-  # Single field, only audit Update and Destroy (not Create)
+  # Single field, only audit Update and Destroy (not Create or Touch)
   # audited only: :name, on: [:update, :destroy]
 end
+```
+
+You can ignore the default callbacks globally unless the callback action is specified in your model using the `:on` option. To configure default callback exclusion, put the following in an initializer file (`config/initializers/audited.rb`):
+
+```ruby
+Audited.ignored_default_callbacks = [:create, :update] # ignore callbacks create and update
 ```
 
 ### Comments

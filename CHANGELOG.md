@@ -1,5 +1,14 @@
 # Audited ChangeLog
 
+### 5.4.3 (2024-01-11)
+
+- Ignore readonly columns in audit - @sriddbs
+  [#692](https://github.com/collectiveidea/audited/pull/692)
+- Robustify Rails version checks - @blaet
+  [#689](https://github.com/collectiveidea/audited/pull/689)
+-  Ignore callbacks if not specifed on the model
+  [#679](https://github.com/collectiveidea/audited/pull/679)
+
 ## 5.4.2 (2023-11-30)
 
 - Revert replacing RequetStore with ActiveSupport::CurrentAttributes until it is fully tested.
