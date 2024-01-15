@@ -289,6 +289,8 @@ module Audited
       end
 
       def filter_encrypted_attrs(filtered_changes)
+        return filtered_changes unless filter_encrypted_attributes?
+
         filter_attr_values(
           audited_changes: filtered_changes,
           attrs: respond_to?(:encrypted_attributes) ? Array(encrypted_attributes).map(&:to_s) : []
@@ -419,6 +421,10 @@ module Audited
         attributes = {}
         audits.each { |audit| attributes.merge!(audit.new_attributes) }
         attributes
+      end
+
+      def filter_encrypted_attributes?
+        Audited.filter_encrypted_attributes
       end
     end
 

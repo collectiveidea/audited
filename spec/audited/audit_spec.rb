@@ -74,6 +74,24 @@ describe Audited::Audit do
       audit.audited_changes = {foo: "bar"}
       expect(audit.audited_changes).to eq "{:foo=>\"bar\"}"
     end
+
+    if ::ActiveRecord::VERSION::MAJOR >= 7
+      context "when encryption is enabled" do
+        before do
+          Audited.encrypt_audited_changes = true
+        end
+
+        it "encrypts the whole column" do
+          company = Models::ActiveRecord::EncryptCompanyAuditedChanges.create!(name: "CollectiveIdea")
+
+          audit = company.audits.last
+          audited_changes = audit.audited_changes
+
+          expect({"name"=>"CollectiveIdea", "owner_id"=>nil}).not_to eq(audit.ciphertext_for(:audited_changes))
+          expect({"name"=>"CollectiveIdea", "owner_id"=>nil}).to eq(audited_changes)
+        end
+      end
+    end
   end
 
   describe "#undo" do
