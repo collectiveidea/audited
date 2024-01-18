@@ -249,6 +249,8 @@ module Audited
             all_changes.except(*self.class.non_audited_columns)
           end
 
+        filtered_changes = normalize_enum_changes(filtered_changes)
+
         if for_touch && (last_audit = audits.last&.audited_changes)
           filtered_changes.reject! do |k, v|
             last_audit[k].to_json == v.to_json ||
@@ -258,7 +260,6 @@ module Audited
 
         filtered_changes = redact_values(filtered_changes)
         filtered_changes = filter_encrypted_attrs(filtered_changes)
-        filtered_changes = normalize_enum_changes(filtered_changes)
         filtered_changes.to_hash
       end
 
