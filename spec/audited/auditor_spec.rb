@@ -2,7 +2,7 @@ require "spec_helper"
 
 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
 # also, an additional 6 around `after_touch` for Versions before 6.
-uncovered = (ActiveRecord::VERSION::MAJOR < 6) ? 15 : 9
+uncovered = (ActiveRecord::VERSION::MAJOR < 6) ? 16 : 9
 SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
