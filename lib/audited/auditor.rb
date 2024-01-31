@@ -408,7 +408,7 @@ module Audited
       end
 
       def run_conditional_check(condition, matching: true)
-        return true if condition.blank?
+        return true if condition.blank? or condition == true
         return condition.call(self) == matching if condition.respond_to?(:call)
         return send(condition) == matching if respond_to?(condition.to_sym, true)
 
