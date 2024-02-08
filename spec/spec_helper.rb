@@ -1,6 +1,7 @@
 ENV["RAILS_ENV"] = "test"
 require "bundler/setup"
 require "single_cov"
+require "pry"
 SingleCov.setup :rspec
 
 if Bundler.definition.dependencies.map(&:name).include?("protected_attributes")
@@ -21,4 +22,5 @@ RSpec.configure do |config|
   config.include AuditedSpecHelpers
   config.use_transactional_fixtures = false if Rails.version.start_with?("4.")
   config.use_transactional_tests = false if config.respond_to?(:use_transactional_tests=)
+  config.filter_run_when_matching :focus
 end

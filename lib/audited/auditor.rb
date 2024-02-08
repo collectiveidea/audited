@@ -79,7 +79,8 @@ module Audited
           before_destroy :require_comment if audited_options[:on].include?(:destroy)
         end
 
-        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name, inverse_of: :auditable
+        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name, foreign_key: infer_foreign_key_from_id_type
+
         Audited.audit_class.audited_class_names << to_s
 
         after_create :audit_create if audited_options[:on].include?(:create)
@@ -98,7 +99,23 @@ module Audited
       end
 
       def has_associated_audits
-        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name
+        foreign_key = infer_foreign_key_from_id_type(associated: true)
+
+        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name, foreign_key: foreign_key
+      end
+
+      def infer_foreign_key_from_id_type(model: self, associated: false)
+        id_type = model.columns_hash["id"].type rescue :integer
+
+        foreign_key =
+          case id_type
+          when :integer
+            associated ? :associated_id : :auditable_id
+          when :uuid
+            associated ? :associated_uuid : :auditable_uuid
+          else
+            raise "Unexpected id type: #{id_type}"
+          end
       end
     end
 
@@ -180,8 +197,17 @@ module Audited
 
       # Returns a list combined of record audits and associated audits.
       def own_and_associated_audits
-        Audited.audit_class.unscoped.where(auditable: self)
-          .or(Audited.audit_class.unscoped.where(associated: self))
+        auditable_foreign_key = self.class.infer_foreign_key_from_id_type
+        associated_foreign_key = self.class.infer_foreign_key_from_id_type(associated: true)
+
+        # In case the model uses STI since polymorphic associations always
+        # result in the base class being stored in the pholymorphic 'type'
+        # field when creating because the DB table is always associated with
+        # the base class.
+        klass = self.class.base_class == self.class ? self.class : self.class.base_class
+
+        Audited.audit_class.unscoped.where(auditable_foreign_key => self.id, auditable_type: self.class.base_class.name)
+          .or(Audited.audit_class.unscoped.where(associated_foreign_key => self.id, associated_type: self.class.base_class.name))
           .order(created_at: :desc)
       end
 
@@ -359,7 +385,13 @@ module Audited
         self.audit_comment = nil
 
         if auditing_enabled
-          attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
+          associated_obj = send(audit_associated_with) unless audit_associated_with.nil?
+
+          if associated_obj.present?
+            foreign_key = self.class.infer_foreign_key_from_id_type(model: associated_obj.class, associated: true)
+            attrs[foreign_key] = associated_obj.id
+            attrs[:associated_type] = associated_obj.class.name
+          end
 
           run_callbacks(:audit) {
             audit = audits.create(attrs)

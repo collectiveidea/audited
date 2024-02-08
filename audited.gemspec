@@ -24,6 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rspec-rails"
   gem.add_development_dependency "standard"
   gem.add_development_dependency "single_cov"
+  gem.add_development_dependency "pry"
 
   # JRuby support for the test ENV
   if defined?(JRUBY_VERSION)

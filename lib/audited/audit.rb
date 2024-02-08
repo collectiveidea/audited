@@ -40,9 +40,7 @@ module Audited
   end
 
   class Audit < ::ActiveRecord::Base
-    belongs_to :auditable, polymorphic: true
     belongs_to :user, polymorphic: true
-    belongs_to :associated, polymorphic: true
 
     before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
 
@@ -64,7 +62,21 @@ module Audited
     scope :up_until, ->(date_or_time) { where("created_at <= ?", date_or_time) }
     scope :from_version, ->(version) { where("version >= ?", version) }
     scope :to_version, ->(version) { where("version <= ?", version) }
-    scope :auditable_finder, ->(auditable_id, auditable_type) { where(auditable_id: auditable_id, auditable_type: auditable_type) }
+
+    scope :auditable_finder, ->(auditable_id, auditable_type) do
+      foreign_key = infer_foreign_key_from_id_value(auditable_id)
+
+      where(foreign_key => auditable_id, auditable_type: auditable_type)
+    end
+
+    def auditable
+      auditable_type.constantize.find_by(id: auditable_id || auditable_uuid)
+    end
+
+    def associated
+      associated_type&.constantize&.find_by(id: associated_id || associated_uuid)
+    end
+
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
@@ -170,6 +182,18 @@ module Audited
     # use created_at as timestamp cache key
     def self.collection_cache_key(collection = all, *)
       super(collection, :created_at)
+    end
+
+    def self.infer_foreign_key_from_id_value(id)
+      return :auditable_id if id.blank?
+
+      if id.is_a? Numeric
+        :auditable_id
+      elsif id.is_a? String
+        :auditable_uuid
+      else
+        raise "Unexpected id type: #{id.class.name}"
+      end
     end
 
     private
