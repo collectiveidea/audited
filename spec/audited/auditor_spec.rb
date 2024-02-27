@@ -2,7 +2,7 @@ require "spec_helper"
 
 # not testing proxy_respond_to? hack / 2 methods / deprecation of `version`
 # also, an additional 6 around `after_touch` for Versions before 6.
-uncovered = (ActiveRecord::VERSION::MAJOR < 6) ? 15 : 9
+uncovered = (ActiveRecord::VERSION::MAJOR < 6) ? 16 : 9
 SingleCov.covered! uncovered: uncovered
 
 class ConditionalPrivateCompany < ::ActiveRecord::Base
@@ -267,10 +267,22 @@ describe Audited::Auditor do
     end
 
     if ::ActiveRecord::VERSION::MAJOR >= 7
-      it "should filter encrypted attributes" do
+      it "should filter encrypted attributes by default" do
         user = Models::ActiveRecord::UserWithEncryptedPassword.create(password: "password")
         user.save
         expect(user.audits.last.audited_changes["password"]).to eq("[FILTERED]")
+      end
+
+      context "when filtering is disabled" do
+        before do
+          Audited.filter_encrypted_attributes = false
+        end
+
+        it "should not filter encrypted attributes" do
+          user = Models::ActiveRecord::UserWithEncryptedPassword.create(password: "password")
+          user.save
+          expect(user.audits.last.audited_changes["password"]).not_to eq("[FILTERED]")
+        end
       end
     end
 

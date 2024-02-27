@@ -403,6 +403,17 @@ class User < ActiveRecord::Base
 end
 ```
 
+You can disable the filtering by adding a config
+
+```ruby
+Audited.filter_encrypted_attributes = false
+```
+
+If you want to encrypt the changes that are audited, you can simply add this line to your config
+```ruby
+Audited.encrypt_audited_changes = true
+```
+
 ### Custom `Audit` model
 
 If you want to extend or modify the audit model, create a new class that
