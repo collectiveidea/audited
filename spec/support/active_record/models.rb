@@ -136,6 +136,7 @@ module Models
       has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
       accepts_nested_attributes_for :companies
+      enum status: {active: 0, reliable: 1, banned: 2}
     end
 
     class OwnedCompany < ::ActiveRecord::Base
