@@ -385,6 +385,7 @@ module Audited
 
       def combine_audits_if_needed
         max_audits = audited_options[:max_audits]
+        max_audits = Integer(method(max_audits).call).abs if respond_to?(max_audits)
         if max_audits && (extra_count = audits.count - max_audits) > 0
           audits_to_combine = audits.limit(extra_count + 1)
           combine_audits(audits_to_combine)
@@ -503,6 +504,8 @@ module Audited
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
         max_audits = audited_options[:max_audits] || Audited.max_audits
+        return if respond_to?(max_audits)
+
         audited_options[:max_audits] = Integer(max_audits).abs if max_audits
       end
 
