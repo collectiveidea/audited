@@ -3,7 +3,7 @@ require "spec_helper"
 describe Audited do
   describe "#store" do
     describe "maintains state of store" do
-      let(:current_user) { Audited::RequestStore.audited_store }
+      let(:current_user) { Models::ActiveRecord::User.new(name: 'Some User', username: 'some_username') }
       before { Audited.store[:current_user] = current_user }
 
       it "checks store is not nil" do
