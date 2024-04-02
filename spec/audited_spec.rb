@@ -9,6 +9,10 @@ describe Audited do
       it "checks store is not nil" do
         expect(Audited.store[:current_user]).to eq(current_user)
       end
+
+      it "when executed with Fibers" do
+        Fiber.new { expect(Audited.store[:current_user]).to eq(current_user) }.resume
+      end
     end
   end
 end

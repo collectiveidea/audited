@@ -12,8 +12,6 @@ jobs:
       matrix:
         ruby: [2.3, 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2]
         appraisal:
-          - rails50
-          - rails51
           - rails52
           - rails60
           - rails61
@@ -30,32 +28,6 @@ jobs:
           # Doesn't seem worth solving.
           - ruby: 2.3
             db: POSTGRES
-
-          # Rails 5.0 supports Ruby 2.2-2.4
-          - appraisal: rails50
-            ruby: 2.5
-          - appraisal: rails50
-            ruby: 2.6
-          - appraisal: rails50
-            ruby: 2.7
-          - appraisal: rails50
-            ruby: 3.0
-          - appraisal: rails50
-            ruby: 3.1
-          - appraisal: rails50
-            ruby: 3.2
-
-          # Rails 5.1 supports Ruby 2.2-2.5
-          - appraisal: rails51
-            ruby: 2.6
-          - appraisal: rails51
-            ruby: 2.7
-          - appraisal: rails51
-            ruby: 3.0
-          - appraisal: rails51
-            ruby: 3.1
-          - appraisal: rails51
-            ruby: 3.2
 
           # Rails 5.2 supports Ruby 2.2-2.5
           - appraisal: rails52
