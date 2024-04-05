@@ -1,10 +1,14 @@
 # Audited ChangeLog
 
-### 5.5.0 (2024-04-02)
+### 5.6.0 (2024-04-05)
 
 - Removed support for Rails 5.0 and 5.1.
 - Replace RequestStore with ActiveSupport::CurrentAttributes - @punkisdead
   [#702](https://github.com/collectiveidea/audited/pull/702)
+
+### 5.5.0 (2024-04-02)
+
+- Bad release. Same code as 5.4.1. Use 5.6.0 for updated features.
 
 ### 5.4.3 (2024-01-11)
 
