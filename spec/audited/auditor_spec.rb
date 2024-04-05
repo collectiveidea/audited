@@ -540,6 +540,14 @@ describe Audited::Auditor do
             expect(user.audits.last.action).to eq("update")
             expect(user.audits.last.audited_changes.keys).to eq(%w[suspended_at])
           end
+
+          it "updating nested resource through parent while changing an enum on parent shouldn't double audit" do
+            user.status = :reliable
+            user.companies_attributes = [{name: "test"}]
+            expect { user.save }.to change(user.audits, :count).from(1).to(2)
+            expect(user.audits.last.action).to eq("update")
+            expect(user.audits.last.audited_changes.keys).to eq(%w[status])
+          end
         end
 
         context "after updating" do
