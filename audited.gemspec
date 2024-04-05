@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.homepage = "https://github.com/collectiveidea/audited"
   gem.license = "MIT"
 
-  gem.files = `git ls-files`.split($\).reject { |f| f =~ /(\.gemspec)/ }
+  gem.files = `git ls-files`.split($\).reject { |f| f =~ /^(\.gemspec|\.git|\.standard|\.yard|gemfiles|test|spec)/ }
 
   gem.required_ruby_version = ">= 2.3.0"
 
