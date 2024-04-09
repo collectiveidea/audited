@@ -12,6 +12,8 @@ module Audited
     attr_accessor \
       :auditing_enabled,
       :current_user_method,
+      :encrypt_audited_changes,
+      :filter_encrypted_attributes,
       :ignored_attributes,
       :ignored_default_callbacks,
       :max_audits,
@@ -44,6 +46,8 @@ module Audited
 
   @current_user_method = :current_user
   @auditing_enabled = true
+  @encrypt_audited_changes = false
+  @filter_encrypted_attributes = true
   @store_synthesized_enums = false
 end
 
