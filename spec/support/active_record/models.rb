@@ -133,14 +133,14 @@ module Models
     end
 
     class Country < ::ActiveRecord::Base
+      audited
+
       has_many :comapnies, class_name: "OwnedCompany", dependent: :destroy
-      has_associated_audits
     end
 
     class Owner < ::ActiveRecord::Base
       self.table_name = "users"
       audited
-      has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
       accepts_nested_attributes_for :companies
       enum status: { active: 0, reliable: 1, banned: 2 }

@@ -93,6 +93,9 @@ module Audited
           inverse_of: :auditable)
         Audited.audit_class.audited_class_names << to_s
 
+        has_many(:audit_associations, as: :associated, class_name: "Audited::AuditAssociation")
+        has_many(:associated_audits, through: :audit_associations, source: :audit, class_name: Audited.audit_class.name)
+
         after_create(:audit_create) if audited_options[:on].include?(:create)
         before_update(:audit_update) if audited_options[:on].include?(:update)
         after_touch(:audit_touch) if audited_options[:on].include?(:touch) && ::ActiveRecord::VERSION::MAJOR >= 6
@@ -106,11 +109,6 @@ module Audited
         set_callback(:audit, :around, :around_audit, if: lambda { respond_to?(:around_audit, true) })
 
         enable_auditing
-      end
-
-      def has_associated_audits
-        has_many(:audit_associations, as: :associated, class_name: "Audited::AuditAssociation")
-        has_many(:associated_audits, through: :audit_associations, source: :audit, class_name: Audited.audit_class.name)
       end
     end
 
