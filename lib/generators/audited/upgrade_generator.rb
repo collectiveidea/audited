@@ -66,7 +66,7 @@ module Audited
         end
 
         unless Audited::Audit.connection.table_exists?(Audited::AuditAssociation.table_name)
-          yield :create_audit_associates
+          yield :create_audit_associations
         end
       end
     end
