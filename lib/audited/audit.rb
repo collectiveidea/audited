@@ -42,7 +42,7 @@ module Audited
   class Audit < ::ActiveRecord::Base
     belongs_to :auditable, polymorphic: true
     belongs_to :user, polymorphic: true
-    belongs_to :associated, polymorphic: true
+    has_many :audit_associations
 
     before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
 
@@ -65,10 +65,16 @@ module Audited
     scope :from_version, ->(version) { where("version >= ?", version) }
     scope :to_version, ->(version) { where("version <= ?", version) }
     scope :auditable_finder, ->(auditable_id, auditable_type) {
- where(auditable_id: auditable_id, auditable_type: auditable_type) }
+      where(auditable_id: auditable_id, auditable_type: auditable_type)
+    }
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
+    end
+
+    # Return the associated objects of the audit
+    def associates
+      audit_associations.map(&:associated)
     end
 
     # Return an instance of what the object looked like at this revision. If

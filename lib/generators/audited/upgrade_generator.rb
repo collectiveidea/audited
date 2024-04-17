@@ -64,6 +64,10 @@ module Audited
         if indexes.any? { |i| i.columns == [ "auditable_type", "auditable_id" ] }
           yield :add_version_to_auditable_index
         end
+
+        unless Audited::Audit.connection.table_exists?(Audited::AuditAssociate.table_name)
+          yield :create_audit_associates
+        end
       end
     end
   end

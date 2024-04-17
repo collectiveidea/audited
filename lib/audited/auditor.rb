@@ -72,7 +72,12 @@ module Audited
         self.audited_options = options
         normalize_audited_options
 
-        self.audit_associated_with = audited_options[:associated_with]
+        associated_with = audited_options[:associated_with]
+        associated_with ||= self.reflect_on_all_associations(:belongs_to).map(&:name).concat(
+          self.reflect_on_all_associations(:has_many_and_belongs_to).map(&:name),
+        )
+        associated_with ||= nil if associated_with.empty?
+        self.audit_associated_with = Array.wrap(associated_with)
 
         if audited_options[:comment_required]
           validate(:presence_of_audit_comment)
@@ -104,7 +109,8 @@ module Audited
       end
 
       def has_associated_audits
-        has_many(:associated_audits, as: :associated, class_name: Audited.audit_class.name)
+        has_many(:audit_associations, as: :associated, class_name: "Audited::AuditAssociation")
+        has_many(:associated_audits, through: :audit_associations, source: :audit, class_name: Audited.audit_class.name)
       end
     end
 
@@ -186,8 +192,10 @@ module Audited
 
       # Returns a list combined of record audits and associated audits.
       def own_and_associated_audits
-        Audited.audit_class.unscoped.where(auditable: self)
-          .or(Audited.audit_class.unscoped.where(associated: self))
+        base_query = Audited.audit_class.unscoped.left_joins(:audit_associations)
+
+        base_query.where(auditable: self)
+          .or(base_query.where(audit_associations: { associated: self }))
           .order(created_at: :desc)
       end
 
@@ -377,10 +385,11 @@ module Audited
         self.audit_comment = nil
 
         if auditing_enabled
-          attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
-
           run_callbacks(:audit) {
             audit = audits.create(attrs)
+
+            audit.audit_associations << all_audit_associations unless all_audit_associations.nil?
+
             combine_audits_if_needed if attrs[:action] != "create"
             audit
           }
@@ -412,6 +421,12 @@ module Audited
         if auditing_enabled && audit_comment.blank?
           errors.add(:audit_comment, :blank)
           throw(:abort)
+        end
+      end
+
+      def all_audit_associations
+        audit_associated_with.map do |associated|
+          Audited::AuditAssociation.new(associated: send(associated))
         end
       end
 

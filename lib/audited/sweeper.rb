@@ -21,7 +21,8 @@ module Audited
 
     def current_user
       lambda {
- controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true) }
+        controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true)
+      }
     end
 
     def remote_ip

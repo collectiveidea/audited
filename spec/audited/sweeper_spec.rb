@@ -38,6 +38,7 @@ describe AuditsController do
   end
 
   let(:user) { create_user }
+  let(:current_user) { user }
 
   describe "POST audit" do
     it "should audit user" do

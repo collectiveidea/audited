@@ -52,9 +52,14 @@ ActiveRecord::Schema.define do
     t.column(:phone_numbers, :string)
   end
 
+  create_table :countries do |t|
+    t.column(:name, :string)
+  end
+
   create_table :companies do |t|
     t.column(:name, :string)
     t.column(:owner_id, :integer)
+    t.column(:country_id, :integer)
     t.column(:type, :string)
   end
 
@@ -83,6 +88,16 @@ ActiveRecord::Schema.define do
     t.column(:request_uuid, :string)
     t.column(:created_at, :datetime)
   end
+
+  create_table :audit_associations, force: true do |t|
+    t.column(:audit_id, :integer)
+    t.column(:associated_id, :integer)
+    t.column(:associated_type, :string)
+  end
+
+  add_index :audit_associations, :audit_id, name: 'index_audit_associations_on_audit_id'
+  add_index :audit_associations, [ :associated_type, :associated_id ], name: 'index_audit_associations_on_associated'
+
 
   add_index :audits, [ :auditable_id, :auditable_type ], name: "auditable_index"
   add_index :audits, [ :associated_id, :associated_type ], name: "associated_index"

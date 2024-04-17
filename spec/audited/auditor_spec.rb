@@ -523,10 +523,12 @@ describe Audited::Auditor do
 
       context "don't double audit" do
         let(:user) {
- Models::ActiveRecord::Owner.create(
-   name: "OwnerUser",
-   suspended_at: 1.month.ago,
-   companies_attributes: [ { name: "OwnedCompany" } ]) }
+          Models::ActiveRecord::Owner.create(
+            name: "OwnerUser",
+            suspended_at: 1.month.ago,
+            companies_attributes: [ { name: "OwnedCompany" } ])
+        }
+
         let(:company) { user.companies.first }
 
         it "should only create 1 (create) audit for object" do
@@ -647,30 +649,38 @@ describe Audited::Auditor do
 
   describe "associated with" do
     let(:owner) { Models::ActiveRecord::Owner.create(name: "Models::ActiveRecord::Owner") }
-    let(:owned_company) { Models::ActiveRecord::OwnedCompany.create!(name: "The auditors", owner: owner) }
+    let(:country) { Models::ActiveRecord::Country.create(name: 'Models::ActiveRecord::Country') }
+    let(:owned_company) {
+ Models::ActiveRecord::OwnedCompany.create!(name: 'The auditors', owner: owner, country: country) }
 
     it "should record the associated object on create" do
-      expect(owned_company.audits.first.associated).to(eq(owner))
+      expect(owned_company.audits.first.associates).to(contain_exactly(owner, country))
     end
 
     it "should store the associated object on update" do
       owned_company.update_attribute(:name, "The Auditors")
-      expect(owned_company.audits.last.associated).to(eq(owner))
+      expect(owned_company.audits.last.associates).to(contain_exactly(owner, country))
     end
 
     it "should store the associated object on destroy" do
       owned_company.destroy
-      expect(owned_company.audits.last.associated).to(eq(owner))
+      expect(owned_company.audits.last.associates).to(contain_exactly(owner, country))
     end
   end
 
   describe "has associated audits" do
     let!(:owner) { Models::ActiveRecord::Owner.create!(name: "Models::ActiveRecord::Owner") }
-    let!(:owned_company) { Models::ActiveRecord::OwnedCompany.create!(name: "The auditors", owner: owner) }
+    let!(:country) { Models::ActiveRecord::Country.create!(name: "Models::ActiveRecord::Country") }
+    let!(:owned_company) {
+      Models::ActiveRecord::OwnedCompany.create!(name: "The auditors", owner: owner, country: country)
+    }
 
     it "should list the associated audits" do
       expect(owner.associated_audits.length).to(eq(1))
       expect(owner.associated_audits.first.auditable).to(eq(owned_company))
+
+      expect(country.associated_audits.length).to(eq(1))
+      expect(country.associated_audits.first.auditable).to(eq(owned_company))
     end
   end
 
