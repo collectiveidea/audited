@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "cgi"
 require File.expand_path("../schema", __FILE__)
 
@@ -7,7 +9,7 @@ module Models
       audited except: :password
       attribute :non_column_attr if Rails.gem_version >= Gem::Version.new("5.1")
       attr_protected :logins if respond_to?(:attr_protected)
-      enum status: {active: 0, reliable: 1, banned: 2}
+      enum status: { active: 0, reliable: 1, banned: 2 }
 
       if Rails.gem_version >= Gem::Version.new("7.1")
         serialize :phone_numbers, type: Array
@@ -38,12 +40,12 @@ module Models
 
     class UserMultipleRedactedAttributes < ::ActiveRecord::Base
       self.table_name = :users
-      audited redacted: [:password, :ssn]
+      audited redacted: [ :password, :ssn ]
     end
 
     class UserRedactedPasswordCustomRedaction < ::ActiveRecord::Base
       self.table_name = :users
-      audited redacted: :password, redaction_value: ["My", "Custom", "Value", 7]
+      audited redacted: :password, redaction_value: [ "My", "Custom", "Value", 7 ]
     end
 
     if ::ActiveRecord::VERSION::MAJOR >= 7
@@ -93,7 +95,7 @@ module Models
 
     class AccessibleBeforeDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
-      attr_accessible :name, :username, :password if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
+      attr_accessible :name, :username, :password if respond_to?(:attr_accessible)
       audited
     end
 
@@ -136,7 +138,7 @@ module Models
       has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
       accepts_nested_attributes_for :companies
-      enum status: {active: 0, reliable: 1, banned: 2}
+      enum status: { active: 0, reliable: 1, banned: 2 }
     end
 
     class OwnedCompany < ::ActiveRecord::Base
@@ -151,32 +153,32 @@ module Models
 
     class OnUpdateDestroy < ::ActiveRecord::Base
       self.table_name = "companies"
-      audited on: [:update, :destroy]
+      audited on: [ :update, :destroy ]
     end
 
     class OnCreateDestroy < ::ActiveRecord::Base
       self.table_name = "companies"
-      audited on: [:create, :destroy]
+      audited on: [ :create, :destroy ]
     end
 
     class OnCreateDestroyUser < ::ActiveRecord::Base
       self.table_name = "users"
-      audited on: [:create, :destroy]
+      audited on: [ :create, :destroy ]
     end
 
     class OnCreateDestroyExceptName < ::ActiveRecord::Base
       self.table_name = "companies"
-      audited except: :name, on: [:create, :destroy]
+      audited except: :name, on: [ :create, :destroy ]
     end
 
     class OnCreateUpdate < ::ActiveRecord::Base
       self.table_name = "companies"
-      audited on: [:create, :update]
+      audited on: [ :create, :update ]
     end
 
     class OnTouchOnly < ::ActiveRecord::Base
       self.table_name = "users"
-      audited on: [:touch]
+      audited on: [ :touch ]
     end
   end
 end

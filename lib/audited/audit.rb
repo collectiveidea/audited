@@ -64,7 +64,8 @@ module Audited
     scope :up_until, ->(date_or_time) { where("created_at <= ?", date_or_time) }
     scope :from_version, ->(version) { where("version >= ?", version) }
     scope :to_version, ->(version) { where("version <= ?", version) }
-    scope :auditable_finder, ->(auditable_id, auditable_type) { where(auditable_id: auditable_id, auditable_type: auditable_type) }
+    scope :auditable_finder, ->(auditable_id, auditable_type) {
+ where(auditable_id: auditable_id, auditable_type: auditable_type) }
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
@@ -75,7 +76,9 @@ module Audited
     def revision
       clazz = auditable_type.constantize
       (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(audit_version: version))
+        self.class.assign_revision_attributes(
+          m,
+          self.class.reconstruct_attributes(ancestors).merge(audit_version: version))
       end
     end
 

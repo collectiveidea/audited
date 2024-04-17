@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_record/railtie"
 
 module RailsApp
@@ -22,12 +24,30 @@ module RailsApp
         BigDecimal,
         ActiveSupport::TimeWithZone,
         ActiveSupport::TimeZone,
-        ActiveSupport::HashWithIndifferentAccess
+        ActiveSupport::HashWithIndifferentAccess,
       ]
-    elsif !Rails.version.start_with?("5.0") && !Rails.version.start_with?("5.1") && config.active_record.respond_to?(:yaml_column_permitted_classes=)
+    elsif !Rails.version.start_with?("5.0") &&
+        !Rails.version.start_with?("5.1") &&
+        config.active_record.respond_to?(:yaml_column_permitted_classes=)
       config.active_record.yaml_column_permitted_classes =
-        %w[String Symbol Integer NilClass Float Time Date FalseClass Hash Array DateTime TrueClass BigDecimal
-          ActiveSupport::TimeWithZone ActiveSupport::TimeZone ActiveSupport::HashWithIndifferentAccess]
+        [
+          'String',
+          'Symbol',
+          'Integer',
+          'NilClass',
+          'Float',
+          'Time',
+          'Date',
+          'FalseClass',
+          'Hash',
+          'Array',
+          'DateTime',
+          'TrueClass',
+          'BigDecimal',
+          'ActiveSupport::TimeWithZone',
+          'ActiveSupport::TimeZone',
+          'ActiveSupport::HashWithIndifferentAccess',
+        ]
     end
 
     if Rails.gem_version >= Gem::Version.new("7.1")

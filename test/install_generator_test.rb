@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 require "generators/audited/install_generator"
@@ -17,7 +19,7 @@ class InstallGeneratorTest < Rails::Generators::TestCase
   end
 
   test "generate migration with 'jsonb' type for audited_changes column" do
-    run_generator %w[--audited-changes-column-type jsonb]
+    run_generator [ "--audited-changes-column-type", "jsonb" ]
 
     assert_migration "db/migrate/install_audited.rb" do |content|
       assert_includes(content, "class InstallAudited")
@@ -26,7 +28,7 @@ class InstallGeneratorTest < Rails::Generators::TestCase
   end
 
   test "generate migration with 'json' type for audited_changes column" do
-    run_generator %w[--audited-changes-column-type json]
+    run_generator [ "--audited-changes-column-type", "json" ]
 
     assert_migration "db/migrate/install_audited.rb" do |content|
       assert_includes(content, "class InstallAudited")
@@ -35,7 +37,7 @@ class InstallGeneratorTest < Rails::Generators::TestCase
   end
 
   test "generate migration with 'string' type for user_id column" do
-    run_generator %w[--audited-user-id-column-type string]
+    run_generator [ "--audited-user-id-column-type", "string" ]
 
     assert_migration "db/migrate/install_audited.rb" do |content|
       assert_includes(content, "class InstallAudited")
@@ -44,7 +46,7 @@ class InstallGeneratorTest < Rails::Generators::TestCase
   end
 
   test "generate migration with 'uuid' type for user_id column" do
-    run_generator %w[--audited-user-id-column-type uuid]
+    run_generator [ "--audited-user-id-column-type", "uuid" ]
 
     assert_migration "db/migrate/install_audited.rb" do |content|
       assert_includes(content, "class InstallAudited")
@@ -56,7 +58,9 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     run_generator
 
     assert_migration "db/migrate/install_audited.rb" do |content|
-      assert_includes(content, "class InstallAudited < ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]\n")
+      assert_includes(
+        content,
+        "class InstallAudited < ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]\n")
     end
   end
 end

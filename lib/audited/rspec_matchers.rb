@@ -8,7 +8,8 @@ module Audited
     # * <tt>associated_with</tt> - tests that the audit makes use of the associated_with option
     # * <tt>only</tt> - tests that the audit makes use of the only option *Overrides <tt>except</tt> option*
     # * <tt>except</tt> - tests that the audit makes use of the except option
-    # * <tt>requires_comment</tt> - if specified, then the audit must require comments through the <tt>audit_comment</tt> attribute
+    # * <tt>requires_comment</tt> - if specified, then the audit must require comments
+    #   through the <tt>audit_comment</tt> attribute
     # * <tt>on</tt> - tests that the audit makes use of the on option with specified parameters
     #
     # Example:
@@ -80,7 +81,7 @@ module Audited
       def description
         description = "audited"
         description += " associated with #{@options[:associated_with]}" if @options.key?(:associated_with)
-        description += " only => #{@options[:only].join ", "}" if @options.key?(:only)
+        description += " only => #{@options[:only].join(", ")}" if @options.key?(:only)
         description += " except => #{@options[:except].join(", ")}" if @options.key?(:except)
         description += " requires audit_comment" if @options.key?(:comment_required)
 
@@ -94,7 +95,7 @@ module Audited
       end
 
       def auditing_enabled?
-        expects "#{model_class} to be audited"
+        expects("#{model_class} to be audited")
         model_class.respond_to?(:auditing_enabled) && model_class.auditing_enabled
       end
 
@@ -103,27 +104,27 @@ module Audited
       end
 
       def associated_with_model?
-        expects "#{model_class} to record audits to associated model #{@options[:associated_with]}"
+        expects("#{model_class} to record audits to associated model #{@options[:associated_with]}")
         model_class.audit_associated_with == @options[:associated_with]
       end
 
       def records_changes_to_specified_fields?
         ignored_fields = build_ignored_fields_from_options
 
-        expects "non audited columns (#{model_class.non_audited_columns.inspect}) to match (#{ignored_fields})"
+        expects("non audited columns (#{model_class.non_audited_columns.inspect}) to match (#{ignored_fields})")
         model_class.non_audited_columns.to_set == ignored_fields.to_set
       end
 
       def comment_required_valid?
-        expects "to require audit_comment before #{model_class.audited_options[:on]} when comment required"
+        expects("to require audit_comment before #{model_class.audited_options[:on]} when comment required")
         validate_callbacks_include_presence_of_comment? && destroy_callbacks_include_comment_required?
       end
 
       def only_audit_on_designated_callbacks?
         {
-          create: [:after, :audit_create],
-          update: [:before, :audit_update],
-          destroy: [:before, :audit_destroy]
+          create: [ :after, :audit_create ],
+          update: [ :before, :audit_update ],
+          destroy: [ :before, :audit_destroy ],
         }.map do |(action, kind_callback)|
           kind, callback = kind_callback
           callbacks_for(action, kind: kind).include?(callback) if @options[:on].include?(action)
@@ -151,7 +152,7 @@ module Audited
       end
 
       def requires_comment_before_callbacks?
-        [:create, :update, :destroy].map do |action|
+        [ :create, :update, :destroy ].map do |action|
           if @options[:comment_required] && model_class.audited_options[:on].include?(action)
             callbacks_for(action).include?(:require_comment)
           end
@@ -180,7 +181,7 @@ module Audited
           except: :records_changes_to_specified_fields?,
           comment_required: :comment_required_valid?,
           associated_with: :associated_with_model?,
-          on: :only_audit_on_designated_callbacks?
+          on: :only_audit_on_designated_callbacks?,
         }.map do |(option, check)|
           send(check) if @options[option].present?
         end.compact.all?
