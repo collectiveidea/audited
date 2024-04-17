@@ -65,7 +65,7 @@ module Audited
           yield :add_version_to_auditable_index
         end
 
-        unless Audited::Audit.connection.table_exists?(Audited::AuditAssociate.table_name)
+        unless Audited::Audit.connection.table_exists?(Audited::AuditAssociations.table_name)
           yield :create_audit_associates
         end
       end
