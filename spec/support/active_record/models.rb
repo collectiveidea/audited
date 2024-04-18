@@ -158,6 +158,24 @@ module Models
     class OwnedCompany::STICompany < OwnedCompany
     end
 
+
+    class Driver < ::ActiveRecord::Base
+      self.table_name = "drivers"
+
+      has_many :vehicles, class_name: "Vehicle"
+
+      audited
+    end
+
+    class Vehicle < ::ActiveRecord::Base
+      self.table_name = "vehicles"
+
+      belongs_to :driver, class_name: "Driver"
+
+      audited associated_with: :driver
+      audit_associated_attribute :driver, :name
+    end
+
     class OnUpdateDestroy < ::ActiveRecord::Base
       self.table_name = "companies"
       audited on: [ :update, :destroy ]

@@ -684,6 +684,30 @@ describe Audited::Auditor do
     end
   end
 
+  describe "audit associated attribute" do
+    let!(:driver) { Models::ActiveRecord::Driver.create!(name: "Driver") }
+    let!(:driver_2) { Models::ActiveRecord::Driver.create!(name: "Driver_2") }
+    let!(:vehicle) { Models::ActiveRecord::Vehicle.create!(name: "Models::ActiveRecord::Vehicle", driver: driver) }
+
+    it "should create the setter method" do
+      vehicle.driver_name = "DriverDave"
+
+      expect(vehicle.driver_name).to(eq("DriverDave"))
+    end
+
+    it "should audit the driver name" do
+      vehicle.update!(driver: driver_2)
+
+      expect(vehicle.audits.last.audited_changes['driver_name']).to(contain_exactly("Driver", "Driver_2"))
+    end
+
+    it "should audit the driver name when updating the id" do
+      vehicle.update!(driver_id: driver_2.id)
+
+      expect(vehicle.audits.last.audited_changes['driver_name']).to(contain_exactly("Driver", "Driver_2"))
+    end
+  end
+
   describe "max_audits" do
     it "should respect global setting" do
       stub_global_max_audits(10) do

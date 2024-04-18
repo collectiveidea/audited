@@ -63,6 +63,15 @@ ActiveRecord::Schema.define do
     t.column(:type, :string)
   end
 
+  create_table :drivers do |t|
+    t.column(:name, :string)
+  end
+
+  create_table :vehicles do |t|
+    t.column(:name, :string)
+    t.column(:driver_id, :integer)
+  end
+
   create_table :authors do |t|
     t.column(:name, :string)
   end

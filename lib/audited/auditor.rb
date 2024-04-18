@@ -105,6 +105,38 @@ module Audited
 
         enable_auditing
       end
+
+      def audit_associated_attribute(association, attribute_name, type: :string, foreign_key: nil)
+        foreign_key ||= "#{association}_id"
+        method_name = "#{association}_#{attribute_name}"
+
+        attr_accessor(method_name)
+        attribute(method_name, type)
+
+        define_method("#{method_name}=") do |value|
+          super(value)
+
+          instance_variable_set("@#{method_name}", value)
+        end
+
+        define_method("#{association}=") do |value|
+          self.send("#{method_name}=", self.send(association)&.send(attribute_name))
+          self.clear_attribute_changes([ method_name.to_sym ])
+
+          super(value)
+
+          self.send("#{method_name}=", self.send(association)&.send(attribute_name))
+        end
+
+        define_method("#{foreign_key}=") do |value|
+          self.send("#{method_name}=", self.send(association)&.send(attribute_name))
+          self.clear_attribute_changes([ method_name.to_sym ])
+
+          super(value)
+
+          self.send("#{method_name}=", self.send(association)&.send(attribute_name))
+        end
+      end
     end
 
     module AuditedInstanceMethods
