@@ -55,5 +55,11 @@ ActiveSupport.on_load(:active_record) do
   include Audited::Auditor
 end
 
+ActiveSupport.on_load(:action_view) do
+  require "audited/audits_helper"
+
+  include Audited::AuditsHelper
+end
+
 require "audited/sweeper"
 require "audited/railtie" if Audited.const_defined?(:Rails)
