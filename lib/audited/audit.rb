@@ -40,6 +40,8 @@ module Audited
   end
 
   class Audit < ::ActiveRecord::Base
+    self.ignored_columns += [ "associated_id", "associated_type" ]
+
     belongs_to :auditable, polymorphic: true
     belongs_to :user, polymorphic: true
     has_many :audit_associations
