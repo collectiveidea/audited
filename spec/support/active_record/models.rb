@@ -152,7 +152,7 @@ module Models
       belongs_to :country
       # declare attr_accessible before calling audited
       attr_accessible :name, :owner, :country if respond_to?(:attr_accessible)
-      audited
+      audited associated_with: [ :owner, :country ]
     end
 
     class OwnedCompany::STICompany < OwnedCompany

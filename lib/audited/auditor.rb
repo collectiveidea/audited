@@ -72,12 +72,7 @@ module Audited
         self.audited_options = options
         normalize_audited_options
 
-        associated_with = audited_options[:associated_with]
-        associated_with ||= self.reflect_on_all_associations(:belongs_to).map(&:name).concat(
-          self.reflect_on_all_associations(:has_many_and_belongs_to).map(&:name),
-        )
-        associated_with ||= nil if associated_with.empty?
-        self.audit_associated_with = Array.wrap(associated_with)
+        self.audit_associated_with = Array.wrap(audited_options[:associated_with])
 
         if audited_options[:comment_required]
           validate(:presence_of_audit_comment)
