@@ -21,20 +21,20 @@ module Audited
               from: v.first,
               to: v.last,
               **i18n_context,
-              default: "#{k} was changed from #{v.first} to #{v.last}",
+              default: "#{k.titleize} was changed from #{v.first} to #{v.last}",
             )
           elsif !v.first.present? && v.last.present?
             t(
               "audited.#{downcased_type}.update.added.#{k}",
               value: v.first,
-              default: "#{k} was added #{v.last}",
+              default: "#{k.titleize} was added #{v.last}",
             )
           else
             t(
               "audited.#{downcased_type}.update.removed.#{k}",
               value: v.last,
               **i18n_context,
-              default: "#{k} #{v.last} was removed.",
+              default: "#{k.titleize} #{v.last} was removed.",
             )
           end
         end
