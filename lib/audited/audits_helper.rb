@@ -40,7 +40,7 @@ module Audited
         end
       when "destroy"
         t(
-          "audited.#{downcased_type}.create",
+          "audited.#{downcased_type}.destroy",
           **audit.audited_changes,
           **i18n_context,
           default: "#{audit.auditable_type} #{audit.auditable_id} was deleted.",
