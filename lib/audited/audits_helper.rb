@@ -3,17 +3,21 @@
 module Audited
   module AuditsHelper
     def humanize_audit(audit, skip: nil, i18n_context: {})
-      downcased_type = audit.auditable_type.downcase
+      downcased_type = audit.auditable_type.underscore
 
-      audit.audited_changes.except!(*skip.map(&:to_s)) if skip.present?
+      audited_changes = if skip.present?
+        audit.audited_changes.except(*skip.map(&:to_s))
+      else
+        audit.audited_changes
+      end.symbolize_keys
 
       changes = case audit.action
       when "create"
-        humanize_create(audit.audited_changes, downcased_type, i18n_context)
+        humanize_create(audited_changes, downcased_type, i18n_context)
       when "update"
-        humanize_update(audit.audited_changes, downcased_type, i18n_context)
+        humanize_update(audited_changes, downcased_type, i18n_context)
       when "destroy"
-        humanize_destroy(audit.audited_changes, downcased_type, i18n_context)
+        humanize_destroy(audited_changes, downcased_type, i18n_context)
       end
 
       Array.wrap(changes)
@@ -24,44 +28,49 @@ module Audited
     def humanize_create(audited_changes, type, i18n_context)
       t(
         "audited.#{type}.create",
+        default: "Created.",
         **audited_changes,
         **i18n_context,
-        default: "Created.",
       )
     end
 
     def humanize_destroy(audited_changes, type, i18n_context)
       t(
         "audited.#{type}.destroy",
+        default: "Deleted.",
         **audited_changes,
         **i18n_context,
-        default: "Deleted.",
       )
     end
 
     def humanize_update(audited_changes, type, i18n_context)
       array = audited_changes.map do |k, v|
-        v = v.map(&:to_s)
+        first_present = !v.first.nil?
+        last_present = !v.last.nil?
 
-        if v.first.present? && v.last.present?
+        if k.to_s.ends_with?("date")
+          v[0] = l(v.first.to_date) if v.first.present?
+          v[1] = l(v.last.to_date) if v.last.present?
+        end
+
+        if first_present && last_present
           humanize_changed(k, v, type, i18n_context)
-        elsif !v.first.present? && v.last.present?
+        elsif !first_present && last_present
           t(
             "audited.#{type}.update.added.#{k}",
-            value: v.first,
-            default: "#{k.titleize} was added #{v.last}",
+            value: v.last,
+            default: "#{k.to_s.titleize} was added #{v.last}",
+            **i18n_context,
           )
         else
           t(
             "audited.#{type}.update.removed.#{k}",
-            value: v.last,
+            value: v.first,
+            default: "#{k.to_s.titleize} #{v.first} was removed.",
             **i18n_context,
-            default: "#{k.titleize} #{v.last} was removed.",
           )
         end
       end
-
-      puts array.inspect
 
       array.flatten
     end
@@ -74,8 +83,8 @@ module Audited
         "audited.#{type}.update.changed.#{key}",
         from: value.first,
         to: value.last,
+        default: "#{key.to_s.titleize} was changed from #{value.first} to #{value.last}",
         **i18n_context,
-        default: "#{key.titleize} was changed from #{value.first} to #{value.last}",
       )
     end
 
@@ -89,8 +98,8 @@ module Audited
         changes << t(
           "audited.#{type}.update.changed.array.added.#{key}",
           added: added.join(", "),
+          default: "#{key.to_s.titleize} had #{added.join(", ")} added.",
           **i18n_context,
-          default: "#{key.titleize} had #{added.join(", ")} added.",
         )
       end
 
@@ -98,10 +107,12 @@ module Audited
         changes << t(
           "audited.#{type}.update.changed.array.removed.#{key}",
           removed: removed.join(", "),
+          default: "#{key.to_s.titleize} had #{removed.join(", ")} removed.",
           **i18n_context,
-          default: "#{key.titleize} had #{removed.join(", ")} removed.",
         )
       end
+
+      changes
     end
 
     def humanize_changed_hash(key, value, type, i18n_context)

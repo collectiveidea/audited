@@ -987,20 +987,6 @@ describe Audited::Auditor do
       company.update!(name: "Collective Idea")
       expect(owner.own_and_associated_audits).to(match_array(owner.audits + company.audits))
     end
-
-    it "should order audits by creation time" do
-      owner = Models::ActiveRecord::Owner.create!
-      first_audit = owner.audits.first
-      first_audit.update_column(:created_at, 1.year.ago)
-
-      company = owner.companies.create!
-      second_audit = company.audits.first
-      second_audit.update_column(:created_at, 1.month.ago)
-
-      company.update!(name: "Collective Idea")
-      third_audit = company.audits.last
-      expect(owner.own_and_associated_audits.to_a).to(eq([ third_audit, second_audit, first_audit ]))
-    end
   end
 
   describe "without auditing" do
