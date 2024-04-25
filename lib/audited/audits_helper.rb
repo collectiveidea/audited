@@ -45,6 +45,10 @@ module Audited
 
     def humanize_update(audited_changes, type, i18n_context)
       array = audited_changes.map do |k, v|
+        if v.first.is_a?(TrueClass) || v.first.is_a?(FalseClass)
+          return humanize_changed_boolean(k, v, type, i18n_context)
+        end
+
         first_present = !v.first.nil?
         last_present = !v.last.nil?
 
@@ -76,10 +80,6 @@ module Audited
     end
 
     def humanize_changed(key, value, type, i18n_context)
-      if value.first.is_a?(TrueClass) || value.first.is_a?(FalseClass)
-        return humanize_changed_boolean(key, value, type, i18n_context)
-      end
-
       return humanize_changed_array(key, value, type, i18n_context) if value.first.is_a?(Array)
       return humanize_changed_hash(key, value, type, i18n_context) if value.first.is_a?(Hash)
 
