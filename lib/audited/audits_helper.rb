@@ -97,13 +97,13 @@ module Audited
         t(
           "audited.#{type}.update.changed.boolean.#{key}.enabled",
           default: "#{key.to_s.titleize} enabled.",
-          **i18n_content,
+          **i18n_context,
         )
       else
         t(
           "audited.#{type}.update.changed.boolean.#{key}.disabled",
           default: "#{key.to_s.titleize} disabled.",
-          **i18n_content,
+          **i18n_context,
           )
       end
     end
