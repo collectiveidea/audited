@@ -76,6 +76,10 @@ module Audited
     end
 
     def humanize_changed(key, value, type, i18n_context)
+      if value.first.is_a?(TrueClass) || value.first.is_a?(FalseClass)
+        return humanize_changed_boolean(key, value, type, i18n_context)
+      end
+
       return humanize_changed_array(key, value, type, i18n_context) if value.first.is_a?(Array)
       return humanize_changed_hash(key, value, type, i18n_context) if value.first.is_a?(Hash)
 
@@ -86,6 +90,14 @@ module Audited
         default: "#{key.to_s.titleize} was changed from #{value.first} to #{value.last}",
         **i18n_context,
       )
+    end
+
+    def humanize_changed_boolean(key, value, type, i18n_context)
+      if value.first && !value.last
+        t("audited.#{type}.update.changed.boolean.#{key}.on", default: "#{key.to_s.titleize} enabled.")
+      else
+        t("audited.#{type}.update.changed.boolean.#{key}.off", default: "#{key.to_s.titleize} disabled.")
+      end
     end
 
     def humanize_changed_array(key, value, type, i18n_context)
