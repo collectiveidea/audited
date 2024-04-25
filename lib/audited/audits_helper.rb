@@ -48,7 +48,7 @@ module Audited
         first_present = !v.first.nil?
         last_present = !v.last.nil?
 
-        if k.to_s.ends_with?("date")
+        if k.to_s.ends_with?("date") || k.to_s.ends_with("through")
           v[0] = l(v.first.to_date) if v.first.present?
           v[1] = l(v.last.to_date) if v.last.present?
         end
