@@ -159,6 +159,9 @@ module Models
     class OwnedCompany::STICompany < OwnedCompany
     end
 
+    class Book < ::ActiveRecord::Base
+      audited
+    end 
 
     class Driver < ::ActiveRecord::Base
       self.table_name = "drivers"

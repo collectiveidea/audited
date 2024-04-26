@@ -124,11 +124,13 @@ module Audited
     def humanized_identifier
       @auditable_class ||= auditable_type.constantize
 
-      puts @auditable_class
-
       return "[deleted]" if auditable.blank?
 
-      auditable.send(@auditable_class.humanize_audit_options[:with])
+      method = @auditable_class.humanize_audit_options[:with]
+
+      return unless auditable.respond_to?(method)
+
+      auditable.send(method)
     end
 
     def skip_humanizing_attributes

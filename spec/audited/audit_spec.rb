@@ -187,6 +187,12 @@ describe Audited::Audit do
       expect(u.audits.first.reload.humanized_identifier).to(eq("[deleted]"))
     end
 
+    it "should return nil if the record doesnt respond to the method" do
+      b = Models::ActiveRecord::Book.create(title: "Fortnite")
+
+      expect(b.audits.first.humanized_identifier).to(eq(nil))
+    end
+
     it "should return the correct attribute if the record exists" do
       u = Models::ActiveRecord::User.create(name: "Joe", username: "MegaJoe")
 
