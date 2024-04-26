@@ -20,7 +20,7 @@ module Audited
       source_root File.expand_path("../templates", __FILE__)
 
       def copy_migration
-        migration_template "install.rb", "db/migrate/install_audited.rb"
+        migration_template("install.rb", "db/migrate/install_audited.rb")
       end
     end
   end

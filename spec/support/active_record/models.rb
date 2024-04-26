@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "cgi"
 require File.expand_path("../schema", __FILE__)
 
@@ -5,9 +7,10 @@ module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
       audited except: :password
+      humanize_audit with: :username, skip: [ :ssn ], path_method: :person_path
       attribute :non_column_attr if Rails.gem_version >= Gem::Version.new("5.1")
       attr_protected :logins if respond_to?(:attr_protected)
-      enum status: {active: 0, reliable: 1, banned: 2}
+      enum status: { active: 0, reliable: 1, banned: 2 }
 
       if Rails.gem_version >= Gem::Version.new("7.1")
         serialize :phone_numbers, type: Array
@@ -38,12 +41,12 @@ module Models
 
     class UserMultipleRedactedAttributes < ::ActiveRecord::Base
       self.table_name = :users
-      audited redacted: [:password, :ssn]
+      audited redacted: [ :password, :ssn ]
     end
 
     class UserRedactedPasswordCustomRedaction < ::ActiveRecord::Base
       self.table_name = :users
-      audited redacted: :password, redaction_value: ["My", "Custom", "Value", 7]
+      audited redacted: :password, redaction_value: [ "My", "Custom", "Value", 7 ]
     end
 
     if ::ActiveRecord::VERSION::MAJOR >= 7
@@ -93,7 +96,7 @@ module Models
 
     class AccessibleBeforeDeclarationUser < ::ActiveRecord::Base
       self.table_name = :users
-      attr_accessible :name, :username, :password if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
+      attr_accessible :name, :username, :password if respond_to?(:attr_accessible)
       audited
     end
 
@@ -130,53 +133,81 @@ module Models
     class Company::STICompany < Company
     end
 
+    class Country < ::ActiveRecord::Base
+      audited
+
+      has_many :comapnies, class_name: "OwnedCompany", dependent: :destroy
+    end
+
     class Owner < ::ActiveRecord::Base
       self.table_name = "users"
       audited
-      has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
       accepts_nested_attributes_for :companies
-      enum status: {active: 0, reliable: 1, banned: 2}
+      enum status: { active: 0, reliable: 1, banned: 2 }
     end
 
     class OwnedCompany < ::ActiveRecord::Base
       self.table_name = "companies"
       belongs_to :owner, class_name: "Owner", touch: true
-      attr_accessible :name, :owner if respond_to?(:attr_accessible) # declare attr_accessible before calling aaa
-      audited associated_with: :owner
+      belongs_to :country
+      # declare attr_accessible before calling audited
+      attr_accessible :name, :owner, :country if respond_to?(:attr_accessible)
+      audited associated_with: [ :owner, :country ]
     end
 
     class OwnedCompany::STICompany < OwnedCompany
     end
 
+    class Book < ::ActiveRecord::Base
+      audited
+    end
+
+    class Driver < ::ActiveRecord::Base
+      self.table_name = "drivers"
+
+      has_many :vehicles, class_name: "Vehicle"
+
+      audited
+    end
+
+    class Vehicle < ::ActiveRecord::Base
+      self.table_name = "vehicles"
+
+      belongs_to :driver, class_name: "Driver"
+
+      audited associated_with: :driver
+      audit_associated_attribute :driver, :name
+    end
+
     class OnUpdateDestroy < ::ActiveRecord::Base
       self.table_name = "companies"
-      audited on: [:update, :destroy]
+      audited on: [ :update, :destroy ]
     end
 
     class OnCreateDestroy < ::ActiveRecord::Base
       self.table_name = "companies"
-      audited on: [:create, :destroy]
+      audited on: [ :create, :destroy ]
     end
 
     class OnCreateDestroyUser < ::ActiveRecord::Base
       self.table_name = "users"
-      audited on: [:create, :destroy]
+      audited on: [ :create, :destroy ]
     end
 
     class OnCreateDestroyExceptName < ::ActiveRecord::Base
       self.table_name = "companies"
-      audited except: :name, on: [:create, :destroy]
+      audited except: :name, on: [ :create, :destroy ]
     end
 
     class OnCreateUpdate < ::ActiveRecord::Base
       self.table_name = "companies"
-      audited on: [:create, :update]
+      audited on: [ :create, :update ]
     end
 
     class OnTouchOnly < ::ActiveRecord::Base
       self.table_name = "users"
-      audited on: [:touch]
+      audited on: [ :touch ]
     end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Include DB adapters matching the version requirements in
 # rails/activerecord/lib/active_record/connection_adapters/*adapter.rb
 

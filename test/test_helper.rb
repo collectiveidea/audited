@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 ENV["RAILS_ENV"] = "test"
 
-$LOAD_PATH.unshift File.dirname(__FILE__)
+$LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require File.expand_path("../../spec/rails_app/config/environment", __FILE__)
 require "rails/test_help"
@@ -13,6 +15,6 @@ class ActiveSupport::TestCase
   end
 
   def load_schema(version)
-    load File.dirname(__FILE__) + "/db/version_#{version}.rb"
+    load(File.dirname(__FILE__) + "/db/version_#{version}.rb")
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RailsApp::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -15,7 +17,7 @@ RailsApp::Application.configure do
   # Configure static file server for tests with Cache-Control for performance.
   if config.respond_to?(:public_file_server)
     config.public_file_server.enabled = true
-    config.public_file_server.headers = {"Cache-Control" => "public, max-age=3600"}
+    config.public_file_server.headers = { "Cache-Control" => "public, max-age=3600" }
   else
     config.static_cache_control = "public, max-age=3600"
     config.serve_static_files = true
@@ -45,7 +47,7 @@ RailsApp::Application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-  if ::ActiveRecord::VERSION::MAJOR >= 7
+  if ActiveRecord::VERSION::MAJOR >= 7
     config.active_record.encryption.key_derivation_salt = SecureRandom.hex
     config.active_record.encryption.primary_key = SecureRandom.hex
   end

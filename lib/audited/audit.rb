@@ -40,9 +40,11 @@ module Audited
   end
 
   class Audit < ::ActiveRecord::Base
+    self.ignored_columns += [ "associated_id", "associated_type" ]
+
     belongs_to :auditable, polymorphic: true
     belongs_to :user, polymorphic: true
-    belongs_to :associated, polymorphic: true
+    has_many :audit_associations
 
     before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
 
@@ -64,10 +66,17 @@ module Audited
     scope :up_until, ->(date_or_time) { where("created_at <= ?", date_or_time) }
     scope :from_version, ->(version) { where("version >= ?", version) }
     scope :to_version, ->(version) { where("version <= ?", version) }
-    scope :auditable_finder, ->(auditable_id, auditable_type) { where(auditable_id: auditable_id, auditable_type: auditable_type) }
+    scope :auditable_finder, ->(auditable_id, auditable_type) {
+      where(auditable_id: auditable_id, auditable_type: auditable_type)
+    }
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
+    end
+
+    # Return the associated objects of the audit
+    def associates
+      audit_associations.map(&:associated)
     end
 
     # Return an instance of what the object looked like at this revision. If
@@ -75,7 +84,9 @@ module Audited
     def revision
       clazz = auditable_type.constantize
       (clazz.find_by_id(auditable_id) || clazz.new).tap do |m|
-        self.class.assign_revision_attributes(m, self.class.reconstruct_attributes(ancestors).merge(audit_version: version))
+        self.class.assign_revision_attributes(
+          m,
+          self.class.reconstruct_attributes(ancestors).merge(audit_version: version))
       end
     end
 
@@ -108,6 +119,36 @@ module Audited
       else
         raise StandardError, "invalid action given #{action}"
       end
+    end
+
+    def humanized_identifier
+      @auditable_class ||= auditable_type.constantize
+
+      return "[deleted]" if auditable.blank?
+
+      method = @auditable_class.humanize_audit_options[:with]
+
+      return unless auditable.respond_to?(method)
+
+      auditable.send(method)
+    end
+
+    def skip_humanizing_attributes
+      @auditable_class ||= auditable_type.constantize
+
+      @auditable_class.humanize_audit_options[:skip]
+    end
+
+    def humanized_path_method
+      @auditable_class ||= auditable_type.constantize
+
+      @auditable_class.humanize_audit_options[:path_method]
+    end
+
+    def humanizable_audited_changes
+      return audited_changes.symbolize_keys if skip_humanizing_attributes.blank?
+
+      audited_changes.except(*skip_humanizing_attributes).symbolize_keys
     end
 
     # Allows user to be set to either a string or an ActiveRecord object

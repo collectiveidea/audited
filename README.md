@@ -7,7 +7,6 @@ Audited
 
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
-
 Audited currently (5.6) works with Rails 7.1, 7.0, 6.1, 6.0, 5.2.
 
 For Rails 5.0 & 5.1, use gem version 5.4.3
@@ -18,14 +17,14 @@ For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.c
 
 Audited supports and is [tested against](https://github.com/collectiveidea/audited/actions/workflows/ci.yml) the following Ruby versions:
 
-* 2.3 (only tested on Sqlite due to testing issues with other DBs)
-* 2.4
-* 2.5
-* 2.6
-* 2.7
-* 3.0
-* 3.1
-* 3.2
+- 2.3 (only tested on Sqlite due to testing issues with other DBs)
+- 2.4
+- 2.5
+- 2.6
+- 2.7
+- 3.0
+- 3.1
+- 3.2
 
 Audited may work just fine with a Ruby version not listed above, but we can't guarantee that it will. If you'd like to maintain a Ruby that isn't listed, please let us know with a [pull request](https://github.com/collectiveidea/audited/pulls).
 
@@ -41,7 +40,7 @@ Add the gem to your Gemfile:
 gem "audited"
 ```
 
-And if you're using ```require: false``` you must add initializers like this:
+And if you're using `require: false` you must add initializers like this:
 
 ```ruby
 #./config/initializers/audited.rb
@@ -71,7 +70,6 @@ $ rake db:migrate
 ```
 
 Upgrading will only make changes if changes are needed.
-
 
 ## Usage
 
@@ -311,6 +309,7 @@ company.associated_audits.last.auditable # => #<User name: "Steve Richert">
 ```
 
 You can access records' own audits and associated audits in one go:
+
 ```ruby
 company.own_and_associated_audits
 ```
@@ -408,6 +407,7 @@ end
 
 If you want to extend or modify the audit model, create a new class that
 inherits from `Audited::Audit`:
+
 ```ruby
 class CustomAudit < Audited::Audit
   def some_custom_behavior
@@ -415,7 +415,9 @@ class CustomAudit < Audited::Audit
   end
 end
 ```
+
 Then set it in an initializer:
+
 ```ruby
 # config/initializers/audited.rb
 
@@ -444,8 +446,8 @@ Or join the [mailing list](http://groups.google.com/group/audited) to get help o
 
 In the spirit of [free software](http://www.fsf.org/licensing/essays/free-sw.html), **everyone** is encouraged to help improve this project. Here are a few ways _you_ can pitch in:
 
-* Use prerelease versions of Audited.
-* [Report bugs](https://github.com/collectiveidea/audited/issues).
-* Fix bugs and submit [pull requests](http://github.com/collectiveidea/audited/pulls).
-* Write, clarify or fix documentation.
-* Refactor code.
+- Use prerelease versions of Audited.
+- [Report bugs](https://github.com/collectiveidea/audited/issues).
+- Fix bugs and submit [pull requests](http://github.com/collectiveidea/audited/pulls).
+- Write, clarify or fix documentation.
+- Refactor code.

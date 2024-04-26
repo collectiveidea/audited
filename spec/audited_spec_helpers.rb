@@ -1,20 +1,30 @@
+# frozen_string_literal: true
+
 module AuditedSpecHelpers
   def create_user(attrs = {})
-    Models::ActiveRecord::User.create({name: "Brandon", username: "brandon", password: "password", favourite_device: "Android Phone"}.merge(attrs))
+    Models::ActiveRecord::User.create({
+      name: "Brandon",
+      username: "brandon",
+      password: "password",
+      favourite_device: "Android Phone", }.merge(attrs))
   end
 
   def create_user_with_readonly_attrs(attrs = {})
-    Models::ActiveRecord::UserWithReadOnlyAttrs.create({name: "Brandon", username: "brandon", password: "password", favourite_device: "Android Phone"}.merge(attrs))
+    Models::ActiveRecord::UserWithReadOnlyAttrs.create({
+      name: "Brandon",
+      username: "brandon",
+      password: "password",
+      favourite_device: "Android Phone", }.merge(attrs))
   end
 
   def build_user(attrs = {})
-    Models::ActiveRecord::User.new({name: "darth", username: "darth", password: "noooooooo"}.merge(attrs))
+    Models::ActiveRecord::User.new({ name: "darth", username: "darth", password: "noooooooo" }.merge(attrs))
   end
 
   def create_versions(n = 2, attrs = {})
     Models::ActiveRecord::User.create(name: "Foobar 1", **attrs).tap do |u|
       (n - 1).times do |i|
-        u.update_attribute :name, "Foobar #{i + 2}"
+        u.update_attribute(:name, "Foobar #{i + 2}")
       end
       u.reload
     end
@@ -26,7 +36,9 @@ module AuditedSpecHelpers
     elsif rails_below?("6.0.0.rc1")
       ActiveRecord::MigrationContext.new(migrations_paths).send(direction, target_version)
     else
-      ActiveRecord::MigrationContext.new(migrations_paths, ActiveRecord::SchemaMigration).send(direction, target_version)
+      ActiveRecord::MigrationContext.new(migrations_paths, ActiveRecord::SchemaMigration).send(
+        direction,
+        target_version)
     end
   end
 
