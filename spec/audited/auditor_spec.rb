@@ -708,6 +708,40 @@ describe Audited::Auditor do
     end
   end
 
+  describe "humanize audit" do
+    context "without specifying anything" do
+      let!(:driver) { Models::ActiveRecord::Driver.create!(name: "Driver") }
+
+      it "defaults to the name" do
+        expect(driver.humanize_audit_options[:with]).to(eq(:name))
+      end
+
+      it "defaults to skipping nothing" do
+        expect(driver.humanize_audit_options[:skip]).to(eq([]))
+      end
+
+      it 'defaults to the class path method' do
+        expect(driver.humanize_audit_options[:path_method]).to(eq("driver_path"))
+      end
+    end
+
+    context "when specifying humanize_audit" do
+      let!(:user) { create_user(ssn: '1234') }
+
+      it "uses the with attribute" do
+        expect(user.humanize_audit_options[:with]).to(eq(:username))
+      end
+
+      it "uses the skip attribute" do
+        expect(user.humanize_audit_options[:skip]).to(eq([ "ssn" ]))
+      end
+
+      it 'uses the path method attribute' do
+        expect(user.humanize_audit_options[:path_method]).to(eq("person_path"))
+      end
+    end
+  end
+
   describe "max_audits" do
     it "should respect global setting" do
       stub_global_max_audits(10) do

@@ -121,6 +121,34 @@ module Audited
       end
     end
 
+    def humanized_identifier
+      @auditable_class ||= auditable_type.constantize
+
+      puts @auditable_class
+
+      return "[deleted]" if auditable.blank?
+
+      auditable.send(@auditable_class.humanize_audit_options[:with])
+    end
+
+    def skip_humanizing_attributes
+      @auditable_class ||= auditable_type.constantize
+
+      @auditable_class.humanize_audit_options[:skip]
+    end
+
+    def humanized_path_method
+      @auditable_class ||= auditable_type.constantize
+
+      @auditable_class.humanize_audit_options[:path_method]
+    end
+
+    def humanizable_audited_changes
+      return audited_changes.symbolize_keys if skip_humanizing_attributes.blank?
+
+      audited_changes.except(*skip_humanizing_attributes).symbolize_keys
+    end
+
     # Allows user to be set to either a string or an ActiveRecord object
     # @private
     def user_as_string=(user)

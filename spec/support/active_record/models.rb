@@ -7,6 +7,7 @@ module Models
   module ActiveRecord
     class User < ::ActiveRecord::Base
       audited except: :password
+      humanize_audit with: :username, skip: [ :ssn ], path_method: :person_path
       attribute :non_column_attr if Rails.gem_version >= Gem::Version.new("5.1")
       attr_protected :logins if respond_to?(:attr_protected)
       enum status: { active: 0, reliable: 1, banned: 2 }

@@ -67,10 +67,13 @@ module Audited
 
         class_attribute(:audit_associated_with, instance_writer: false)
         class_attribute(:audited_options, instance_writer: false)
+        class_attribute(:humanize_audit_options, instance_writer: false)
         attr_accessor(:audit_version, :audit_comment)
 
         self.audited_options = options
         normalize_audited_options
+
+        self.humanize_audit_options = { with: :name, skip: [], path_method: "#{self.table_name.singularize}_path" }
 
         self.audit_associated_with = Array.wrap(audited_options[:associated_with])
 
@@ -104,6 +107,17 @@ module Audited
         set_callback(:audit, :around, :around_audit, if: lambda { respond_to?(:around_audit, true) })
 
         enable_auditing
+      end
+
+      def humanize_audit(options = {})
+        options[:with] ||= :name
+        options[:skip] ||= []
+        options[:path_method] ||= "#{self.name.underscore}_path"
+
+        options[:skip].map!(&:to_s)
+        options[:path_method] = options[:path_method].to_s
+
+        self.humanize_audit_options = options
       end
 
       def audit_associated_attribute(association, attribute_name, type: :string, foreign_key: nil)

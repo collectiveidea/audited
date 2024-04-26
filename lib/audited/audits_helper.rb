@@ -2,14 +2,23 @@
 
 module Audited
   module AuditsHelper
-    def humanize_audit(audit, skip: nil, i18n_context: {})
+    def humanize_audit(audit)
       downcased_type = audit.auditable_type.underscore
 
-      audited_changes = if skip.present?
-        audit.audited_changes.except(*skip.map(&:to_s))
+      audited_changes = audit.humanizable_audited_changes
+
+      i18n_context = if respond_to?(audit.humanized_path_method)
+        {
+          identifier: link_to(
+            audit.humanized_identifier,
+            send(audit.humanized_path_method, id: audit.auditable_id),
+            target: :_blank,
+            rel: "noopener noreferrer",
+          ),
+        }
       else
-        audit.audited_changes
-      end.symbolize_keys
+        { identifier: audit.humanized_identifier }
+      end
 
       changes = case audit.action
       when "create"
@@ -20,7 +29,7 @@ module Audited
         humanize_destroy(audited_changes, downcased_type, i18n_context)
       end
 
-      Array.wrap(changes)
+      Array.wrap(changes).map { |change| sanitize(change, tags: [ "a" ], attributes: [ "target", "href", "rel" ]) }
     end
 
     private

@@ -179,6 +179,51 @@ describe Audited::Audit do
     end
   end
 
+  describe "#humanized_identifier" do
+    it "should return deleted if the record doesnt exist" do
+      u = Models::ActiveRecord::User.create(name: "Joe")
+      u.destroy!
+
+      expect(u.audits.first.reload.humanized_identifier).to(eq("[deleted]"))
+    end
+
+    it "should return the correct attribute if the record exists" do
+      u = Models::ActiveRecord::User.create(name: "Joe", username: "MegaJoe")
+
+      expect(u.audits.first.humanized_identifier).to(eq("MegaJoe"))
+    end
+  end
+
+  describe "#skip_humanizing_attributes" do
+    it "should return the defined skip attributes" do
+      u = Models::ActiveRecord::User.create(name: "Joe")
+
+      expect(u.audits.first.skip_humanizing_attributes).to(eq([ "ssn" ]))
+    end
+  end
+
+  describe "#humanized_path_method" do
+    it "should return the defined humanized path method" do
+      u = Models::ActiveRecord::User.create(name: "Joe")
+
+      expect(u.audits.first.humanized_path_method).to(eq("person_path"))
+    end
+  end
+
+  describe "#humanizable_audited_changes" do
+    it "returns all changes if no skip is defined" do
+      d = Models::ActiveRecord::Driver.create(name: "Joe")
+
+      expect(d.audits.first.humanizable_audited_changes).to(eq(d.audits.first.audited_changes.symbolize_keys))
+    end
+
+    it "returns the changes without specified keys" do
+      u = Models::ActiveRecord::User.create(name: "Joe", ssn: "1234")
+
+      expect(u.audits.first.humanizable_audited_changes.keys).not_to(include([ "ssn" ]))
+    end
+  end
+
   describe ".collection_cache_key" do
     if ActiveRecord::VERSION::MAJOR >= 5
       it "uses created at" do
