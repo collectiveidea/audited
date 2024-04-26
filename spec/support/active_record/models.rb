@@ -161,7 +161,7 @@ module Models
 
     class Book < ::ActiveRecord::Base
       audited
-    end 
+    end
 
     class Driver < ::ActiveRecord::Base
       self.table_name = "drivers"
