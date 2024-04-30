@@ -464,8 +464,8 @@ module Audited
 
       def all_audit_associations
         audit_associated_with.map do |associated|
-          Audited::AuditAssociation.new(associated: send(associated))
-        end
+          Audited::AuditAssociation.new(associated: send(associated)) if send(associated).present?
+        end.compact
       end
 
       CALLBACKS.each do |attr_name|
