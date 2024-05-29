@@ -188,7 +188,15 @@ module Audited
       # Combine multiple audits into one.
       def combine_audits(audits_to_combine)
         combine_target = audits_to_combine.last
-        combine_target.audited_changes = audits_to_combine.pluck(:audited_changes).reduce(&:merge)
+        combine_target.audited_changes = audits_to_combine.pluck(:audited_changes).reduce do |h1, h2|
+          h1.merge(h2) do |_key, this, other|
+            if this.is_a?(Array) && other.is_a?(Array)
+              [this.first, other.last]
+            else
+              other
+            end
+          end
+        end
         combine_target.comment = "#{combine_target.comment}\nThis audit is the result of multiple audits being combined."
 
         transaction do
