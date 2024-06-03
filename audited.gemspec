@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency "activesupport", ">= 5.2", "< 7.2"
 
   gem.add_development_dependency "appraisal"
-  gem.add_development_dependency "rails", ">= 5.2", "< 7.2"
+  gem.add_development_dependency "rails", ">= 5.2"
   gem.add_development_dependency "rspec-rails"
   gem.add_development_dependency "standard"
   gem.add_development_dependency "single_cov"
