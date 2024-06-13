@@ -143,9 +143,9 @@ module Audited
       #   end
       #
       def revisions(from_version = 1)
-        return [] unless audits.from_version(from_version).exists?
+        return [] unless has_version?(from_version)
 
-        all_audits = audits.select([:audited_changes, :version, :action]).to_a
+        all_audits = audits.pluck(:audited_changes, :version, :action).to_a
         targeted_audits = all_audits.select { |audit| audit.version >= from_version }
 
         previous_attributes = reconstruct_attributes(all_audits - targeted_audits)
@@ -154,6 +154,10 @@ module Audited
           previous_attributes.merge!(audit.new_attributes)
           revision_with(previous_attributes.merge!(version: audit.version))
         end
+      end
+
+      def has_version?(version)
+        audits.loaded? ? audits.any? { |audit| audit.version >= from_version } : audits.from_version(from_version).exists?
       end
 
       # Get a specific revision specified by the version number, or +:previous+
@@ -166,8 +170,8 @@ module Audited
 
       # Find the oldest revision recorded prior to the date/time provided.
       def revision_at(date_or_time)
-        audits = self.audits.up_until(date_or_time)
-        revision_with Audited.audit_class.reconstruct_attributes(audits) unless audits.empty?
+        targeted_audits = audits.loaded? ? audits.filter { |audit| audit.created_at <= date_or_time } : audits.up_until(date_or_time)
+        revision_with Audited.audit_class.reconstruct_attributes(targeted_audits) unless targeted_audits.empty?
       end
 
       # List of attributes that are audited.
@@ -323,11 +327,12 @@ module Audited
           version = if audit_version
             audit_version - 1
           else
-            previous = audits.descending.offset(1).first
+            previous = audits.loaded? ? audits.sort_by { |audit| -audit.version }.second : audits.descending.offset(1).first
             previous ? previous.version : 1
           end
         end
-        audits.to_version(version)
+
+        audits.loaded? ? audits.filter { |audit| audit.version <= version } : audits.to_version(version)
       end
 
       def audit_create
@@ -386,7 +391,7 @@ module Audited
       def combine_audits_if_needed
         max_audits = audited_options[:max_audits]
         if max_audits && (extra_count = audits.count - max_audits) > 0
-          audits_to_combine = audits.limit(extra_count + 1)
+          audits_to_combine = audits.loaded? ? audits.take(extra_count + 1) : audits.limit(extra_count + 1)
           combine_audits(audits_to_combine)
         end
       end
