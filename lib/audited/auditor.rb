@@ -170,7 +170,7 @@ module Audited
 
       # Find the oldest revision recorded prior to the date/time provided.
       def revision_at(date_or_time)
-        targeted_audits = audits.loaded? ? audits.filter { |audit| audit.created_at <= date_or_time } : audits.up_until(date_or_time)
+        targeted_audits = audits.loaded? ? audits.filter { |audit| audit.created_at <= date_or_time }.sort_by(&:version) : audits.up_until(date_or_time)
         revision_with Audited.audit_class.reconstruct_attributes(targeted_audits) unless targeted_audits.empty?
       end
 
@@ -332,7 +332,7 @@ module Audited
           end
         end
 
-        audits.loaded? ? audits.filter { |audit| audit.version <= version } : audits.to_version(version)
+        audits.loaded? ? audits.filter { |audit| audit.version <= version }.sort_by(&:version) : audits.to_version(version)
       end
 
       def audit_create
@@ -391,7 +391,7 @@ module Audited
       def combine_audits_if_needed
         max_audits = audited_options[:max_audits]
         if max_audits && (extra_count = audits.count - max_audits) > 0
-          audits_to_combine = audits.loaded? ? audits.take(extra_count + 1) : audits.limit(extra_count + 1)
+          audits_to_combine = audits.loaded? ? audits.sort_by(&:version).take(extra_count + 1) : audits.limit(extra_count + 1)
           combine_audits(audits_to_combine)
         end
       end
