@@ -384,11 +384,23 @@ module Audited
       end
 
       def combine_audits_if_needed
-        max_audits = audited_options[:max_audits]
+        max_audits = evaluate_max_audits
+
         if max_audits && (extra_count = audits.count - max_audits) > 0
           audits_to_combine = audits.limit(extra_count + 1)
           combine_audits(audits_to_combine)
         end
+      end
+
+      def evaluate_max_audits
+        max_audits = case (option = audited_options[:max_audits])
+        when Proc then option.call
+        when Symbol then send(option)
+        else
+          option
+        end
+
+        Integer(max_audits).abs if max_audits
       end
 
       def require_comment
@@ -502,8 +514,7 @@ module Audited
         audited_options[:on] = ([:create, :update, :touch, :destroy] - Audited.ignored_default_callbacks) if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
-        max_audits = audited_options[:max_audits] || Audited.max_audits
-        audited_options[:max_audits] = Integer(max_audits).abs if max_audits
+        audited_options[:max_audits] ||= Audited.max_audits
       end
 
       def calculate_non_audited_columns
