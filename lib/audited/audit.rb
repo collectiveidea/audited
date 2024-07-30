@@ -55,6 +55,10 @@ module Audited
       serialize :audited_changes, YAMLIfTextColumnType
     end
 
+    if Rails.gem_version >= Gem::Version.new("7.0") && Audited.encrypt_audited_changes
+      encrypts :audited_changes
+    end
+
     scope :ascending, -> { reorder(version: :asc) }
     scope :descending, -> { reorder(version: :desc) }
     scope :creates, -> { where(action: "create") }
