@@ -17,6 +17,7 @@ jobs:
           - rails61
           - rails70
           - rails71
+          - rails80
         db: [POSTGRES, MYSQL, SQLITE]
         exclude:
           # MySQL has issues on Ruby 2.3
@@ -77,6 +78,8 @@ jobs:
           - appraisal: rails71
             ruby: 2.5
           - appraisal: rails71
+            ruby: 2.6
+          - appraisal: rails80
             ruby: 2.6
 
     services:
