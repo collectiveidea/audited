@@ -106,7 +106,7 @@ jobs:
         sudo /etc/init.d/mysql start
         mysql -e 'CREATE DATABASE audited_test;' -uroot -proot
         mysql -e 'SHOW DATABASES;' -uroot -proot
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Copy Gemfile
       run: sed 's/\.\././' gemfiles/${{ matrix.appraisal }}.gemfile > Gemfile
     - name: Set up Ruby ${{ matrix.ruby }}
