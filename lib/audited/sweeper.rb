@@ -20,7 +20,15 @@ module Audited
     end
 
     def current_user
-      lambda { controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true) }
+      lambda do
+        if controller.respond_to?(Audited.current_user_method, true)
+          controller.send(Audited.current_user_method)
+        else
+          if controller.respond_to?(:current_spree_user)
+            controller.send(:current_spree_user)
+          end
+        end
+      end
     end
 
     def remote_ip
