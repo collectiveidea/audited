@@ -28,14 +28,14 @@ appraise "rails70" do
   gem "rails", "~> 7.0.8"
   gem "mysql2", ">= 0.4.4"
   gem "pg", ">= 1.1"
-  gem "sqlite3", ">= 1.4"
+  gem "sqlite3", "~> 1.4"
 end
 
 appraise "rails71" do
   gem "rails", "~> 7.1.3"
   gem "mysql2", ">= 0.4.4"
   gem "pg", ">= 1.1"
-  gem "sqlite3", ">= 1.4"
+  gem "sqlite3", "~> 1.4"
 end
 
 appraise "rails80" do
