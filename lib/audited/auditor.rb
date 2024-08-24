@@ -145,7 +145,7 @@ module Audited
       def revisions(from_version = 1)
         return [] unless has_version?(from_version)
 
-        all_audits = audits.pluck(:audited_changes, :version, :action).to_a
+        all_audits = audits.loaded? ? audits.to_a : audits.select([:audited_changes, :version, :action]).to_a
         targeted_audits = all_audits.select { |audit| audit.version >= from_version }
 
         previous_attributes = reconstruct_attributes(all_audits - targeted_audits)
@@ -157,7 +157,7 @@ module Audited
       end
 
       def has_version?(version)
-        audits.loaded? ? audits.any? { |audit| audit.version >= from_version } : audits.from_version(from_version).exists?
+        audits.loaded? ? audits.any? { |audit| audit.version >= version } : audits.from_version(version).exists?
       end
 
       # Get a specific revision specified by the version number, or +:previous+
@@ -170,7 +170,7 @@ module Audited
 
       # Find the oldest revision recorded prior to the date/time provided.
       def revision_at(date_or_time)
-        targeted_audits = audits.loaded? ? audits.filter { |audit| audit.created_at <= date_or_time }.sort_by(&:version) : audits.up_until(date_or_time)
+        targeted_audits = audits.loaded? ? audits.select { |audit| audit.created_at <= date_or_time }.sort_by(&:version) : audits.up_until(date_or_time)
         revision_with Audited.audit_class.reconstruct_attributes(targeted_audits) unless targeted_audits.empty?
       end
 
@@ -332,7 +332,7 @@ module Audited
           end
         end
 
-        audits.loaded? ? audits.filter { |audit| audit.version <= version }.sort_by(&:version) : audits.to_version(version)
+        audits.loaded? ? audits.select { |audit| audit.version <= version }.sort_by(&:version) : audits.to_version(version)
       end
 
       def audit_create
