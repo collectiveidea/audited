@@ -7,7 +7,12 @@ module Models
       audited except: :password
       attribute :non_column_attr if Rails.gem_version >= Gem::Version.new("5.1")
       attr_protected :logins if respond_to?(:attr_protected)
-      enum status: {active: 0, reliable: 1, banned: 2}
+
+      if Rails.gem_version >= Gem::Version.new("7.2")
+        enum :status, {active: 0, reliable: 1, banned: 2}
+      else
+        enum status: {active: 0, reliable: 1, banned: 2}
+      end
 
       if Rails.gem_version >= Gem::Version.new("7.1")
         serialize :phone_numbers, type: Array
@@ -136,7 +141,12 @@ module Models
       has_associated_audits
       has_many :companies, class_name: "OwnedCompany", dependent: :destroy
       accepts_nested_attributes_for :companies
-      enum status: {active: 0, reliable: 1, banned: 2}
+
+      if Rails.gem_version >= Gem::Version.new("7.2")
+        enum :status, {active: 0, reliable: 1, banned: 2}
+      else
+        enum status: {active: 0, reliable: 1, banned: 2}
+      end
     end
 
     class OwnedCompany < ::ActiveRecord::Base
