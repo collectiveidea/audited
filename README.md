@@ -425,6 +425,18 @@ Audited.config do |config|
 end
 ```
 
+#### Changing the table name
+
+If you use a custom audit model _and_ define a different table name inside it, you must mark the `Audited::Audit` superclass as abstract. Otherwise you may get exceptions from attempts to access the missing `audits` table, since ActiveRecord still "sees" a valid, non-abstract model class in `Audited::Audit` and may attempt to access information about its inferred related table.
+
+Due to complexities of autoloading, this is most reliably achieved inside the subclass itself:
+```ruby
+class CustomAudit < Audited::Audit
+  self.table_name = 'audit_trails'
+  superclass.abstract_class = true
+end
+```
+
 ### Enum Storage
 
 In 4.10, the default behavior for enums changed from storing the value synthesized by Rails to the value stored in the DB. You can restore the previous behavior by setting the store_synthesized_enums configuration value:
