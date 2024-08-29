@@ -128,6 +128,11 @@ module Models
       audited max_audits: 5
     end
 
+    class MaxAuditsIgnoreKeepCreateActionUser < ::ActiveRecord::Base
+      self.table_name = :users
+      audited max_audits: 6, keep_create_action: false
+    end
+
     class Company < ::ActiveRecord::Base
       audited
     end
