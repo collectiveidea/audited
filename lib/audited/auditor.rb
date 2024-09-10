@@ -231,7 +231,7 @@ module Audited
 
       private
 
-      def audited_changes(for_touch: false)
+      def audited_changes(for_touch: false, exclude_readonly_attrs: false)
         all_changes = if for_touch
           previous_changes
         elsif respond_to?(:changes_to_save)
@@ -240,12 +240,16 @@ module Audited
           changes
         end
 
+        all_changes = all_changes.except(*self.class.readonly_attributes.to_a) if exclude_readonly_attrs
+
         filtered_changes = \
           if audited_options[:only].present?
             all_changes.slice(*self.class.audited_columns)
           else
             all_changes.except(*self.class.non_audited_columns)
           end
+
+        filtered_changes = normalize_enum_changes(filtered_changes)
 
         if for_touch && (last_audit = audits.last&.audited_changes)
           filtered_changes.reject! do |k, v|
@@ -256,7 +260,6 @@ module Audited
 
         filtered_changes = redact_values(filtered_changes)
         filtered_changes = filter_encrypted_attrs(filtered_changes)
-        filtered_changes = normalize_enum_changes(filtered_changes)
         filtered_changes.to_hash
       end
 
@@ -333,14 +336,14 @@ module Audited
       end
 
       def audit_update
-        unless (changes = audited_changes).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
+        unless (changes = audited_changes(exclude_readonly_attrs: true)).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
           write_audit(action: "update", audited_changes: changes,
             comment: audit_comment)
         end
       end
 
       def audit_touch
-        unless (changes = audited_changes(for_touch: true)).empty?
+        unless (changes = audited_changes(for_touch: true, exclude_readonly_attrs: true)).empty?
           write_audit(action: "update", audited_changes: changes,
             comment: audit_comment)
         end
@@ -381,11 +384,23 @@ module Audited
       end
 
       def combine_audits_if_needed
-        max_audits = audited_options[:max_audits]
+        max_audits = evaluate_max_audits
+
         if max_audits && (extra_count = audits.count - max_audits) > 0
           audits_to_combine = audits.limit(extra_count + 1)
           combine_audits(audits_to_combine)
         end
+      end
+
+      def evaluate_max_audits
+        max_audits = case (option = audited_options[:max_audits])
+        when Proc then option.call
+        when Symbol then send(option)
+        else
+          option
+        end
+
+        Integer(max_audits).abs if max_audits
       end
 
       def require_comment
@@ -496,11 +511,10 @@ module Audited
 
       def normalize_audited_options
         audited_options[:on] = Array.wrap(audited_options[:on])
-        audited_options[:on] = [:create, :update, :touch, :destroy] if audited_options[:on].empty?
+        audited_options[:on] = ([:create, :update, :touch, :destroy] - Audited.ignored_default_callbacks) if audited_options[:on].empty?
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
-        max_audits = audited_options[:max_audits] || Audited.max_audits
-        audited_options[:max_audits] = Integer(max_audits).abs if max_audits
+        audited_options[:max_audits] ||= Audited.max_audits
       end
 
       def calculate_non_audited_columns

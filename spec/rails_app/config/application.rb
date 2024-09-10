@@ -5,7 +5,7 @@ module RailsApp
     config.root = File.expand_path("../../", __FILE__)
     config.i18n.enforce_available_locales = true
 
-    if Rails.version.start_with?("7.1") && config.active_record.respond_to?(:yaml_column_permitted_classes=)
+    if Rails.gem_version >= Gem::Version.new("7.1") && config.active_record.respond_to?(:yaml_column_permitted_classes=)
       config.active_record.yaml_column_permitted_classes = [
         String,
         Symbol,
@@ -30,7 +30,7 @@ module RailsApp
           ActiveSupport::TimeWithZone ActiveSupport::TimeZone ActiveSupport::HashWithIndifferentAccess]
     end
 
-    if Rails.version >= "7.1"
+    if Rails.gem_version >= Gem::Version.new("7.1")
       config.active_support.cache_format_version = 7.1
     end
   end

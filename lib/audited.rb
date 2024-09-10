@@ -1,14 +1,19 @@
 # frozen_string_literal: true
 
 require "active_record"
-require "request_store"
 
 module Audited
+  # Wrapper around ActiveSupport::CurrentAttributes
+  class RequestStore < ActiveSupport::CurrentAttributes
+    attribute :audited_store
+  end
+
   class << self
     attr_accessor \
       :auditing_enabled,
       :current_user_method,
       :ignored_attributes,
+      :ignored_default_callbacks,
       :max_audits,
       :store_synthesized_enums
     attr_writer :audit_class
@@ -26,7 +31,7 @@ module Audited
               deprecator: ActiveSupport::Deprecation.new('6.0.0', 'Audited')
 
     def store
-      RequestStore.store[:audited_store] ||= {}
+      RequestStore.audited_store ||= {}
     end
 
     def config
@@ -35,6 +40,7 @@ module Audited
   end
 
   @ignored_attributes = %w[lock_version created_at updated_at created_on updated_on]
+  @ignored_default_callbacks = []
 
   @current_user_method = :current_user
   @auditing_enabled = true
