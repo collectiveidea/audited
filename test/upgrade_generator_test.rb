@@ -94,4 +94,17 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
       assert_includes(content, "class AddCommentToAudits < ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]\n")
     end
   end
+
+  test "should set several audits columns NOT NULL" do
+    load_schema 1
+
+    run_generator %w[upgrade]
+
+    assert_migration "db/migrate/change_audits_columns_not_null.rb" do |content|
+      assert_includes(content, 'change_column_null :audits, :action, false')
+      assert_includes(content, 'change_column_null :audits, :audited_changes, false')
+      assert_includes(content, 'change_column_null :audits, :version, false')
+      assert_includes(content, 'change_column_null :audits, :created_at, false')
+    end
+  end
 end

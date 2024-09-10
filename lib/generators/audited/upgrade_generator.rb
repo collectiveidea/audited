@@ -26,7 +26,7 @@ module Audited
 
       def migrations_to_be_applied
         Audited::Audit.reset_column_information
-        columns = Audited::Audit.columns.map(&:name)
+        columns = Audited::Audit.columns.map { |column| [column.name, column] }.to_h
         indexes = Audited::Audit.connection.indexes(Audited::Audit.table_name)
 
         yield :add_comment_to_audits unless columns.include?("comment")
@@ -63,6 +63,16 @@ module Audited
 
         if indexes.any? { |i| i.columns == %w[auditable_type auditable_id] }
           yield :add_version_to_auditable_index
+        end
+
+        columns_not_null = [
+          "action",
+          "audited_changes",
+          "version",
+          "created_at",
+        ]
+        if columns_not_null.any? { |column| columns[column].null }
+          yield :change_audits_columns_not_null
         end
       end
     end
