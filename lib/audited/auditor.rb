@@ -67,7 +67,7 @@ module Audited
 
         class_attribute :audit_associated_with, instance_writer: false
         class_attribute :audited_options, instance_writer: false
-        attr_accessor :audit_version, :audit_comment
+        attr_accessor :audit_version, :audit_comment, :audit_attributes
 
         self.audited_options = options
         normalize_audited_options
@@ -78,6 +78,8 @@ module Audited
           validate :presence_of_audit_comment
           before_destroy :require_comment if audited_options[:on].include?(:destroy)
         end
+
+        validate :validate_audit_attributes
 
         has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name, inverse_of: :auditable
         Audited.audit_class.audited_class_names << to_s
@@ -332,32 +334,33 @@ module Audited
 
       def audit_create
         write_audit(action: "create", audited_changes: audited_attributes,
-          comment: audit_comment)
+          comment: audit_comment, **safe_audit_attributes)
       end
 
       def audit_update
         unless (changes = audited_changes(exclude_readonly_attrs: true)).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
           write_audit(action: "update", audited_changes: changes,
-            comment: audit_comment)
+            comment: audit_comment, **safe_audit_attributes)
         end
       end
 
       def audit_touch
         unless (changes = audited_changes(for_touch: true, exclude_readonly_attrs: true)).empty?
           write_audit(action: "update", audited_changes: changes,
-            comment: audit_comment)
+            comment: audit_comment, **safe_audit_attributes)
         end
       end
 
       def audit_destroy
         unless new_record?
           write_audit(action: "destroy", audited_changes: audited_attributes,
-            comment: audit_comment)
+            comment: audit_comment, **safe_audit_attributes)
         end
       end
 
       def write_audit(attrs)
         self.audit_comment = nil
+        self.audit_attributes = nil
 
         if auditing_enabled
           attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
@@ -374,6 +377,18 @@ module Audited
         if comment_required_state?
           errors.add(:audit_comment, :blank) unless audit_comment.present?
         end
+      end
+
+      def validate_audit_attributes
+        return unless audit_attributes.present?
+        audit_columns = Audited.audit_class.column_names.map(&:to_sym)
+        if !audit_attributes.is_a?(Hash) || (audit_attributes.keys - audit_columns).any?
+          errors.add(:audit_attributes, "must be a hash including only the keys of the audit class (#{audit_columns.join(", ")})")
+        end
+      end
+
+      def safe_audit_attributes
+        audit_attributes.is_a?(Hash) ? audit_attributes : {}
       end
 
       def comment_required_state?
