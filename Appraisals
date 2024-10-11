@@ -44,3 +44,10 @@ appraise "rails72" do
   gem "pg", "~> 1.1"
   gem "sqlite3", ">= 1.4"
 end
+
+appraise "rails_main" do
+  gem "rails", github: "rails/rails", branch: "main"
+  gem "mysql2", "~> 0.5"
+  gem "pg", "~> 1.1"
+  gem "sqlite3", ">= 2.0"
+end
