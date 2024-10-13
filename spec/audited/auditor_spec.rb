@@ -707,7 +707,7 @@ describe Audited::Auditor do
         audits = user.audits
 
         expect(audits.count).to eq(3)
-        expect(audits[0].audited_changes).to include({"name" => ["Foobar", "Awesome"], "username" => ["brandon", "keepers"]})
+        expect(audits[0].audited_changes).to include({"name" => ["Brandon", "Awesome"], "username" => ["brandon", "keepers"]})
         expect(audits[1].audited_changes).to eq({"activated" => [nil, true]})
         expect(audits[2].audited_changes).to eq({"favourite_device" => [nil, "Android Phone"]})
       end
