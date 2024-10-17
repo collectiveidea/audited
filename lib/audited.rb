@@ -15,6 +15,7 @@ module Audited
       :ignored_attributes,
       :ignored_default_callbacks,
       :max_audits,
+      :keep_create_action,
       :store_synthesized_enums
     attr_writer :audit_class
 

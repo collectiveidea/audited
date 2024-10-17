@@ -388,6 +388,9 @@ module Audited
 
         if max_audits && (extra_count = audits.count - max_audits) > 0
           audits_to_combine = audits.limit(extra_count + 1)
+          if audited_options[:keep_create_action]
+            audits_to_combine = audits_to_combine.where.not(action: 'create')
+          end
           combine_audits(audits_to_combine)
         end
       end
@@ -515,6 +518,7 @@ module Audited
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
         audited_options[:max_audits] ||= Audited.max_audits
+        audited_options[:keep_create_action] ||= Audited.keep_create_action
       end
 
       def calculate_non_audited_columns
