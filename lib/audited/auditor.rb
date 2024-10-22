@@ -108,6 +108,9 @@ module Audited
       def update_audited_options(new_options)
         previous_audit_options = self.audited_options
         set_audited_options(new_options)
+
+        return if previous_audit_options == self.audited_options
+
         self.reset_audited_columns
 
         log_message = "#{self.name} is already audited, audit options will be updated\n"\
