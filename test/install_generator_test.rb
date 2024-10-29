@@ -63,6 +63,10 @@ class InstallGeneratorTest < Rails::Generators::TestCase
   test "generate custom audit" do
     run_generator %w[--audited-table-name custom_audits]
 
+    assert_migration "db/migrate/create_custom_audits.rb" do |content|
+      assert_includes(content, "class CreateCustomAudits < ActiveRecord::Migration")
+    end
+
     assert_file "app/models/custom_audit.rb" do |content|
       assert_includes(content, "class CustomAudit < Audited::Audit")
     end
