@@ -132,6 +132,14 @@ module Models
       audited
     end
 
+    class CustomAudit < Audited::Audit
+    end
+
+    class CustomCompany < ::ActiveRecord::Base
+      self.table_name = "companies"
+      audited as: CustomAudit
+    end
+
     class Company::STICompany < Company
     end
 
