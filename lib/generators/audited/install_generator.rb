@@ -21,7 +21,11 @@ module Audited
       source_root File.expand_path("../templates", __FILE__)
 
       def copy_migration
-        migration_template "install.rb", "db/migrate/install_audited.rb"
+        name = "db/migrate/install_audited.rb"
+        if options[:audited_table_name] != "audits"
+          name = "db/migrate/create_#{options[:audited_table_name].underscore.pluralize}.rb"
+        end
+        migration_template "install.rb", name
       end
 
       def create_custom_audit
