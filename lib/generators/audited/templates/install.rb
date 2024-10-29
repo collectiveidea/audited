@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 <% table_name = options[:audited_table_name].underscore.pluralize %>
 class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
@@ -20,9 +19,9 @@ class <%= migration_class_name %> < <%= migration_parent %>
       t.column :created_at, :datetime
     end
 
-    add_index :<%= table_name %>, [:auditable_type, :auditable_id, :version], :name => '#{table_name}_auditable_index'
-    add_index :<%= table_name %>, [:associated_type, :associated_id], :name => '#{table_name}_associated_index'
-    add_index :<%= table_name %>, [:user_id, :user_type], :name => '#{table_name}_user_index'
+    add_index :<%= table_name %>, [:auditable_type, :auditable_id, :version], :name => "#{table_name}_auditable_index"
+    add_index :<%= table_name %>, [:associated_type, :associated_id], :name => "#{table_name}_associated_index"
+    add_index :<%= table_name %>, [:user_id, :user_type], :name => "#{table_name}_user_index"
     add_index :<%= table_name %>, :request_uuid
     add_index :<%= table_name %>, :created_at
   end
