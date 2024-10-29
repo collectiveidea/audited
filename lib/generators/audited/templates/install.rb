@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-<% table_name = options[:audited_table_name] %>
+<% table_name = options[:audited_table_name].underscore.pluralize %>
 class <%= migration_class_name %> < <%= migration_parent %>
   def self.up
     create_table :<%= table_name %>, :force => true do |t|
