@@ -88,6 +88,9 @@ module Audited
         else
           Audited.audit_class
         end
+        if audit_class.nil?
+          raise "No audit class resolved. Please specify existing audit class using the `:as` option or remove it."
+        end
 
         if audited_options[:comment_required]
           validate :presence_of_audit_comment
