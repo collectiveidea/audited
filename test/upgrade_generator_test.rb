@@ -94,4 +94,24 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
       assert_includes(content, "class AddCommentToAudits < ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]\n")
     end
   end
+
+  test "generate migration with context column change" do
+    load_schema 6
+
+    run_generator %w[upgrade]
+
+    assert_migration "db/migrate/add_context_to_audits.rb" do |content|
+      assert_match(/add_column :audits, :context, :jsonb/, content)
+    end
+  end
+
+  test "generate migration with context column change for custom table name" do
+    load_schema 6
+
+    run_generator %w[upgrade --audited_table_name=custom_audits]
+
+    assert_migration "db/migrate/add_context_to_custom_audits.rb" do |content|
+      assert_match(/add_column :custom_audits, :context, :jsonb/, content)
+    end
+  end
 end

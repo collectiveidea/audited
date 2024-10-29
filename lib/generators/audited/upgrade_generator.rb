@@ -19,8 +19,12 @@ module Audited
       source_root File.expand_path("../templates", __FILE__)
 
       def copy_templates
-        migrations_to_be_applied do |m|
-          migration_template "#{m}.rb", "db/migrate/#{m}.rb"
+        migrations_to_be_applied do |template_name|
+          name = "db/migrate/#{template_name}.rb"
+          if options[:audited_table_name] != "audits"
+            name = name.gsub("_to_audits", "_to_#{options[:audited_table_name]}")
+          end
+          migration_template "#{template_name}.rb", name
         end
       end
 
