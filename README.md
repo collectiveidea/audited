@@ -435,6 +435,22 @@ In 4.10, the default behavior for enums changed from storing the value synthesiz
 Audited.store_synthesized_enums = true
 ```
 
+### Audit SQL
+
+To fetch the SQL used to create the audit, you can use the `audit_sql` method. Can be useful for batched operations or for debugging.
+
+```ruby
+class User < ActiveRecord::Base
+  audited
+end
+
+user = User.new(name: "Brandon")
+user.disable_auditing
+user.audit_sql
+```
+
+NOTE: This method will return non-nil value only if the record is dirty (is new or has changes).
+
 ## Support
 
 You can find documentation at: https://www.rubydoc.info/gems/audited
