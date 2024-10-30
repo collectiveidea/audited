@@ -445,10 +445,13 @@ describe Audited::Auditor do
       @user.assign_attributes(name: "Changed")
       audit_sql = @user.audit_sql
 
-      matches = audit_sql.match(/INSERT INTO "audits" \((.*?)\) VALUES \((.*?)\)/)
-      columns = matches[1].split(", ").map { |c| c.delete('"') }
-      values = matches[2].split(", ").map { |v| v.delete("'") }
-      parsed_sql = columns.zip(values).to_h
+      def parse_sql(sql)
+        matches = sql.match(/INSERT INTO "audits" \((.*?)\) VALUES \((.*?)\)/)
+        columns = matches[1].split(", ").map { |c| c.delete('"') }
+        values = matches[2].split(", ").map { |v| v.delete("'") }
+        columns.zip(values).to_h
+      end
+      parsed_sql = parse_sql(audit_sql)
       # expect(parsed_sql["auditable_id"]).to eq("1")
       expect(parsed_sql["auditable_type"]).to eq("Models::ActiveRecord::User")
       expect(parsed_sql["action"]).to eq("update")
@@ -462,6 +465,20 @@ describe Audited::Auditor do
       expect(last_audit.action).to eq("update")
       expect(last_audit.audited_changes).to eq({"name" => ["Brandon", "Changed"]})
       expect(last_audit.version).to eq(2)
+
+      @user.assign_attributes(name: "Changed-2")
+      expect { ActiveRecord::Base.connection.execute(@user.audit_sql) }.to change(@user.audits, :count).by(1)
+      expect { @user.class.where(id: @user.id).update_all(name: "Changed-2") }.not_to change(@user.audits, :count)
+      expect { @user.reload.save! }.not_to change(@user.audits, :count)
+
+      expect { @user.update!(name: "Changed-3") }.to change(@user.audits, :count).by(1)
+      expect(@user.audits.last.version).to eq(4)
+
+      destroy_sql = parse_sql(@user.audit_sql(destroy: true))
+      expect(destroy_sql["action"]).to eq("destroy")
+
+      @user.assign_attributes(name: "Changed-4")
+      expect { @user.audit_sql }.not_to change(@user.audits, :count)
     end
 
     context "with readonly attributes" do

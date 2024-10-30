@@ -203,7 +203,7 @@ module Audited
       end
 
       def audit_sql(destroy: false)
-        return unless changed?
+        return unless changed? || destroy
 
         action = if new_record?
           "create"
@@ -212,6 +212,7 @@ module Audited
         else
           "update"
         end
+
         attrs = {
           action: action,
           audited_changes: audited_changes,
@@ -225,18 +226,17 @@ module Audited
           audits.delete(audit)
           result
         end
-        return if changes.empty?
+        changes = changes.each_with_object({}) do |(k, v), h|
+          h[k] = v.last
+          h[k] = h[k].to_json if h[k].is_a?(Hash)
+        end
+        changes["created_at"] ||= Time.current
 
-        updates = changes.each_with_object({}) { |(k, v), h| h[k] = v.last }
         stmt = Arel::InsertManager.new
         table = Arel::Table.new(Audited.audit_class.table_name)
-        column_names = Audited.audit_class.column_names
         stmt.into(table)
-        updates["audited_changes"] = updates["audited_changes"].to_json
-        updates["created_at"] ||= Time.current if column_names.include?("created_at")
-        updates["updated_at"] ||= Time.current if column_names.include?("updated_at")
-        updates.keys.each { |key| stmt.columns << table[key] }
-        stmt.values = stmt.create_values(updates.values)
+        changes.keys.each { |key| stmt.columns << table[key] }
+        stmt.values = stmt.create_values(changes.values)
         stmt.to_sql
       end
 
