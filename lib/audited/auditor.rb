@@ -221,7 +221,9 @@ module Audited
         changes = run_callbacks(:audit) do
           audit = audits.new(attrs)
           audit.run_callbacks(:create)
-          audit.changes
+          result = audit.changes
+          audits.delete(audit)
+          result
         end
         return if changes.empty?
 
