@@ -202,6 +202,42 @@ module Audited
         end
       end
 
+      def audit_sql(destroy: false)
+        return unless changed?
+
+        action = if new_record?
+          "create"
+        elsif destroy
+          "destroy"
+        else
+          "update"
+        end
+        attrs = {
+          action: action,
+          audited_changes: audited_changes,
+          comment: audit_comment
+        }
+        attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
+        changes = run_callbacks(:audit) do
+          audit = audits.new(attrs)
+          audit.run_callbacks(:create)
+          audit.changes
+        end
+        return if changes.empty?
+
+        updates = changes.each_with_object({}) { |(k, v), h| h[k] = v.last }
+        stmt = Arel::InsertManager.new
+        table = Arel::Table.new(Audited.audit_class.table_name)
+        column_names = Audited.audit_class.column_names
+        stmt.into(table)
+        updates["audited_changes"] = updates["audited_changes"].to_json
+        updates["created_at"] ||= Time.current if column_names.include?("created_at")
+        updates["updated_at"] ||= Time.current if column_names.include?("updated_at")
+        updates.keys.each { |key| stmt.columns << table[key] }
+        stmt.values = stmt.create_values(updates.values)
+        stmt.to_sql
+      end
+
       protected
 
       def revision_with(attributes)

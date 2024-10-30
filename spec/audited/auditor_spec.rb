@@ -437,6 +437,28 @@ describe Audited::Auditor do
       expect { @user.update_attribute :activated, "1" }.to_not change(Audited::Audit, :count)
     end
 
+    it "should return sql for audit when changes are made" do
+      expect(@user.new_record?).to eq(false)
+      expect(@user.changes).to be_blank
+      expect(@user.audit_sql).to eq(nil)
+
+      @user.assign_attributes(name: "Changed")
+      audit_sql = @user.audit_sql
+
+      matches = audit_sql.match(/INSERT INTO "audits" \((.*?)\) VALUES \((.*?)\)/)
+      columns = matches[1].split(", ").map { |c| c.delete('"') }
+      values = matches[2].split(", ").map { |v| v.delete("'") }
+      parsed_sql = columns.zip(values).to_h
+      expect(parsed_sql["auditable_id"]).to eq("1")
+      expect(parsed_sql["auditable_type"]).to eq("Models::ActiveRecord::User")
+      expect(parsed_sql["action"]).to eq("update")
+      expect(parsed_sql["audited_changes"]).to include('"name":["Brandon","Changed"]')
+      expect(parsed_sql["version"]).to eq("2")
+
+      @user.save!
+      expect(@user.audit_sql).to eq(nil)
+    end
+
     context "with readonly attributes" do
       before do
         @user = create_user_with_readonly_attrs(status: "active")
