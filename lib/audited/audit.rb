@@ -44,7 +44,7 @@ module Audited
     belongs_to :user, polymorphic: true
     belongs_to :associated, polymorphic: true
 
-    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
+    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address, :set_audit_context
 
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
@@ -197,6 +197,10 @@ module Audited
 
     def set_remote_address
       self.remote_address ||= ::Audited.store[:current_remote_address]
+    end
+
+    def set_audit_context
+      self.context = (::Audited.context || {}).merge(context || {})
     end
   end
 end

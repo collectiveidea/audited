@@ -329,7 +329,7 @@ describe Audited::Auditor do
   end
 
   describe "on create" do
-    let(:user) { create_user status: :reliable, audit_comment: "Create" }
+    let(:user) { create_user status: :reliable, audit_comment: "Create", audit_context: {sample_key: "sample_value"} }
 
     it "should change the audit count" do
       expect {
@@ -368,6 +368,19 @@ describe Audited::Auditor do
 
     it "should store comment" do
       expect(user.audits.first.comment).to eq("Create")
+    end
+
+    it "should store context" do
+      expect(user.audits.first.context).to eq({"sample_key" => "sample_value"})
+    end
+
+    context "with global context" do
+      before { Audited.context[:global_key] = "global_value" }
+      after { Audited.context.delete(:global_key) }
+
+      it "should merge global context" do
+        expect(user.audits.first.context).to eq({"sample_key" => "sample_value", "global_key" => "global_value"})
+      end
     end
 
     it "should not audit an attribute which is excepted if specified on create or destroy" do
