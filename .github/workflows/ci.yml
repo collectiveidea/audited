@@ -18,6 +18,7 @@ jobs:
           - rails70
           - rails71
           - rails72
+          - rails80
           - rails_main
         db: [POSTGRES, MYSQL, SQLITE]
         exclude:
@@ -98,6 +99,22 @@ jobs:
             ruby: "2.7"
           - appraisal: rails72
             ruby: "3.0"
+
+          # Rails 8.0 supports Ruby 3.2+
+          - appraisal: rails80
+            ruby: "2.3"
+          - appraisal: rails80
+            ruby: "2.4"
+          - appraisal: rails80
+            ruby: "2.5"
+          - appraisal: rails80
+            ruby: "2.6"
+          - appraisal: rails80
+            ruby: "2.7"
+          - appraisal: rails80
+            ruby: "3.0"
+          - appraisal: rails80
+            ruby: "3.1"
 
           # Rails main supports Ruby 3.2+
           - appraisal: rails_main
