@@ -221,7 +221,7 @@ module Audited
       def association_exists?
         !reflection.nil? &&
           reflection.macro == :has_many &&
-          reflection.options[:class_name] == Audited.audit_class.name
+          reflection.options[:class_name] == model_class.audit_class.name
       end
     end
   end

@@ -62,6 +62,8 @@ By default changes are stored in YAML format. If you're using PostgreSQL, then y
 
 If you're using something other than integer primary keys (e.g. UUID) for your User model, then you can use `rails generate audited:install --audited-user-id-column-type uuid` to customize the `audits` table `user_id` column type.
 
+If you would like to use a custom audits table, you can use `rails generate audited:install --audited-table-name custom_audits` to specify a custom audit table name, it will generate a schema migration file and a custom audit model in `app/models`.
+
 #### Upgrading
 
 If you're already using Audited (or acts_as_audited), your `audits` table may require additional columns. After every upgrade, please run:
@@ -416,12 +418,39 @@ class CustomAudit < Audited::Audit
   end
 end
 ```
+
 Then set it in an initializer:
+
 ```ruby
 # config/initializers/audited.rb
 
 Audited.config do |config|
   config.audit_class = "CustomAudit"
+end
+```
+
+You can also specify a custom audit class on a per-model basis, which will override default audit class for the exact model.
+
+```ruby
+class User < ActiveRecord::Base
+  audited as: "CustomAudit"
+end
+
+# or with a custom class
+class User < ActiveRecord::Base
+  audited as: CustomAudit
+end
+```
+
+You can also supply a custom table name for the audit records.
+
+```ruby
+class CustomAudit < Audited::Audit
+  self.table_name = "custom_audits"
+end
+
+class User < ActiveRecord::Base
+  audited as: CustomAudit
 end
 ```
 
