@@ -10,13 +10,13 @@ class <%= migration_class_name %> < <%= migration_parent %>
       t.column :user_id, :<%= options[:audited_user_id_column_type] %>
       t.column :user_type, :string
       t.column :username, :string
-      t.column :action, :string
-      t.column :audited_changes, :<%= options[:audited_changes_column_type] %>
-      t.column :version, :integer, :default => 0
+      t.column :action, :string, null: false
+      t.column :audited_changes, :<%= options[:audited_changes_column_type] %>, null: false
+      t.column :version, :integer, :default => 0, null: false
       t.column :comment, :string
       t.column :remote_address, :string
       t.column :request_uuid, :string
-      t.column :created_at, :datetime
+      t.column :created_at, :datetime, null: false
     end
 
     add_index :audits, [:auditable_type, :auditable_id, :version], :name => 'auditable_index'
