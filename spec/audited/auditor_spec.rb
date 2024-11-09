@@ -1312,4 +1312,20 @@ describe Audited::Auditor do
       }.to raise_error(ActiveRecord::RecordInvalid).with_message(/Audit attributes must be a hash including only the keys of the audit class/)
     end
   end
+
+  describe "call audit multiple times" do
+    it "should update audit options" do
+      user = Models::ActiveRecord::UserOnlyName.create
+      user.update(password: "new password 1", name: "new name 1")
+      expect(user.audits.last.audited_changes.keys).to eq(%w[name])
+
+      user.class.class_eval do
+        audited only: :password
+      end
+
+      user = Models::ActiveRecord::UserOnlyName.last
+      user.update(password: "new password 2", name: "new name 2")
+      expect(user.audits.last.audited_changes.keys).to eq(%w[password])
+    end
+  end
 end
