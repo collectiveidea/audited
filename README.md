@@ -178,6 +178,63 @@ class User < ActiveRecord::Base
 end
 ```
 
+### Custom Audit Attributes
+
+The `audit_attributes` feature allows you to dynamically set custom attributes when creating audit records. This is useful if you have added additional columns to your audit table and want to include specific values during the auditing process.
+
+For example, if you want to add a custom_attribute column to the audits table, create a migration:
+
+```ruby
+class AddCustomAttributeToAudits < ActiveRecord::Migration[7.0]
+  def change
+    add_column :audits, :custom_attribute, :string
+  end
+end
+```
+
+Run the migration:
+
+```bash
+$ rails db:migrate
+```
+
+To use `audit_attributes`, pass a hash containing the custom attributes you want to set when creating or updating a record:
+
+```ruby
+class User < ActiveRecord::Base
+  audited
+end
+
+user = User.create!(
+  name: "John Doe",
+  audit_attributes: { custom_attribute: "Extra Info" }
+)
+
+audit = user.audits.last
+audit.custom_attribute # => "Extra Info"
+```
+
+The keys provided in `audit_attributes` must correspond to existing columns in your custom `audit` table. If an invalid key is included, an error will be raised:
+
+```ruby
+user = User.create!(
+  name: "Steve",
+  audit_attributes: { invalid_key: "Invalid" }
+)
+# => Raises ActiveRecord::RecordInvalid
+```
+
+If a key in `audit_attributes` matches a predefined attribute, it will override the default value set during the auditing process:
+
+```ruby
+user.update!(
+  name: "Jane Doe",
+  audit_attributes: { comment: "Overridden comment" }
+)
+
+user.audits.last.comment # => "Overridden comment"
+```
+
 ### Limiting stored audits
 
 You can limit the number of audits stored for your model. To configure limiting for all audited models, put the following in an initializer file (`config/initializers/audited.rb`):
