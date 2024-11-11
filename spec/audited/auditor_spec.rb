@@ -308,6 +308,14 @@ describe Audited::Auditor do
           expect(TemporaryCustomSecret.audit_class).to eq(CustomAudit)
         end
       end
+
+      context "when using wrong audit class" do
+        it "should raise error" do
+          expect {
+            eval %(class TemporaryWrongAudited < ::ActiveRecord::Base; audited as: "WrongAudit"; end), binding, __FILE__, __LINE__
+          }.to raise_error(StandardError, "No audit class resolved. Please specify existing audit class using the `:as` option or remove it.")
+        end
+      end
     end
 
     context "when using custom audit class" do
