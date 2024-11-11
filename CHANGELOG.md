@@ -1,5 +1,11 @@
 # Audited ChangeLog
 
+### 5.8.0 (2024-11-08)
+- Allow calling audited multiple times - @mohammednasser-32
+  [734](https://github.com/collectiveidea/audited/pull/734)  
+- Relax gemspec to allow Rails 8.1 - @BranLiang
+  [738](https://github.com/collectiveidea/audited/pull/738)
+
 ### 5.7.0 (2024-08-13)
 
 - Support for Rails 7.2 and Ruby 3.3, and testing cleanups - @mattbrictson

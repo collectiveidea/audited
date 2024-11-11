@@ -36,6 +36,12 @@ module Models
       audited only: :password
     end
 
+    class UserOnlyName < ::ActiveRecord::Base
+      self.table_name = :users
+      attribute :non_column_attr if Rails.gem_version >= Gem::Version.new("5.1")
+      audited only: :name
+    end
+
     class UserRedactedPassword < ::ActiveRecord::Base
       self.table_name = :users
       audited redacted: :password
