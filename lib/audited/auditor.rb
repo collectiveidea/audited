@@ -59,9 +59,16 @@ module Audited
       #     end
       #
       def audited(options = {})
-        # don't allow multiple calls
-        return if included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
+        audited? ? update_audited_options(options) : set_audit(options)
+      end
 
+      private
+
+      def audited?
+        included_modules.include?(Audited::Auditor::AuditedInstanceMethods)
+      end
+
+      def set_audit(options)
         extend Audited::Auditor::AuditedClassMethods
         include Audited::Auditor::AuditedInstanceMethods
 
@@ -71,10 +78,7 @@ module Audited
 
         attr_accessor :audit_version, :audit_comment
 
-        self.audited_options = options
-        normalize_audited_options
-
-        self.audit_associated_with = audited_options[:associated_with]
+        set_audited_options(options)
 
         self.audit_class = case audited_options[:as]
         when String, Symbol
@@ -113,6 +117,18 @@ module Audited
 
       def has_associated_audits
         has_many :associated_audits, as: :associated, class_name: audit_class.name
+      end
+
+      def update_audited_options(new_options)
+        previous_audit_options = self.audited_options
+        set_audited_options(new_options)
+        self.reset_audited_columns
+      end
+
+      def set_audited_options(options)
+        self.audited_options = options
+        normalize_audited_options
+        self.audit_associated_with = audited_options[:associated_with]
       end
     end
 
@@ -543,6 +559,11 @@ module Audited
 
       def class_auditing_enabled
         Audited.store.fetch("#{table_name}_auditing_enabled", true)
+      end
+
+      def reset_audited_columns
+        @audited_columns = nil
+        @non_audited_columns = nil
       end
     end
   end
