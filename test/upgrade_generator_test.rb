@@ -101,7 +101,7 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
     run_generator %w[upgrade]
 
     assert_migration "db/migrate/add_context_to_audits.rb" do |content|
-      assert_match(/add_column :audits, :context, :jsonb/, content)
+      assert_match(/add_column :audits, :context, :text/, content)
     end
   end
 
@@ -111,7 +111,7 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
     run_generator %w[upgrade --audited_table_name=custom_audits]
 
     assert_migration "db/migrate/add_context_to_custom_audits.rb" do |content|
-      assert_match(/add_column :custom_audits, :context, :jsonb/, content)
+      assert_match(/add_column :custom_audits, :context, :text/, content)
     end
   end
 end

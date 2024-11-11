@@ -15,6 +15,7 @@ module Audited
       extend Audited::Generators::Migration
 
       class_option :audited_table_name, type: :string, default: "audits", required: false
+      class_option :audited_context_column_type, type: :string, default: "text", required: false
 
       source_root File.expand_path("../templates", __FILE__)
 

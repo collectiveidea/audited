@@ -371,7 +371,7 @@ describe Audited::Auditor do
     end
 
     it "should store context" do
-      expect(user.audits.first.context).to eq({"sample_key" => "sample_value"})
+      expect(user.audits.first.audited_context).to eq({sample_key: "sample_value"})
     end
 
     context "with global context" do
@@ -379,7 +379,7 @@ describe Audited::Auditor do
       after { Audited.context.delete(:global_key) }
 
       it "should merge global context" do
-        expect(user.audits.first.context).to eq({"sample_key" => "sample_value", "global_key" => "global_value"})
+        expect(user.audits.first.audited_context).to eq({sample_key: "sample_value", global_key: "global_value"})
       end
     end
 

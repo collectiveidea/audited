@@ -159,7 +159,7 @@ You can attach context to each audit using an `audit_context` attribute on your 
 
 ```ruby
 user.update!(name: "Ryan", audit_context: {class_name: self.class.name, id: self.id})
-user.audits.last.context # => {"class_name"=>"User", "id"=>1}
+user.audits.last.audited_context # => {"class_name"=>"User", "id"=>1}
 ```
 
 or using global context, it will be merged with the model context:
@@ -167,10 +167,10 @@ or using global context, it will be merged with the model context:
 ```ruby
 Audited.context = {class_name: self.class.name, id: self.id}
 user.update!(name: "Ryan")
-user.audits.last.context # => {"class_name"=>"User", "id"=>1}
+user.audits.last.audited_context # => {"class_name"=>"User", "id"=>1}
 
 user.update!(name: "Brian", audit_context: {sample_key: "sample_value"})
-user.audits.last.context # => {"class_name"=>"User", "id"=>2, "sample_key"=>"sample_value"}
+user.audits.last.audited_context # => {"class_name"=>"User", "id"=>2, "sample_key"=>"sample_value"}
 ```
 
 ### Comments

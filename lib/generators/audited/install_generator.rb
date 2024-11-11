@@ -17,6 +17,7 @@ module Audited
       class_option :audited_changes_column_type, type: :string, default: "text", required: false
       class_option :audited_user_id_column_type, type: :string, default: "integer", required: false
       class_option :audited_table_name, type: :string, default: "audits", required: false
+      class_option :audited_context_column_type, type: :string, default: "text", required: false
 
       source_root File.expand_path("../templates", __FILE__)
 

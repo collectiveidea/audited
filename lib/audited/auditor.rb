@@ -348,27 +348,27 @@ module Audited
 
       def audit_create
         write_audit(action: "create", audited_changes: audited_attributes,
-          comment: audit_comment, context: audit_context)
+          comment: audit_comment, audited_context: audit_context)
       end
 
       def audit_update
         unless (changes = audited_changes(exclude_readonly_attrs: true)).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
           write_audit(action: "update", audited_changes: changes,
-            comment: audit_comment, context: audit_context)
+            comment: audit_comment, audited_context: audit_context)
         end
       end
 
       def audit_touch
         unless (changes = audited_changes(for_touch: true, exclude_readonly_attrs: true)).empty?
           write_audit(action: "update", audited_changes: changes,
-            comment: audit_comment, context: audit_context)
+            comment: audit_comment, audited_context: audit_context)
         end
       end
 
       def audit_destroy
         unless new_record?
           write_audit(action: "destroy", audited_changes: audited_attributes,
-            comment: audit_comment, context: audit_context)
+            comment: audit_comment, audited_context: audit_context)
         end
       end
 
