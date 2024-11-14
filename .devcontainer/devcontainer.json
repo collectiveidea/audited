@@ -1,0 +1,20 @@
+{
+  "name": "Ruby Development Container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:1": {}
+  },
+  "postCreateCommand": "bundle install && bundle exec appraisal install",
+  "customizations": {
+    "settings": {
+      "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "vscode": {
+      "extensions": [
+        "rebornix.Ruby"
+      ]
+    }
+  }
+}
