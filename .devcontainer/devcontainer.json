@@ -3,6 +3,9 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:1": {}
+  },
   "postCreateCommand": "bundle install && bundle exec appraisal install",
   "customizations": {
     "settings": {
