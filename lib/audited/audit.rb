@@ -79,6 +79,15 @@ module Audited
       user_type.constantize.find_by(id: user_id || user_uuid)
     end
 
+    def user=(user)
+      if user.id.is_a? String
+        self.user_uuid = user.id
+      else
+        self.user_id = user.id
+      end
+      self.user_type = user.class.name
+    end
+
     # Return all audits older than the current one.
     def ancestors
       self.class.ascending.auditable_finder(auditable_id, auditable_type).to_version(version)
