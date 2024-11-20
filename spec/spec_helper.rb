@@ -24,3 +24,4 @@ RSpec.configure do |config|
   config.use_transactional_tests = false if config.respond_to?(:use_transactional_tests=)
   config.filter_run_when_matching :focus
 end
+
