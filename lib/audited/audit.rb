@@ -76,10 +76,12 @@ module Audited
     end
 
     def user
-      user_type.constantize.find_by(id: user_id || user_uuid)
+      user_type&.constantize&.find_by(id: user_id || user_uuid)
     end
 
     def user=(user)
+      return unless user
+
       if user.id.is_a? String
         self.user_uuid = user.id
       else
