@@ -40,8 +40,6 @@ module Audited
   end
 
   class Audit < ::ActiveRecord::Base
-    belongs_to :user, polymorphic: true
-
     before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
 
     cattr_accessor :audited_class_names
@@ -75,6 +73,10 @@ module Audited
 
     def associated
       associated_type&.constantize&.find_by(id: associated_id || associated_uuid)
+    end
+
+    def user
+      user_type.constantize.find_by(id: user_id || user_uuid)
     end
 
     # Return all audits older than the current one.
