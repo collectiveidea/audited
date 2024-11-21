@@ -48,7 +48,7 @@ class UpgradeGeneratorTest < Rails::Generators::TestCase
     run_generator %w[upgrade]
 
     assert_migration "db/migrate/add_association_to_audits.rb" do |content|
-      assert_match(/add_column :audits, :association_id, :integer/, content)
+      assert_match(/add_column :audits, :association_id, :bigint/, content)
       assert_match(/add_column :audits, :association_type, :string/, content)
     end
   end

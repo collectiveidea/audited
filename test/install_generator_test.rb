@@ -59,4 +59,32 @@ class InstallGeneratorTest < Rails::Generators::TestCase
       assert_includes(content, "class InstallAudited < ActiveRecord::Migration[#{ActiveRecord::Migration.current_version}]\n")
     end
   end
+
+  test "generate migration with 'bigint' type for user_id column" do
+    run_generator %w(--audited-user-id-column-type bigint)
+
+    assert_migration "db/migrate/install_audited.rb" do |content|
+      assert_includes(content, 'class InstallAudited')
+      assert_includes(content, 't.column :user_id, :bigint')
+    end
+  end
+
+  test "generate migration with 'bigint' type for auditable_id column" do
+    run_generator
+
+    assert_migration "db/migrate/install_audited.rb" do |content|
+      assert_includes(content, 'class InstallAudited')
+      assert_includes(content, 't.column :auditable_id, :bigint')
+    end
+  end
+
+  test "generate migration with 'bigint' type for associated_id column" do
+    run_generator
+
+    assert_migration "db/migrate/install_audited.rb" do |content|
+      assert_includes(content, 'class InstallAudited')
+      assert_includes(content, 't.column :associated_id, :bigint')
+    end
+  end
+
 end
