@@ -204,7 +204,8 @@ module Audited
       # Combine multiple audits into one.
       def combine_audits(audits_to_combine)
         combine_target = audits_to_combine.last
-        combine_target.audited_changes = audits_to_combine.pluck(:audited_changes).reduce(&:merge)
+        combine_target.audited_changes = audits_to_combine.map(&:audited_changes).reduce(&:merge)
+        combine_target.audited_context = audits_to_combine.map(&:audited_context).reduce(&:merge)
         combine_target.comment = "#{combine_target.comment}\nThis audit is the result of multiple audits being combined."
 
         transaction do
