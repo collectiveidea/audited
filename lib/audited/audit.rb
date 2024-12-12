@@ -60,8 +60,18 @@ module Audited
     end
 
     if Rails.gem_version >= Gem::Version.new("7.1")
+      def self.inherited(subclass)
+        super
+        subclass.serialize :audited_changes, coder: YAMLIfTextColumnType.new(subclass)
+      end
+
       serialize :audited_changes, coder: YAMLIfTextColumnType.new(self)
     else
+      def self.inherited(subclass)
+        super
+        subclass.serialize :audited_changes, YAMLIfTextColumnType.new(subclass)
+      end
+
       serialize :audited_changes, YAMLIfTextColumnType.new(self)
     end
 
