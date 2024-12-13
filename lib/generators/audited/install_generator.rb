@@ -16,11 +16,22 @@ module Audited
 
       class_option :audited_changes_column_type, type: :string, default: "text", required: false
       class_option :audited_user_id_column_type, type: :string, default: "integer", required: false
+      class_option :audited_table_name, type: :string, default: "audits", required: false
 
       source_root File.expand_path("../templates", __FILE__)
 
       def copy_migration
-        migration_template "install.rb", "db/migrate/install_audited.rb"
+        name = "db/migrate/install_audited.rb"
+        if options[:audited_table_name] != "audits"
+          name = "db/migrate/create_#{options[:audited_table_name].underscore.pluralize}.rb"
+        end
+        migration_template "install.rb", name
+      end
+
+      def create_custom_audit
+        return if options[:audited_table_name] == "audits"
+
+        template "custom_audit.rb", "app/models/#{options[:audited_table_name].singularize.underscore}.rb"
       end
     end
   end

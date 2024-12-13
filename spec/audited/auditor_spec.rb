@@ -67,6 +67,15 @@ class Secret2 < ::ActiveRecord::Base
   self.non_audited_columns = ["delta", "top_secret", "created_at"]
 end
 
+class CustomAudit < Audited::Audit
+  self.table_name = "custom_audits"
+end
+
+class CustomCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+  audited as: CustomAudit
+end
+
 describe Audited::Auditor do
   describe "configuration" do
     it "should include instance methods" do
@@ -267,6 +276,95 @@ describe Audited::Auditor do
       end
     end
 
+    context "when using default audit class" do
+      it "should use default audit class" do
+        expect(Models::ActiveRecord::Company.audit_class).to eq(Audited::Audit)
+      end
+
+      context "when using custom audit class" do
+        before do
+          eval %(class TemporaryCustomAudit < Audited::Audit; end), binding, __FILE__, __LINE__
+          Audited.config do |config|
+            config.audit_class = TemporaryCustomAudit
+          end
+          eval %(class TemporaryCustomSecret < ::ActiveRecord::Base; audited as: CustomAudit; end), binding, __FILE__, __LINE__
+          eval %(class TemporarySecret < ::ActiveRecord::Base; audited; end), binding, __FILE__, __LINE__
+        end
+
+        after do
+          Audited.config do |config|
+            config.audit_class = Audited::Audit
+          end
+          Object.send(:remove_const, :TemporarySecret)
+          Object.send(:remove_const, :TemporaryCustomSecret)
+          Object.send(:remove_const, :TemporaryCustomAudit)
+        end
+
+        it "should use custom default audit class" do
+          expect(TemporarySecret.audit_class).to eq(TemporaryCustomAudit)
+        end
+
+        it "should not affect models with custom audit class" do
+          expect(TemporaryCustomSecret.audit_class).to eq(CustomAudit)
+        end
+      end
+
+      context "when using wrong audit class" do
+        it "should raise error" do
+          expect {
+            eval %(class TemporaryWrongAudited < ::ActiveRecord::Base; audited as: "WrongAudit"; end), binding, __FILE__, __LINE__
+          }.to raise_error(StandardError, "No audit class resolved. Please specify existing audit class using the `:as` option or remove it.")
+        end
+      end
+    end
+
+    context "when using custom audit class" do
+      it "should use custom audit class" do
+        expect(CustomCompany.audit_class).to eq(CustomAudit)
+      end
+
+      it "should have correct table name" do
+        expect(CustomAudit.table_name).to eq("custom_audits")
+        expect(CustomAudit.table_name).not_to eq(Audited::Audit.table_name)
+      end
+
+      it "should have association with custom audit class" do
+        expect(CustomAudit.audited_classes).to include(CustomCompany)
+      end
+
+      it "should not have association with default audit class" do
+        expect(Audited::Audit.audited_classes).not_to include(CustomCompany)
+      end
+    end
+
+    context "when using custom audit class as string" do
+      before do
+        eval %(class TemporaryCustomCompany < ::ActiveRecord::Base; self.table_name = "companies"; audited as: "CustomAudit"; end), binding, __FILE__, __LINE__
+      end
+
+      after do
+        Object.send(:remove_const, :TemporaryCustomCompany)
+      end
+
+      it "should resolve custom audit class" do
+        expect(TemporaryCustomCompany.audit_class).to eq(CustomAudit)
+      end
+    end
+
+    context "when using custom audit class as symbol" do
+      before do
+        eval %(class TemporaryCustomCompany < ::ActiveRecord::Base; self.table_name = "companies"; audited as: :CustomAudit; end), binding, __FILE__, __LINE__
+      end
+
+      after do
+        Object.send(:remove_const, :TemporaryCustomCompany)
+      end
+
+      it "should resolve custom audit class" do
+        expect(TemporaryCustomCompany.audit_class).to eq(CustomAudit)
+      end
+    end
+
     if ::ActiveRecord::VERSION::MAJOR >= 7
       it "should filter encrypted attributes" do
         user = Models::ActiveRecord::UserWithEncryptedPassword.create(password: "password")
@@ -385,6 +483,29 @@ describe Audited::Auditor do
       expect {
         Models::ActiveRecord::UserWithReadOnlyAttrs.create!(name: "Bart")
       }.to change(Audited::Audit, :count)
+    end
+
+    context "when using custom audit class" do
+      let(:company) { CustomCompany.create!(name: "Custom Company") }
+
+      it "should have correct configuration" do
+        expect(CustomCompany.audit_class).to eq(CustomAudit)
+        expect(company.audit_class).to eq(CustomAudit)
+      end
+
+      it "should create custom audit" do
+        expect(company.audits.first.class).to eq(CustomAudit)
+        expect(company.audits.first.action).to eq("create")
+        expect(CustomAudit.creates.order(:id).last).to eq(company.audits.first)
+        expect(company.audits.creates.count).to eq(1)
+        expect(company.audits.updates.count).to eq(0)
+        expect(company.audits.destroys.count).to eq(0)
+      end
+
+      it "should not create default audit record" do
+        expect { company }.not_to change(Audited::Audit, :count)
+        expect(Audited::Audit.where(auditable_type: CustomCompany.name).count).to eq(0)
+      end
     end
   end
 
