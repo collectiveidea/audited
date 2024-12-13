@@ -16,26 +16,29 @@ module Audited
   #
 
   class YAMLIfTextColumnType
-    class << self
-      def load(obj)
-        if text_column?
-          ActiveRecord::Coders::YAMLColumn.new(Object).load(obj)
-        else
-          obj
-        end
-      end
+    def initialize(audit_class, column_name)
+      @audit_class = audit_class
+      @column_name = column_name
+    end
 
-      def dump(obj)
-        if text_column?
-          ActiveRecord::Coders::YAMLColumn.new(Object).dump(obj)
-        else
-          obj
-        end
+    def load(obj)
+      if text_column?
+        ActiveRecord::Coders::YAMLColumn.new(Object).load(obj)
+      else
+        obj
       end
+    end
 
-      def text_column?
-        Audited.audit_class.columns_hash["audited_changes"].type.to_s == "text"
+    def dump(obj)
+      if text_column?
+        ActiveRecord::Coders::YAMLColumn.new(Object).dump(obj)
+      else
+        obj
       end
+    end
+
+    def text_column?
+      @audit_class.columns_hash[@column_name].type.to_s == "text"
     end
   end
 
@@ -44,15 +47,17 @@ module Audited
     belongs_to :user, polymorphic: true
     belongs_to :associated, polymorphic: true
 
-    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
+    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address, :set_audited_context
 
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
 
     if Rails.gem_version >= Gem::Version.new("7.1")
-      serialize :audited_changes, coder: YAMLIfTextColumnType
+      serialize :audited_changes, coder: YAMLIfTextColumnType.new(self, "audited_changes")
+      serialize :audited_context, coder: YAMLIfTextColumnType.new(self, "audited_context")
     else
-      serialize :audited_changes, YAMLIfTextColumnType
+      serialize :audited_changes, YAMLIfTextColumnType.new(self, "audited_changes")
+      serialize :audited_context, YAMLIfTextColumnType.new(self, "audited_context")
     end
 
     scope :ascending, -> { reorder(version: :asc) }
@@ -197,6 +202,10 @@ module Audited
 
     def set_remote_address
       self.remote_address ||= ::Audited.store[:current_remote_address]
+    end
+
+    def set_audited_context
+      self.audited_context = (::Audited.context || {}).merge(audited_context || {})
     end
   end
 end

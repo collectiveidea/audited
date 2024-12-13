@@ -79,6 +79,7 @@ ActiveRecord::Schema.define do
     t.column :comment, :string
     t.column :remote_address, :string
     t.column :request_uuid, :string
+    t.column :audited_context, :text
     t.column :created_at, :datetime
   end
 
