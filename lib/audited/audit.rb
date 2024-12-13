@@ -16,8 +16,9 @@ module Audited
   #
 
   class YAMLIfTextColumnType
-    def initialize(audit_class)
+    def initialize(audit_class, column_name)
       @audit_class = audit_class
+      @column_name = column_name
     end
 
     def load(obj)
@@ -37,7 +38,7 @@ module Audited
     end
 
     def text_column?
-      @audit_class.columns_hash["audited_changes"].type.to_s == "text"
+      @audit_class.columns_hash[@column_name].type.to_s == "text"
     end
   end
 
@@ -59,20 +60,19 @@ module Audited
       @@audited_classes[name] ||= Set.new
     end
 
-    if Rails.gem_version >= Gem::Version.new("7.1")
-      def self.inherited(subclass)
-        super
-        subclass.serialize :audited_changes, coder: YAMLIfTextColumnType.new(subclass)
+    def self.initialize_serializers
+      if Rails.gem_version >= Gem::Version.new("7.1")
+        serialize :audited_changes, coder: YAMLIfTextColumnType.new(self, "audited_changes")
+      else
+        serialize :audited_changes, YAMLIfTextColumnType.new(self, "audited_changes")
       end
+    end
 
-      serialize :audited_changes, coder: YAMLIfTextColumnType.new(self)
-    else
-      def self.inherited(subclass)
-        super
-        subclass.serialize :audited_changes, YAMLIfTextColumnType.new(subclass)
-      end
+    initialize_serializers
 
-      serialize :audited_changes, YAMLIfTextColumnType.new(self)
+    def self.inherited(subclass)
+      super
+      subclass.initialize_serializers
     end
 
     scope :ascending, -> { reorder(version: :asc) }
