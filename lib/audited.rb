@@ -40,6 +40,8 @@ module Audited
     end
 
     def context=(value)
+      raise "context must be a hash" unless value.is_a?(Hash)
+
       RequestStore.audit_context = value
     end
 
