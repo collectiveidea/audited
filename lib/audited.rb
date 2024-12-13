@@ -39,6 +39,10 @@ module Audited
       RequestStore.audit_context ||= {}
     end
 
+    def context=(value)
+      RequestStore.audit_context = value
+    end
+
     def config
       yield(self)
     end
