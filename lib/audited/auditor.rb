@@ -86,10 +86,7 @@ module Audited
         has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name, inverse_of: :auditable
         Audited.audit_class.audited_class_names << to_s
 
-        after_create :audit_create if audited_options[:on].include?(:create)
-        before_update :audit_update if audited_options[:on].include?(:update)
-        after_touch :audit_touch if audited_options[:on].include?(:touch) && ::ActiveRecord::VERSION::MAJOR >= 6
-        before_destroy :audit_destroy if audited_options[:on].include?(:destroy)
+        set_audited_callbacks
 
         # Define and set after_audit and around_audit callbacks. This might be useful if you want
         # to notify a party after the audit has been created or if you want to access the newly-created
@@ -528,9 +525,19 @@ module Audited
       def normalize_audited_options
         audited_options[:on] = Array.wrap(audited_options[:on])
         audited_options[:on] = ([:create, :update, :touch, :destroy] - Audited.ignored_default_callbacks) if audited_options[:on].empty?
+        set_audited_callbacks
+
         audited_options[:only] = Array.wrap(audited_options[:only]).map(&:to_s)
         audited_options[:except] = Array.wrap(audited_options[:except]).map(&:to_s)
         audited_options[:max_audits] ||= Audited.max_audits
+      end
+
+
+      def set_audited_callbacks
+        after_create :audit_create if audited_options[:on].include?(:create) && (audited? ? _create_callbacks.none? { _1.filter == :audit_create } : true)
+        before_update :audit_update if audited_options[:on].include?(:update) && ( audited? ? _update_callbacks.none? {  _1.filter == :audit_update } : true)
+        after_touch :audit_touch if audited_options[:on].include?(:touch) && ::ActiveRecord::VERSION::MAJOR >= 6 && (audited? ? _touch_callbacks.none? { _1.filter == :audit_touch } : true)
+        before_destroy :audit_destroy if audited_options[:on].include?(:destroy) && ( audited? ?  _destroy_callbacks.none? { _1.filter == :audit_destroy } : true )
       end
 
       def calculate_non_audited_columns
