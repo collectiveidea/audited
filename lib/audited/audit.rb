@@ -41,8 +41,8 @@ module Audited
 
   class Audit < ::ActiveRecord::Base
     belongs_to :auditable, polymorphic: true
-    belongs_to :user, polymorphic: true
-    belongs_to :associated, polymorphic: true
+    belongs_to :user, polymorphic: true, optional: true
+    belongs_to :associated, polymorphic: true, optional: true
 
     before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
 
