@@ -330,6 +330,8 @@ class User < ActiveRecord::Base
 end
 ```
 
+Optionally your callback method can take an `action` parameter whose value is either `create`, `update` or `destroy`.
+
 Just like in ActiveModel, you can use an inline Proc in your conditions:
 
 ```ruby
@@ -338,7 +340,7 @@ class User < ActiveRecord::Base
 end
 ```
 
-In the above case, the user will only be audited when `User#ninja` is `false`.
+In the above case, the user will only be audited when `User#ninja` is `false`. Similar to the method the Proc can accept the audited action as second parameter.
 
 ### Disabling auditing
 
