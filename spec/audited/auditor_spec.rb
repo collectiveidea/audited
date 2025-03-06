@@ -25,9 +25,27 @@ class ConditionalCompany < ::ActiveRecord::Base
   end
 end
 
+class ConditionalParameterCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+
+  audited if: :public?
+
+  def public?(action)
+  end
+end
+
 class ExclusiveCompany < ::ActiveRecord::Base
   self.table_name = "companies"
   audited if: proc { false }
+end
+
+class ExclusiveParameterCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+  attr_accessor :recorded_action
+  audited if: proc { |c, action|
+    c.recorded_action = action
+    false
+  }
 end
 
 class ExclusionaryCompany < ::ActiveRecord::Base
@@ -39,13 +57,27 @@ class ExclusionaryCompany < ::ActiveRecord::Base
   end
 end
 
+class ExclusionaryParameterCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+
+  audited unless: :non_profit?
+
+  def non_profit?(action)
+  end
+end
+
 class ExclusionaryCompany2 < ::ActiveRecord::Base
   self.table_name = "companies"
-  audited unless: proc { |c| c.exclusive? }
+  audited unless: proc { |c| true }
+end
 
-  def exclusive?
+class ExclusionaryParameterCompany2 < ::ActiveRecord::Base
+  self.table_name = "companies"
+  attr_accessor :recorded_action
+  audited unless: proc { |c, action|
+    c.recorded_action = action
     true
-  end
+  }
 end
 
 class InclusiveCompany < ::ActiveRecord::Base
@@ -53,9 +85,27 @@ class InclusiveCompany < ::ActiveRecord::Base
   audited if: proc { true }
 end
 
+class InclusiveParameterCompany < ::ActiveRecord::Base
+  self.table_name = "companies"
+  attr_accessor :recorded_action
+  audited if: proc { |c, action|
+    c.recorded_action = action
+    true
+  }
+end
+
 class InclusiveCompany2 < ::ActiveRecord::Base
   self.table_name = "companies"
   audited unless: proc { false }
+end
+
+class InclusiveParameterCompany2 < ::ActiveRecord::Base
+  self.table_name = "companies"
+  attr_accessor :recorded_action
+  audited unless: proc { |c, action|
+    c.recorded_action = action
+    false
+  }
 end
 
 class Secret < ::ActiveRecord::Base
@@ -92,56 +142,129 @@ describe Audited::Auditor do
         it { is_expected.to be_truthy }
       end
 
-      context "when passing a method name" do
-        context "when conditions are true" do
-          before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(true) }
-          it { is_expected.to be_truthy }
+      context "when using a method name" do
+        context "when method takes no parameters" do
+          context "when conditions are true" do
+            before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(true) }
+            it { is_expected.to be_truthy }
+          end
+
+          context "when conditions are false" do
+            before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(false) }
+            it { is_expected.to be_falsey }
+          end
         end
 
-        context "when conditions are false" do
-          before { allow_any_instance_of(ConditionalCompany).to receive(:public?).and_return(false) }
-          it { is_expected.to be_falsey }
+        context "when method takes action parameter" do
+          subject { ConditionalParameterCompany.new.send(:auditing_enabled, "create") }
+
+          context "when conditions are true" do
+            before { expect_any_instance_of(ConditionalParameterCompany).to receive(:public?).with("create").and_return(true) }
+            it { is_expected.to be_truthy }
+          end
+
+          context "when conditions are false" do
+            before { expect_any_instance_of(ConditionalParameterCompany).to receive(:public?).with("create").and_return(false) }
+            it { is_expected.to be_falsey }
+          end
         end
+
       end
 
-      context "when passing a Proc" do
-        context "when conditions are true" do
-          subject { InclusiveCompany.new.send(:auditing_enabled) }
+      context "when using a Proc" do
+        context "when Proc takes no parameters" do
+          context "when conditions are true" do
+            subject { InclusiveCompany.new.send(:auditing_enabled) }
 
-          it { is_expected.to be_truthy }
+            it { is_expected.to be_truthy }
+          end
+
+          context "when conditions are false" do
+            subject { ExclusiveCompany.new.send(:auditing_enabled) }
+            it { is_expected.to be_falsey }
+          end
         end
 
-        context "when conditions are false" do
-          subject { ExclusiveCompany.new.send(:auditing_enabled) }
-          it { is_expected.to be_falsey }
+        context "when Proc takes parameters" do
+          context "when conditions are true" do
+            subject { InclusiveParameterCompany.new }
+            it {
+              subject.send(:auditing_enabled, "create")
+              expect(subject.recorded_action).to eq("create")
+            }
+          end
+
+          context "when conditions are false" do
+            subject { ExclusiveParameterCompany.new }
+            it {
+              subject.send(:auditing_enabled, "create")
+              expect(subject.recorded_action).to eq("create")
+            }
+          end
         end
       end
     end
 
     context "should be configurable which conditions aren't audited" do
       context "when using a method name" do
-        subject { ExclusionaryCompany.new.send(:auditing_enabled) }
+        context "when method takes no parameters" do
+          subject { ExclusionaryCompany.new.send(:auditing_enabled) }
 
-        context "when conditions are true" do
-          before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(true) }
-          it { is_expected.to be_falsey }
+          context "when conditions are true" do
+            before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(true) }
+            it { is_expected.to be_falsey }
+          end
+
+          context "when conditions are false" do
+            before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(false) }
+            it { is_expected.to be_truthy }
+          end
         end
 
-        context "when conditions are false" do
-          before { allow_any_instance_of(ExclusionaryCompany).to receive(:non_profit?).and_return(false) }
-          it { is_expected.to be_truthy }
+        context "when method takes action parameter" do
+          subject { ExclusionaryParameterCompany.new.send(:auditing_enabled, "create") }
+
+          context "when conditions are true" do
+            before { expect_any_instance_of(ExclusionaryParameterCompany).to receive(:non_profit?).with("create").and_return(true) }
+            it { is_expected.to be_falsey }
+          end
+
+          context "when conditions are false" do
+            before { expect_any_instance_of(ExclusionaryParameterCompany).to receive(:non_profit?).and_return(false) }
+            it { is_expected.to be_truthy }
+          end
         end
       end
 
       context "when using a proc" do
-        context "when conditions are true" do
-          subject { ExclusionaryCompany2.new.send(:auditing_enabled) }
-          it { is_expected.to be_falsey }
+        context "when Proc takes no parameters" do
+          context "when conditions are true" do
+            subject { ExclusionaryCompany2.new.send(:auditing_enabled) }
+            it { is_expected.to be_falsey }
+          end
+
+          context "when conditions are false" do
+            subject { InclusiveCompany2.new.send(:auditing_enabled) }
+            it { is_expected.to be_truthy }
+          end
         end
 
-        context "when conditions are false" do
-          subject { InclusiveCompany2.new.send(:auditing_enabled) }
-          it { is_expected.to be_truthy }
+        context "when Proc takes parameters" do
+          context "when conditions are true" do
+            subject { ExclusionaryParameterCompany2.new }
+            it {
+              subject.send(:auditing_enabled, "create")
+              expect(subject.recorded_action).to eq("create")
+            }
+          end
+
+          context "when conditions are false" do
+            subject { InclusiveParameterCompany2.new }
+            it { 
+              subject.send(:auditing_enabled, "create")
+              expect(subject.recorded_action).to eq("create")
+            }
+          end
         end
       end
     end
