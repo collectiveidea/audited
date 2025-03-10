@@ -132,7 +132,7 @@ module Audited
 
       def validate_callbacks_include_presence_of_comment?
         if @options[:comment_required] && audited_on_create_or_update?
-          callbacks_for(:validate).include?(:presence_of_audit_comment)
+          callbacks_for(:validate).include?(:validate_presence_of_audit_comment)
         else
           true
         end
