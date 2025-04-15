@@ -41,9 +41,11 @@ module Audited
       before_value_in_store = store.delete(:auditing_enabled)
       store[:auditing_enabled] = true
 
-      result = yield
-
-      store[:auditing_enabled] = before_value_in_store unless before_value_in_store.nil?
+      begin
+        result = yield
+      ensure
+        store[:auditing_enabled] = before_value_in_store unless before_value_in_store.nil?
+      end
 
       result
     end
@@ -52,9 +54,11 @@ module Audited
       before_value_in_store = store.delete(:auditing_enabled)
       store[:auditing_enabled] = false
 
-      result = yield
-
-      store[:auditing_enabled] = before_value_in_store unless before_value_in_store.nil?
+      begin
+        result = yield
+      ensure
+        store[:auditing_enabled] = before_value_in_store unless before_value_in_store.nil?
+      end
 
       result
     end
