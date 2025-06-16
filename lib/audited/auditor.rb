@@ -331,7 +331,7 @@ module Audited
       end
 
       def rails_below?(rails_version)
-        Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
+        ::ActiveRecord.version < Gem::Version.new(rails_version)
       end
 
       def audits_to(version = nil)

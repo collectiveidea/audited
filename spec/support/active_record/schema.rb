@@ -2,7 +2,7 @@ require "active_record"
 require "logger"
 
 begin
-  if ActiveRecord.version >= Gem::Version.new("6.1.0")
+  if ::ActiveRecord.version >= Gem::Version.new("6.1.0")
     db_config = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).first
     ActiveRecord::Tasks::DatabaseTasks.create(db_config)
   else
