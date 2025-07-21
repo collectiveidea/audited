@@ -23,7 +23,7 @@ module AuditedSpecHelpers
   def run_migrations(direction, migrations_paths, target_version = nil)
     if rails_below?("5.2.0.rc1")
       ActiveRecord::Migrator.send(direction, migrations_paths, target_version)
-    elsif rails_below?("6.0.0.rc1")
+    elsif rails_below?("6.0.0.rc1") || rails_at_least?("7.2.0")
       ActiveRecord::MigrationContext.new(migrations_paths).send(direction, target_version)
     else
       ActiveRecord::MigrationContext.new(migrations_paths, ActiveRecord::SchemaMigration).send(direction, target_version)
@@ -32,5 +32,9 @@ module AuditedSpecHelpers
 
   def rails_below?(rails_version)
     Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
+  end
+
+  def rails_at_least?(rails_version)
+    Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new(rails_version)
   end
 end
