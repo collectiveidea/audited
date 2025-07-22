@@ -62,6 +62,20 @@ module Audited
         audited? ? update_audited_options(options) : set_audit(options)
       end
 
+      def infer_foreign_key_from_id_type(model: self, associated: false)
+        id_type = model.columns_hash["id"].type rescue :integer
+
+        foreign_key =
+          case id_type
+          when :integer
+            associated ? :associated_id : :auditable_id
+          when :uuid
+            associated ? :associated_uuid : :auditable_uuid
+          else
+            raise "Unexpected id type: #{id_type}"
+          end
+      end
+
       private
 
       def audited?
@@ -106,20 +120,6 @@ module Audited
         foreign_key = infer_foreign_key_from_id_type(associated: true)
 
         has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name, foreign_key: foreign_key
-      end
-
-      def infer_foreign_key_from_id_type(model: self, associated: false)
-        id_type = model.columns_hash["id"].type rescue :integer
-
-        foreign_key =
-          case id_type
-          when :integer
-            associated ? :associated_id : :auditable_id
-          when :uuid
-            associated ? :associated_uuid : :auditable_uuid
-          else
-            raise "Unexpected id type: #{id_type}"
-          end
       end
 
       def update_audited_options(new_options)
