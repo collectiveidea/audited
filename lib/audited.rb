@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 require "active_record"
-require "request_store"
 
 module Audited
+  # Wrapper around ActiveSupport::CurrentAttributes
+  class RequestStore < ActiveSupport::CurrentAttributes
+    attribute :audited_store
+  end
+
   class << self
     attr_accessor \
       :auditing_enabled,
@@ -27,7 +31,7 @@ module Audited
               deprecator: ActiveSupport::Deprecation.new('6.0.0', 'Audited')
 
     def store
-      RequestStore.store[:audited_store] ||= {}
+      RequestStore.audited_store ||= {}
     end
 
     def config
