@@ -287,7 +287,7 @@ module Audited
             changes[name] = \
               if changes[name].is_a?(Array)
                 changes[name].map { |v| values[v] }
-              elsif rails_below?("5.0")
+              elsif active_record_below?("5.0")
                 changes[name]
               else
                 values[changes[name]]
@@ -330,8 +330,8 @@ module Audited
         audited_changes
       end
 
-      def rails_below?(rails_version)
-        Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new(rails_version)
+      def active_record_below?(active_record_version)
+        Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new(active_record_version)
       end
 
       def audits_to(version = nil)
