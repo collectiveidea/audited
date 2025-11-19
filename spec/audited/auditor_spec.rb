@@ -329,7 +329,7 @@ describe Audited::Auditor do
   end
 
   describe "on create" do
-    let(:user) { create_user status: :reliable, audit_comment: "Create" }
+    let(:user) { create_user status: :reliable, audit_comment: "Create", audit_attributes: {custom_attribute: "Create Value"} }
 
     it "should change the audit count" do
       expect {
@@ -370,6 +370,10 @@ describe Audited::Auditor do
       expect(user.audits.first.comment).to eq("Create")
     end
 
+    it "should set the audit_attributes" do
+      expect(user.audits.first.custom_attribute).to eq("Create Value")
+    end
+
     it "should not audit an attribute which is excepted if specified on create or destroy" do
       on_create_destroy_except_name = Models::ActiveRecord::OnCreateDestroyExceptName.create(name: "Bart")
       expect(on_create_destroy_except_name.audits.first.audited_changes.keys.any? { |col| ["name"].include? col }).to eq(false)
@@ -390,7 +394,7 @@ describe Audited::Auditor do
 
   describe "on update" do
     before do
-      @user = create_user(name: "Brandon", status: :active, audit_comment: "Update")
+      @user = create_user(name: "Brandon", status: :active, audit_comment: "Update", audit_attributes: {custom_attribute: "Update Value"})
     end
 
     it "should save an audit" do
@@ -421,6 +425,10 @@ describe Audited::Auditor do
 
     it "should store audit comment" do
       expect(@user.audits.last.comment).to eq("Update")
+    end
+
+    it "should set the audit_attributes" do
+      expect(@user.audits.first.custom_attribute).to eq("Update Value")
     end
 
     it "should not save an audit if only specified on create/destroy" do
@@ -1135,7 +1143,7 @@ describe Audited::Auditor do
     end
 
     describe "on update" do
-      let(:user) { Models::ActiveRecord::CommentRequiredUser.create!(audit_comment: "Create") }
+      let(:user) { Models::ActiveRecord::CommentRequiredUser.create!(audit_comment: "Create", audit_attributes: {custom_attribute: "Create Value"}) }
       let(:on_create_user) { Models::ActiveRecord::OnDestroyCommentRequiredUser.create }
       let(:on_destroy_user) { Models::ActiveRecord::OnDestroyCommentRequiredUser.create }
 
@@ -1268,6 +1276,40 @@ describe Audited::Auditor do
         company.update! name: "STI auditors"
         Models::ActiveRecord::Company.auditing_enabled = true
       }.to_not change(Audited::Audit, :count)
+    end
+  end
+
+  describe "Setting audit_attributes" do
+    let(:user) { create_user status: :reliable, audit_comment: "Create", audit_attributes: {custom_attribute: "Create Value", comment: "Overrided Comment"} }
+
+    it "should change the audit count" do
+      expect {
+        user
+      }.to change(Models::ActiveRecord::User, :count).by(1)
+    end
+
+    it "should set custom attributes" do
+      expect(user.audits.first.custom_attribute).to eq("Create Value")
+    end
+
+    it "should override set attributes (comment)" do
+      expect(user.audits.first.comment).to eq("Overrided Comment")
+    end
+
+    it "doesn't affect unset attributes (status)" do
+      expect(user.audits.first.audited_changes["status"]).to eq(1)
+    end
+
+    it "validates that audit_attributes is a hash" do
+      expect {
+        Models::ActiveRecord::User.create!(audit_attributes: 4)
+      }.to raise_error(ActiveRecord::RecordInvalid).with_message(/Audit attributes must be a hash including only the keys of the audit class/)
+    end
+
+    it "validates that audit_attributes is a hash with only valid keys" do
+      expect {
+        Models::ActiveRecord::User.create!(audit_attributes: {custom_attribute: "Create Value", comment: "Overrided Comment", invalid_key: "Invalid Key"})
+      }.to raise_error(ActiveRecord::RecordInvalid).with_message(/Audit attributes must be a hash including only the keys of the audit class/)
     end
   end
 
