@@ -14,11 +14,18 @@ module Audited
       include Audited::Generators::MigrationHelper
       extend Audited::Generators::Migration
 
+      class_option :audited_table_name, type: :string, default: "audits", required: false
+      class_option :audited_context_column_type, type: :string, default: "text", required: false
+
       source_root File.expand_path("../templates", __FILE__)
 
       def copy_templates
-        migrations_to_be_applied do |m|
-          migration_template "#{m}.rb", "db/migrate/#{m}.rb"
+        migrations_to_be_applied do |template_name|
+          name = "db/migrate/#{template_name}.rb"
+          if options[:audited_table_name] != "audits"
+            name = name.gsub("_to_audits", "_to_#{options[:audited_table_name]}")
+          end
+          migration_template "#{template_name}.rb", name
         end
       end
 
@@ -63,6 +70,10 @@ module Audited
 
         if indexes.any? { |i| i.columns == %w[auditable_type auditable_id] }
           yield :add_version_to_auditable_index
+        end
+
+        unless columns.include?("context")
+          yield :add_context_to_audits
         end
       end
     end

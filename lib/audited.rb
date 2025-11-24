@@ -6,6 +6,7 @@ module Audited
   # Wrapper around ActiveSupport::CurrentAttributes
   class RequestStore < ActiveSupport::CurrentAttributes
     attribute :audited_store
+    attribute :audit_context
   end
 
   class << self
@@ -32,6 +33,16 @@ module Audited
 
     def store
       RequestStore.audited_store ||= {}
+    end
+
+    def context
+      RequestStore.audit_context ||= {}
+    end
+
+    def context=(value)
+      raise "context must be a hash" unless value.is_a?(Hash)
+
+      RequestStore.audit_context = value
     end
 
     def config
