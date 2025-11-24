@@ -437,6 +437,50 @@ describe Audited::Auditor do
       expect { @user.update_attribute :activated, "1" }.to_not change(Audited::Audit, :count)
     end
 
+    it "should return sql for audit when changes are made" do
+      expect(@user.new_record?).to eq(false)
+      expect(@user.changes).to be_blank
+      expect(@user.audit_sql).to eq(nil)
+
+      @user.assign_attributes(name: "Changed")
+      audit_sql = @user.audit_sql
+
+      def parse_sql(sql)
+        matches = sql.match(/INSERT INTO "audits" \((.*?)\) VALUES \((.*?)\)/)
+        columns = matches[1].split(", ").map { |c| c.delete('"') }
+        values = matches[2].split(", ").map { |v| v.delete("'") }
+        columns.zip(values).to_h
+      end
+      parsed_sql = parse_sql(audit_sql)
+      # expect(parsed_sql["auditable_id"]).to eq("1")
+      expect(parsed_sql["auditable_type"]).to eq("Models::ActiveRecord::User")
+      expect(parsed_sql["action"]).to eq("update")
+      expect(parsed_sql["audited_changes"]).to eq('{"name":["Brandon","Changed"]}')
+      expect(parsed_sql["version"]).to eq("2")
+
+      @user.save!
+      expect(@user.audit_sql).to eq(nil)
+
+      last_audit = @user.audits.last
+      expect(last_audit.action).to eq("update")
+      expect(last_audit.audited_changes).to eq({"name" => ["Brandon", "Changed"]})
+      expect(last_audit.version).to eq(2)
+
+      @user.assign_attributes(name: "Changed-2")
+      expect { ActiveRecord::Base.connection.execute(@user.audit_sql) }.to change(@user.audits, :count).by(1)
+      expect { @user.class.where(id: @user.id).update_all(name: "Changed-2") }.not_to change(@user.audits, :count)
+      expect { @user.reload.save! }.not_to change(@user.audits, :count)
+
+      expect { @user.update!(name: "Changed-3") }.to change(@user.audits, :count).by(1)
+      expect(@user.audits.last.version).to eq(4)
+
+      destroy_sql = parse_sql(@user.audit_sql(destroy: true))
+      expect(destroy_sql["action"]).to eq("destroy")
+
+      @user.assign_attributes(name: "Changed-4")
+      expect { @user.audit_sql }.not_to change(@user.audits, :count)
+    end
+
     context "with readonly attributes" do
       before do
         @user = create_user_with_readonly_attrs(status: "active")
