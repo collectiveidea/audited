@@ -33,7 +33,7 @@ module Audited
       #       audited except: :password
       #     end
       #
-      # * +require_comment+ - Ensures that audit_comment is supplied before
+      # * +comment_required+ - Ensures that audit_comment is supplied before
       #   any create, update or destroy operation.
       # * +max_audits+ - Limits the number of stored audits.
 
@@ -375,7 +375,7 @@ module Audited
       def write_audit(attrs)
         self.audit_comment = nil
 
-        if auditing_enabled
+        if auditing_enabled(attrs[:action])
           attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
 
           run_callbacks(:audit) {
@@ -393,10 +393,16 @@ module Audited
       end
 
       def comment_required_state?
-        auditing_enabled &&
+        action = if audited_options[:on].include?(:create) && new_record?
+          "create"
+        elsif audited_options[:on].include?(:update) && persisted? && changed?
+          "update"
+        else
+          nil
+        end
+        auditing_enabled(action) &&
           audited_changes.present? &&
-          ((audited_options[:on].include?(:create) && new_record?) ||
-          (audited_options[:on].include?(:update) && persisted? && changed?))
+          (action == "create" || action == "update")
       end
 
       def combine_audits_if_needed
@@ -420,7 +426,9 @@ module Audited
       end
 
       def require_comment
-        if auditing_enabled && audit_comment.blank?
+        # this method is only called as before_destroy callback
+        # therefore it's safe to statically pass "destroy"
+        if auditing_enabled("destroy") && audit_comment.blank?
           errors.add(:audit_comment, :blank)
           throw(:abort)
         end
@@ -430,18 +438,21 @@ module Audited
         alias_method "#{attr_name}_callback".to_sym, attr_name
       end
 
-      def auditing_enabled
-        run_conditional_check(audited_options[:if]) &&
-          run_conditional_check(audited_options[:unless], matching: false) &&
+      def auditing_enabled(action = nil)
+        run_conditional_check(audited_options[:if], action: action) &&
+          run_conditional_check(audited_options[:unless], action: action, matching: false) &&
           self.class.auditing_enabled
       end
 
-      def run_conditional_check(condition, matching: true)
+      def run_conditional_check(condition, action:, matching: true)
         return true if condition.blank?
-        return condition.call(self) == matching if condition.respond_to?(:call)
-        return send(condition) == matching if respond_to?(condition.to_sym, true)
+        result = case condition
+        when Proc then condition.call(self, action)
+        when Symbol then method(condition.to_sym).arity == 0 ? send(condition) : send(condition, action)
+        else return true
+        end
 
-        true
+        result == matching
       end
 
       def reconstruct_attributes(audits)
