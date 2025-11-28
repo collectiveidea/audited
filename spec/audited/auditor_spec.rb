@@ -972,6 +972,18 @@ describe Audited::Auditor do
       }.to_not change(Audited::Audit, :count)
     end
 
+    it 'should not perform audit-related queries when touching an audited model' do
+      user = Models::ActiveRecord::User.create!(name: "Brandon")
+
+      subscription = ActiveSupport::Notifications.subscribe('sql.active_record') do |_name, _start, _finish, _id, payload|
+        expect(payload[:sql]).to_not include("audits")
+      end
+
+      Models::ActiveRecord::User.without_auditing { user.touch }
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscription)
+    end
+
     context "when global audits are disabled" do
       it "should re-enable class audits after #without_auditing block" do
         Audited.auditing_enabled = false

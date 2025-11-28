@@ -79,7 +79,7 @@ module Audited
         set_audited_options(options)
 
         if audited_options[:comment_required]
-          validate :presence_of_audit_comment
+          validate :validate_presence_of_audit_comment
           before_destroy :require_comment if audited_options[:on].include?(:destroy)
         end
 
@@ -347,11 +347,15 @@ module Audited
       end
 
       def audit_create
+        return unless auditing_enabled
+
         write_audit(action: "create", audited_changes: audited_attributes,
           comment: audit_comment)
       end
 
       def audit_update
+        return unless auditing_enabled
+
         unless (changes = audited_changes(exclude_readonly_attrs: true)).empty? && (audit_comment.blank? || audited_options[:update_with_comment_only] == false)
           write_audit(action: "update", audited_changes: changes,
             comment: audit_comment)
@@ -359,6 +363,8 @@ module Audited
       end
 
       def audit_touch
+        return unless auditing_enabled
+
         unless (changes = audited_changes(for_touch: true, exclude_readonly_attrs: true)).empty?
           write_audit(action: "update", audited_changes: changes,
             comment: audit_comment)
@@ -366,6 +372,8 @@ module Audited
       end
 
       def audit_destroy
+        return unless auditing_enabled
+
         unless new_record?
           write_audit(action: "destroy", audited_changes: audited_attributes,
             comment: audit_comment)
@@ -375,18 +383,18 @@ module Audited
       def write_audit(attrs)
         self.audit_comment = nil
 
-        if auditing_enabled
-          attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
+        attrs[:associated] = send(audit_associated_with) unless audit_associated_with.nil?
 
-          run_callbacks(:audit) {
-            audit = audits.create(attrs)
-            combine_audits_if_needed if attrs[:action] != "create"
-            audit
-          }
-        end
+        run_callbacks(:audit) {
+          audit = audits.create(attrs)
+          combine_audits_if_needed if attrs[:action] != "create"
+          audit
+        }
       end
 
-      def presence_of_audit_comment
+      def validate_presence_of_audit_comment
+        return unless auditing_enabled
+
         if comment_required_state?
           errors.add(:audit_comment, :blank) unless audit_comment.present?
         end
@@ -420,6 +428,8 @@ module Audited
       end
 
       def require_comment
+        return unless auditing_enabled
+
         if auditing_enabled && audit_comment.blank?
           errors.add(:audit_comment, :blank)
           throw(:abort)
