@@ -722,6 +722,28 @@ describe Audited::Auditor do
       end
     end
 
+    context 'when set to keep create action' do
+      before do
+        Audited.keep_create_action = true
+      end
+
+      it 'should respect per model setting' do
+        stub_global_max_audits(4) do
+          expect(Models::ActiveRecord::MaxAuditsIgnoreKeepCreateActionUser.audited_options[:keep_create_action]).to be_falsey
+        end
+      end
+
+      it 'should keep create action' do
+        stub_global_max_audits(2) do
+          user = Models::ActiveRecord::User.create!(name: "Foobar 1")
+          user.update(name: "Foobar 2", audit_comment: "First audit comment")
+          user.update(name: "Foobar 3", audit_comment: "Second audit comment")
+          pp user.audits
+          expect(user.audits.first.action).to eq('create')
+        end
+      end
+    end
+
     def stub_global_max_audits(max_audits)
       previous_max_audits = Audited.max_audits
       previous_user_audited_options = Models::ActiveRecord::User.audited_options.dup
