@@ -88,7 +88,7 @@ describe Audited::Audit do
 
     it "undos destroy" do
       user.destroy
-      user.audits.last.undo
+      Audited::Audit.last.undo
       user = Models::ActiveRecord::User.find_by(name: "John")
       expect(user.name).to eq("John")
     end
@@ -171,7 +171,7 @@ describe Audited::Audit do
     it "should work for deleted records" do
       user = Models::ActiveRecord::User.create name: "1"
       user.destroy
-      revision = user.audits.last.revision
+      revision = Audited::Audit.where(:auditable_type => 'Models::ActiveRecord::User').last.revision
       expect(revision.name).to eq(user.name)
       expect(revision).to be_a_new_record
     end
@@ -212,7 +212,7 @@ describe Audited::Audit do
     expect(user.audits.reload.first.version).to eq(1)
     expect(user.audits.reload.last.version).to eq(2)
     user.destroy
-    expect(Audited::Audit.where(auditable_type: "Models::ActiveRecord::User", auditable_id: user.id).last.version).to eq(3)
+    expect(Audited::Audit.where(auditable_type: "Models::ActiveRecord::User", auditable_id: nil).last.version).to eq(3)
   end
 
   it "should set the request uuid on create" do
