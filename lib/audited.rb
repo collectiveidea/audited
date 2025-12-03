@@ -10,13 +10,12 @@ module Audited
 
   class << self
     attr_accessor \
-      :auditing_enabled,
       :current_user_method,
       :ignored_attributes,
       :ignored_default_callbacks,
       :max_audits,
       :store_synthesized_enums
-    attr_writer :audit_class
+    attr_writer :auditing_enabled, :audit_class
 
     def audit_class
       # The audit_class is set as String in the initializer. It can not be constantized during initialization and must
@@ -32,6 +31,36 @@ module Audited
 
     def store
       RequestStore.audited_store ||= {}
+    end
+
+    def auditing_enabled
+      store.key?(:auditing_enabled) ? store[:auditing_enabled] : @auditing_enabled
+    end
+
+    def with_auditing
+      before_value_in_store = store.delete(:auditing_enabled)
+      store[:auditing_enabled] = true
+
+      begin
+        result = yield
+      ensure
+        store[:auditing_enabled] = before_value_in_store unless before_value_in_store.nil?
+      end
+
+      result
+    end
+
+    def without_auditing
+      before_value_in_store = store.delete(:auditing_enabled)
+      store[:auditing_enabled] = false
+
+      begin
+        result = yield
+      ensure
+        store[:auditing_enabled] = before_value_in_store unless before_value_in_store.nil?
+      end
+
+      result
     end
 
     def config
