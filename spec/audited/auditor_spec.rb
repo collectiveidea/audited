@@ -918,6 +918,20 @@ describe Audited::Auditor do
     end
   end
 
+  describe "has_version" do
+    let(:user) { create_versions(2) }
+
+    it "should return true when a version exists" do
+      expect(user.has_version?(1)).to eq(true)
+      expect(user.has_version?(2)).to eq(true)
+    end
+
+    it "should return false when a version does not exist" do
+      expect(user.has_version?(8)).to eq(false)
+      expect(user.has_version?(1337)).to eq(false)
+    end
+  end
+
   describe "own_and_associated_audits" do
     it "should return audits for self and associated audits" do
       owner = Models::ActiveRecord::Owner.create!
