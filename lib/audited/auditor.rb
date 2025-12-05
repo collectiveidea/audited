@@ -101,8 +101,8 @@ module Audited
         enable_auditing
       end
 
-      def has_associated_audits
-        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name
+      def has_associated_audits(&block)
+        has_many :associated_audits, as: :associated, class_name: Audited.audit_class.name, &block
       end
 
       def update_audited_options(new_options)
