@@ -425,6 +425,24 @@ Audited.config do |config|
 end
 ```
 
+### Multiple `Audit` models
+
+If you want to use a different audit model for a specfic audited model, create a new class that
+inherits from `Audited::Audit`:
+```ruby
+class CustomAudit < Audited::Audit
+  def some_custom_behavior
+    "Hiya!"
+  end
+end
+```
+Then provide the class name in options:
+```ruby
+class User < ActiveRecord::Base
+  audited class_name: "CustomAudit"
+end
+```
+
 ### Enum Storage
 
 In 4.10, the default behavior for enums changed from storing the value synthesized by Rails to the value stored in the DB. You can restore the previous behavior by setting the store_synthesized_enums configuration value:
