@@ -18,11 +18,18 @@ module Audited
       :store_synthesized_enums
     attr_writer :audit_class
 
-    def audit_class
+    def default_audit_class
       # The audit_class is set as String in the initializer. It can not be constantized during initialization and must
       # be constantized at runtime. See https://github.com/collectiveidea/audited/issues/608
       @audit_class = @audit_class.safe_constantize if @audit_class.is_a?(String)
       @audit_class ||= Audited::Audit
+    end
+
+    def audit_class(custom_class_name = nil)
+      if custom_class_name.is_a?(String)
+        return custom_class_name.safe_constantize || default_audit_class
+      end
+      default_audit_class
     end
 
     # remove audit_model in next major version it was only shortly present in 5.1.0
