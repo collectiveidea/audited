@@ -20,6 +20,8 @@ Gem::Specification.new do |gem|
   gem.add_dependency "activesupport", ">= 5.2", "< 8.2"
 
   gem.add_development_dependency "appraisal"
+  gem.add_development_dependency "benchmark"
+  gem.add_development_dependency "cgi"
   gem.add_development_dependency "rails", ">= 5.2", "< 8.2"
   gem.add_development_dependency "rspec-rails"
   gem.add_development_dependency "standard"
