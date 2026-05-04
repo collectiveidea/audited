@@ -267,10 +267,10 @@ module Audited
 
         filtered_changes = normalize_enum_changes(filtered_changes)
 
-        if for_touch && (last_audit = audits.last&.audited_changes)
+        if for_touch && @last_audited_changes
           filtered_changes.reject! do |k, v|
-            last_audit[k].to_json == v.to_json ||
-            last_audit[k].to_json == v[1].to_json
+            @last_audited_changes[k].to_json == v.to_json ||
+            @last_audited_changes[k].to_json == v[1].to_json
           end
         end
 
@@ -380,6 +380,7 @@ module Audited
 
           run_callbacks(:audit) {
             audit = audits.create(attrs)
+            @last_audited_changes = attrs[:audited_changes] if audit.persisted?
             combine_audits_if_needed if attrs[:action] != "create"
             audit
           }
