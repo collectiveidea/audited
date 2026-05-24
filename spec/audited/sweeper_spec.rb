@@ -33,6 +33,7 @@ describe AuditsController do
   before do
     Audited::Railtie.initializers.each(&:run)
     Audited.current_user_method = :current_user
+    Audited::Sweeper.warned_for_methods.clear
   end
 
   let(:user) { create_user }
@@ -47,13 +48,21 @@ describe AuditsController do
       expect(controller.company.audits.last.user).to eq(user)
     end
 
-    it "does not audit when method is not found" do
+    it "warns and sets nil user when method is not found" do
       controller.send(:current_user=, user)
       Audited.current_user_method = :nope
+      expect(Rails.logger).to receive(:warn).with(/\[audited\].*nope.*not defined/)
       expect {
         post :create
       }.to change(Audited::Audit, :count)
       expect(controller.company.audits.last.user).to eq(nil)
+    end
+
+    it "warns only once per missing method across multiple requests" do
+      controller.send(:current_user=, user)
+      Audited.current_user_method = :nope
+      expect(Rails.logger).to receive(:warn).with(/\[audited\].*nope.*not defined/).once
+      3.times { post :create }
     end
 
     it "should support custom users for sweepers" do
@@ -129,5 +138,16 @@ describe Audited::Sweeper do
     t2.join
 
     expect(instance.controller).to be_nil
+  end
+
+  it "falls back to Kernel#warn when Rails.logger is unavailable" do
+    Audited::Sweeper.warned_for_methods.clear
+    instance = Audited::Sweeper.new
+    instance.controller = Object.new
+    allow(Rails).to receive(:logger).and_return(nil)
+
+    expect {
+      instance.send(:warn_missing_current_user_method, :nope)
+    }.to output(/\[audited\].*nope.*not defined/).to_stderr
   end
 end
