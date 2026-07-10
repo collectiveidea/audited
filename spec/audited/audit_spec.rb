@@ -70,7 +70,7 @@ describe Audited::Audit do
     end
 
     it "does not unserialize from binary columns" do
-      allow(Audited::YAMLIfTextColumnType).to receive(:text_column?).and_return(false)
+      allow_any_instance_of(Audited::YAMLIfTextColumnType).to receive(:text_column?).and_return(false)
       audit.audited_changes = {foo: "bar"}
       expect(audit.audited_changes).to eq "{:foo=>\"bar\"}"
     end

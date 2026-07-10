@@ -5,6 +5,10 @@ Audited
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 =======
 
+## Deprecation Notice
+
+**Audited is deprecated.** Use [ActiveVersion](https://github.com/amkisko/active_version.rb) instead—it covers all Audited features (change logging, user attribution, associated audits, and more) and adds translations, revisions, sharding, PostgreSQL triggers, and configurable audit storage.
+
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
 
@@ -61,6 +65,8 @@ $ rake db:migrate
 By default changes are stored in YAML format. If you're using PostgreSQL, then you can use `rails generate audited:install --audited-changes-column-type jsonb` (or `json` for MySQL 5.7+ and Rails 5+) to store audit changes natively with database JSON column types.
 
 If you're using something other than integer primary keys (e.g. UUID) for your User model, then you can use `rails generate audited:install --audited-user-id-column-type uuid` to customize the `audits` table `user_id` column type.
+
+If you would like to use a custom audits table, you can use `rails generate audited:install --audited-table-name custom_audits` to specify a custom audit table name, it will generate a schema migration file and a custom audit model in `app/models`.
 
 #### Upgrading
 
@@ -301,6 +307,27 @@ class Company < ActiveRecord::Base
 end
 ```
 
+When associated models use a different audit class (for example a custom audit table), pass the same class to `has_associated_audits`:
+
+```ruby
+class Order < ActiveRecord::Base
+  audited as: OrderAudit, associated_with: :account
+end
+
+class Account < ActiveRecord::Base
+  audited
+  has_associated_audits as: OrderAudit
+end
+```
+
+`has_associated_audits` also works on models that are not audited. In that case, specify the audit class with `as:` or rely on `Audited.audit_class`:
+
+```ruby
+class Account < ActiveRecord::Base
+  has_associated_audits as: OrderAudit
+end
+```
+
 Now, when an audit is created for a user, that user's company is also saved alongside the audit. This makes it much easier (and faster) to access audits indirectly related to a company.
 
 ```ruby
@@ -416,12 +443,39 @@ class CustomAudit < Audited::Audit
   end
 end
 ```
+
 Then set it in an initializer:
+
 ```ruby
 # config/initializers/audited.rb
 
 Audited.config do |config|
   config.audit_class = "CustomAudit"
+end
+```
+
+You can also specify a custom audit class on a per-model basis, which will override default audit class for the exact model.
+
+```ruby
+class User < ActiveRecord::Base
+  audited as: "CustomAudit"
+end
+
+# or with a custom class
+class User < ActiveRecord::Base
+  audited as: CustomAudit
+end
+```
+
+You can also supply a custom table name for the audit records.
+
+```ruby
+class CustomAudit < Audited::Audit
+  self.table_name = "custom_audits"
+end
+
+class User < ActiveRecord::Base
+  audited as: CustomAudit
 end
 ```
 

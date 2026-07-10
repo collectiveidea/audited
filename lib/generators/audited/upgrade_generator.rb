@@ -14,6 +14,8 @@ module Audited
       include Audited::Generators::MigrationHelper
       extend Audited::Generators::Migration
 
+      class_option :audited_table_name, type: :string, default: "audits", required: false
+
       source_root File.expand_path("../templates", __FILE__)
 
       def copy_templates

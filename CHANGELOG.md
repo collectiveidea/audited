@@ -1,5 +1,9 @@
 # Audited ChangeLog
 
+## Unreleased
+
+- Add `as:` option to `has_associated_audits` for custom audit classes and non-audited models.
+
 ### 5.8.0 (2024-11-08)
 - Allow calling audited multiple times - @mohammednasser-32
   [734](https://github.com/collectiveidea/audited/pull/734)  
