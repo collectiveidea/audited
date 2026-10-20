@@ -20,7 +20,16 @@ module Audited
     end
 
     def current_user
-      lambda { controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true) }
+      lambda do
+        method_name = Audited.current_user_method
+        unless controller.respond_to?(method_name, true)
+          raise NoMethodError,
+            "The configured Audited.current_user_method (#{method_name.inspect}) " \
+            "is not defined on #{controller.class}. " \
+            "Please configure Audited.current_user_method to a method that exists on your controller."
+        end
+        controller.send(method_name)
+      end
     end
 
     def remote_ip
