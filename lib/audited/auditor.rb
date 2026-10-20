@@ -308,7 +308,8 @@ module Audited
       def filter_encrypted_attrs(filtered_changes)
         filter_attr_values(
           audited_changes: filtered_changes,
-          attrs: respond_to?(:encrypted_attributes) ? Array(encrypted_attributes).map(&:to_s) : []
+          attrs: respond_to?(:encrypted_attributes) ? Array(encrypted_attributes).map(&:to_s) : [],
+          placeholder: audited_options[:redaction_value] || REDACTED
         )
       end
 
